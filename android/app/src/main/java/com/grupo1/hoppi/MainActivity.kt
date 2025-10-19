@@ -11,37 +11,49 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.grupo1.hoppi.ui.screens.Login.SignUpScreen
+import com.grupo1.hoppi.ui.screens.LoginScreen
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            HoppiTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+object Destinations {
+    const val LOGIN_ROUTE = "login"
+    const val SIGNUP_ROUTE = "signup"
+}
+@Composable
+fun HoppiApp() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = Destinations.LOGIN_ROUTE
+    ) {
+        composable(Destinations.LOGIN_ROUTE) {
+            LoginScreen(
+                onSignUpClick = {
+                    navController.navigate(Destinations.SIGNUP_ROUTE)
                 }
-            }
+            )
+        }
+
+        composable(Destinations.SIGNUP_ROUTE) {
+            SignUpScreen(
+                onLoginClick = {
+                    navController.navigate(Destinations.LOGIN_ROUTE)
+                }
+            )
         }
     }
 }
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    HoppiTheme {
-        Greeting("Android")
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            HoppiTheme {
+                HoppiApp()
+            }
+        }
     }
 }
