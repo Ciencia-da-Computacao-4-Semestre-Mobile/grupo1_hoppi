@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
-import com.grupo1.hoppi.ui.screens.login.SignUpScreen
+import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
@@ -38,7 +38,7 @@ fun HoppiApp() {
         }
 
         composable(Destinations.SIGNUP_ROUTE) {
-            SignUpScreen(
+            SignUpFlow(
                 onLoginClick = {
                     navController.navigate(Destinations.LOGIN_ROUTE)
                 }

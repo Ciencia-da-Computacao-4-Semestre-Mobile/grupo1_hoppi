@@ -1,5 +1,6 @@
-package com.grupo1.hoppi.ui.screens.login
+package com.grupo1.hoppi.ui.screens.signup
 
+import android.app.DatePickerDialog
 import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -52,7 +53,8 @@ import java.util.Calendar
 import java.util.Date
 
 @Composable
-fun SignUpScreen(
+fun SignUpStep1Screen(
+    onContinue: () -> Unit,
     onLoginClick: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -69,7 +71,7 @@ fun SignUpScreen(
     val initialDay = calendar.get(Calendar.DAY_OF_MONTH)
 
     val datePickerDialog = remember {
-        android.app.DatePickerDialog(
+        DatePickerDialog(
             context,
             { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
                 birthDate = "$dayOfMonth/${month + 1}/$year"
@@ -264,7 +266,12 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = { /* TODO: Lógica de Login */ },
+                onClick = {
+                    val isValid = name.isNotEmpty() && email.isNotEmpty()
+                    if (isValid) {
+                        onContinue()
+                    }
+                },
                 Modifier.width(124.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
