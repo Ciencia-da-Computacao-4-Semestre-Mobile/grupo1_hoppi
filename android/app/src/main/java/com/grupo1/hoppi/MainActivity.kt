@@ -3,24 +3,19 @@ package com.grupo1.hoppi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.grupo1.hoppi.ui.screens.Login.SignUpScreen
-import com.grupo1.hoppi.ui.screens.LoginScreen
+import com.grupo1.hoppi.ui.screens.login.LoginScreen
+import com.grupo1.hoppi.ui.screens.login.SignUpScreen
+import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
 object Destinations {
     const val LOGIN_ROUTE = "login"
     const val SIGNUP_ROUTE = "signup"
+    const val FORGOT_PASSWORD_ROUTE = "forgot_password"
 }
 @Composable
 fun HoppiApp() {
@@ -34,6 +29,10 @@ fun HoppiApp() {
             LoginScreen(
                 onSignUpClick = {
                     navController.navigate(Destinations.SIGNUP_ROUTE)
+                },
+
+                onForgotPasswordClick = {
+                    navController.navigate(Destinations.FORGOT_PASSWORD_ROUTE)
                 }
             )
         }
@@ -43,6 +42,12 @@ fun HoppiApp() {
                 onLoginClick = {
                     navController.navigate(Destinations.LOGIN_ROUTE)
                 }
+            )
+        }
+
+        composable(Destinations.FORGOT_PASSWORD_ROUTE) {
+            ForgotPasswordFlow(
+                onBackToLogin = { navController.popBackStack(Destinations.LOGIN_ROUTE, inclusive = false) }
             )
         }
     }

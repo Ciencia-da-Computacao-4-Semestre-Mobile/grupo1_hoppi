@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.ui.screens
+package com.grupo1.hoppi.ui.screens.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,10 +26,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.ui.components.LoginTextField
 import com.grupo1.hoppi.ui.components.PasswordTextField
+import com.grupo1.hoppi.ui.components.PawPrintsDecorationLocal
 import com.grupo1.hoppi.R
 
 @Composable
 fun LoginScreen(
+    onForgotPasswordClick: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -52,7 +53,7 @@ fun LoginScreen(
             .fillMaxSize()
             .background(verticalGradientBrush)
     ) {
-        PawPrintsDecoration(
+        PawPrintsDecorationLocal(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomEnd)
@@ -135,7 +136,9 @@ fun LoginScreen(
                 modifier = Modifier
                     .padding(top = 5.dp)
                     .align(Alignment.End)
-                    .clickable { /* TODO: Implementar lógica */ }
+                    .clickable {
+                        onForgotPasswordClick()
+                    }
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -170,16 +173,4 @@ fun LoginScreen(
 
         }
     }
-}
-
-@Composable
-fun PawPrintsDecoration(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(id = R.drawable.patinhas),
-        contentDescription = "Patas decorativas",
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        contentScale = ContentScale.FillWidth
-    )
 }

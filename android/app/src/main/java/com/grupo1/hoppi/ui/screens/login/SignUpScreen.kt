@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.ui.screens.Login
+package com.grupo1.hoppi.ui.screens.login
 
 import android.widget.DatePicker
 import androidx.compose.foundation.Image
@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
