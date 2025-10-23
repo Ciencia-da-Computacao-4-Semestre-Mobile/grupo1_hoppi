@@ -28,8 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.PawPrintsDecorationLocal
-import com.grupo1.hoppi.ui.components.RecoveryOptionCard
+import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
+import com.grupo1.hoppi.ui.components.login.RecoveryOptionCard
 
 @Composable
 fun RecoveryStep1Screen(

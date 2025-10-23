@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
@@ -16,6 +17,7 @@ object Destinations {
     const val LOGIN_ROUTE = "login"
     const val SIGNUP_ROUTE = "signup"
     const val FORGOT_PASSWORD_ROUTE = "forgot_password"
+    const val HOME_ROUTE = "home"
 }
 @Composable
 fun HoppiApp() {
@@ -33,6 +35,12 @@ fun HoppiApp() {
 
                 onForgotPasswordClick = {
                     navController.navigate(Destinations.FORGOT_PASSWORD_ROUTE)
+                },
+
+                onLoginSuccess = {
+                    navController.navigate(Destinations.HOME_ROUTE) {
+                        popUpTo(Destinations.LOGIN_ROUTE) { inclusive = true }
+                    }
                 }
             )
         }
@@ -49,6 +57,10 @@ fun HoppiApp() {
             ForgotPasswordFlow(
                 onBackToLogin = { navController.popBackStack(Destinations.LOGIN_ROUTE, inclusive = false) }
             )
+        }
+
+        composable(Destinations.HOME_ROUTE) {
+            HomeScreen(rootNavController = navController)
         }
     }
 }

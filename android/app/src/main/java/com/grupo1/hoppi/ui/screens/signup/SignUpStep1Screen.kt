@@ -46,9 +46,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.DateTextField
-import com.grupo1.hoppi.ui.components.LoginTextField
-import com.grupo1.hoppi.ui.components.PasswordTextField
+import com.grupo1.hoppi.ui.components.login.DateTextField
+import com.grupo1.hoppi.ui.components.login.LoginTextField
+import com.grupo1.hoppi.ui.components.login.PasswordTextField
 import java.util.Calendar
 import java.util.Date
 

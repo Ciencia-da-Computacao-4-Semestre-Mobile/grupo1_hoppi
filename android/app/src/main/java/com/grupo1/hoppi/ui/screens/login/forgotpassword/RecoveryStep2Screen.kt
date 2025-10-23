@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.PawPrintsDecorationLocal
+import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 
 @Composable
 fun RecoveryStep2Screen(

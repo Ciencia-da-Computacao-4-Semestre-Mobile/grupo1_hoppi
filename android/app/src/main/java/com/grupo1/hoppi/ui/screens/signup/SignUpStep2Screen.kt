@@ -66,9 +66,6 @@ fun SignUpStep2Screen(
         colors = gradientColors
     )
 
-    val buttonBackgroundColor = Color.White
-    val buttonTextColor = Color(0xFF4C4B4B)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -174,8 +171,8 @@ fun SignUpStep2Screen(
                 onClick = onFinish,
                 modifier = Modifier.width(124.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = buttonBackgroundColor,
-                    contentColor = buttonTextColor
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF4C4B4B)
                 ),
                 enabled = selectedAvatarIndex != -1
             ) {

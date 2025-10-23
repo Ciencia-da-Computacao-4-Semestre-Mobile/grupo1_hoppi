@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.ui.components
+package com.grupo1.hoppi.ui.components.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -40,8 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.LoginTextField
-import com.grupo1.hoppi.ui.components.PawPrintsDecorationLocal
+import com.grupo1.hoppi.ui.components.login.LoginTextField
+import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 
 @Composable
 fun RecoveryStep3Screen(

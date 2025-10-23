@@ -24,15 +24,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
-import com.grupo1.hoppi.ui.components.LoginTextField
-import com.grupo1.hoppi.ui.components.PasswordTextField
-import com.grupo1.hoppi.ui.components.PawPrintsDecorationLocal
+import com.grupo1.hoppi.ui.components.login.LoginTextField
+import com.grupo1.hoppi.ui.components.login.PasswordTextField
+import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 import com.grupo1.hoppi.R
 
 @Composable
 fun LoginScreen(
     onForgotPasswordClick: () -> Unit,
-    onSignUpClick: () -> Unit
+    onSignUpClick: () -> Unit,
+    onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -144,7 +145,9 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = { /* TODO: Lógica de Login */ },
+                onClick = {
+                    onLoginSuccess()
+                },
                 Modifier.width(124.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
