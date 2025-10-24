@@ -31,7 +31,10 @@ val mockPosts = List(10) { i ->
 }
 
 @Composable
-fun FeedScreen(onPostClick: (postId: Int) -> Unit) {
+fun FeedScreen(
+    onPostClick: (postId: Int) -> Unit,
+    onNotificationsClick: () -> Unit,
+) {
     val listBackgroundColor = Color.White
 
     LazyColumn(
@@ -42,7 +45,9 @@ fun FeedScreen(onPostClick: (postId: Int) -> Unit) {
     ) {
 
         item {
-            FeedTopBarContent()
+            FeedTopBarContent(
+                onNotificationsClick = onNotificationsClick,
+            )
             Divider(color = Color(0xFF9CBDC6).copy(alpha = 1.0f), thickness = 1.dp)
         }
 
@@ -57,7 +62,9 @@ fun FeedScreen(onPostClick: (postId: Int) -> Unit) {
 }
 
 @Composable
-fun FeedTopBarContent() {
+fun FeedTopBarContent(
+    onNotificationsClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,7 +90,7 @@ fun FeedTopBarContent() {
             )
         }
 
-        IconButton(onClick = { /* Notificações */ }) {
+        IconButton(onClick = onNotificationsClick) {
             Image(
                 painter = painterResource(id = R.drawable.notificacoes),
                 contentDescription = "Notificações",

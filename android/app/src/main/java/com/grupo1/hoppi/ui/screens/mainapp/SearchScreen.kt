@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,14 +23,34 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
+import kotlinx.coroutines.delay
 
 val mockSearchItems = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
 
 @Composable
 fun SearchScreen(navController: NavController) {
     var searchText by remember { mutableStateOf("") }
-
+    var searchHistory by remember { mutableStateOf(mockSearchItems.toMutableList()) }
     val focusRequester = remember { FocusRequester() }
+
+    val searchTopBarColor = Color(0xFFEC8445)
+    val view = LocalView.current
+    val window = (view.context as? Activity)?.window
+    LaunchedEffect(Unit) {
+        window?.let {
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+            it.statusBarColor = searchTopBarColor.toArgb()
+            val insetsController = WindowCompat.getInsetsController(it, view)
+            insetsController.isAppearanceLightStatusBars = false
+        }
+    }
 
     Scaffold(
         topBar = { SearchTopBar(navController) }
@@ -50,8 +71,7 @@ fun SearchScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 20.dp)
                     .focusRequester(focusRequester),
-
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(50.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color(0xFFF0F0F0),
@@ -63,6 +83,7 @@ fun SearchScreen(navController: NavController) {
             )
 
             LaunchedEffect(Unit) {
+                delay(300)
                 focusRequester.requestFocus()
             }
 
@@ -72,8 +93,13 @@ fun SearchScreen(navController: NavController) {
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                items(mockSearchItems) { item ->
-                    SearchItemRow(item = item)
+                items(searchHistory) { item ->
+                    SearchItemRow(
+                        item = item,
+                        onRemoveItem = { removed ->
+                            searchHistory = searchHistory.filterNot { it == removed }.toMutableList()
+                        }
+                    )
                 }
             }
         }
@@ -87,11 +113,13 @@ fun SearchTopBar(navController: NavController) {
         title = {
             Text(
                 text = "Pesquisa",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.headlineLarge
             )
         },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = {
+                navController.popBackStack()
+            }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Voltar")
             }
         },
@@ -99,28 +127,44 @@ fun SearchTopBar(navController: NavController) {
             containerColor = Color(0xFFEC8445),
             titleContentColor = Color.White,
             navigationIconContentColor = Color.White
-        )
+        ),
+        windowInsets = WindowInsets(0.dp)
     )
 }
 
 @Composable
-fun SearchItemRow(item: String) {
+fun SearchItemRow(
+    item: String,
+    onRemoveItem: (String) -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(horizontal = 30.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(item, style = MaterialTheme.typography.bodyLarge)
+            Text(item, style = MaterialTheme.typography.bodyMedium)
 
-            IconButton(onClick = { /* Lógica de remover item */ }) {
+            IconButton(onClick = { onRemoveItem(item) }) {
                 Icon(Icons.Filled.Close, contentDescription = "Remover item")
             }
         }
         Divider(
-            color = Color.Gray.copy(alpha = 0.5f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp)
+                .drawBehind {
+                    drawLine(
+                        color = Color(0xFFBDBDBD),
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, 0f),
+                        strokeWidth = 1.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 10f), 0f)
+                    )
+                },
+            color = Color.Transparent,
             thickness = 1.dp
         )
     }
