@@ -29,7 +29,7 @@ Esse projeto será dividido em branches de desenvolvimento separadas por camadas
 
 ## Regras de nomenclatura de commits
 
-Nomeie seu novu commit seguindo os padrões abaixo.
+Nomeie seu novo commit seguindo os padrões abaixo.
 Seu commit deve conter 2 partes:
 
 1. Tipo de mudança/funcionalidade:
