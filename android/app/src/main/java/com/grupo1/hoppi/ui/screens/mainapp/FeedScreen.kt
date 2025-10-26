@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
 
 data class Post(val id: Int, val username: String, val content: String, val isSale: Boolean = false)
+
 val mockPosts = List(10) { i ->
     Post(
         id = i,
@@ -37,19 +38,23 @@ fun FeedScreen(
 ) {
     val listBackgroundColor = Color.White
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+
+    FeedTopBarContent(
+        onNotificationsClick = onNotificationsClick,
+    )
+    Divider(color = Color(0xFF9CBDC6).copy(alpha = 1.0f), thickness = 1.dp)
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(listBackgroundColor),
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
-
-        item {
-            FeedTopBarContent(
-                onNotificationsClick = onNotificationsClick,
-            )
-            Divider(color = Color(0xFF9CBDC6).copy(alpha = 1.0f), thickness = 1.dp)
-        }
 
         items(mockPosts) { post ->
             PostCard(
@@ -58,6 +63,7 @@ fun FeedScreen(
             )
             Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
         }
+    }
     }
 }
 
@@ -126,14 +132,29 @@ fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(post.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
+                        Text(
+                            post.username,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 14.sp
+                        )
                         Spacer(Modifier.width(5.dp))
-                        Text("@fulan.tal", style = MaterialTheme.typography.bodyMedium, color = Color(0xFFA6A6A6), fontSize = 14.sp)
+                        Text(
+                            "@fulan.tal",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFFA6A6A6),
+                            fontSize = 14.sp
+                        )
                     }
                 }
             }
 
-            Text(post.content, style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
+            Text(
+                post.content,
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+            )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 
@@ -155,13 +176,30 @@ fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
                 Spacer(Modifier.width(4.dp))
                 Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFFA6A6A6))
 
+                Spacer(Modifier.weight(1f))
+
                 if (post.isSale) {
                     AssistChip(
                         onClick = { /* Sem Ação */ },
-                        label = { Text("Venda", fontWeight = FontWeight.Light, style = MaterialTheme.typography.bodyMedium, fontSize = 10.sp, color = Color(0xFF406B8D)) },
+                        label = {
+                            Image(
+                                painter = painterResource(id = R.drawable.venda_icon),
+                                contentDescription = "Venda",
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                "Venda",
+                                fontWeight = FontWeight.Light,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontSize = 10.sp,
+                                color = Color(0xFF406B8D)
+                            )
+                        },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = Color(0xFF9CBDC6)
                         ),
+                        border = null,
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier.height(20.dp)
                     )
