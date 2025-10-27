@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.home
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -18,9 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
-import com.grupo1.hoppi.ui.screens.mainapp.FeedScreen
-import com.grupo1.hoppi.ui.screens.mainapp.NotificationScreen
-import com.grupo1.hoppi.ui.screens.mainapp.SearchScreen
+import com.grupo1.hoppi.ui.screens.mainapp.*
 
 object MainAppDestinations {
     const val FEED_ROUTE = "main/feed"
@@ -29,6 +28,7 @@ object MainAppDestinations {
     const val CREATE_POST_ROUTE = "main/create_post"
     const val PROFILE_ROUTE = "main/profile"
     const val NOTIFICATIONS_ROUTE = "main/notifications"
+    const val POST_OPEN_ROUTE = "main/post_open/{postId}"
 }
 
 @Composable fun ProfileScreen() { Text("Perfil") }
@@ -44,16 +44,12 @@ fun HomeScreen(rootNavController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            if (showBottomBarAndFab) {
-                BottomNavBar(bottomNavController)
-            }
+            if (showBottomBarAndFab) BottomNavBar(bottomNavController)
         },
         floatingActionButton = {
             if (showBottomBarAndFab) {
                 FloatingActionButton(
-                    onClick = {
-                        rootNavController.navigate(MainAppDestinations.CREATE_POST_ROUTE)
-                    },
+                    onClick = { rootNavController.navigate(MainAppDestinations.CREATE_POST_ROUTE) },
                     containerColor = Color(0xFFEC8445),
                     shape = FloatingActionButtonDefaults.extendedFabShape,
                     modifier = Modifier.clip(CircleShape)
@@ -69,41 +65,46 @@ fun HomeScreen(rootNavController: NavHostController) {
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            NavHost(
+                navController = bottomNavController,
+                startDestination = MainAppDestinations.FEED_ROUTE
+            ) {
+                composable(MainAppDestinations.FEED_ROUTE) {
+                    FeedScreen(
+                        onPostClick = { postId ->
+                            rootNavController.navigate("main/post_open/$postId")
+                        },
+                        onNotificationsClick = {
+                            bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE)
+                        }
+                    )
+                }
 
-        NavHost(
-            navController = bottomNavController,
-            startDestination = MainAppDestinations.FEED_ROUTE,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(MainAppDestinations.FEED_ROUTE) {
-                FeedScreen(
-                    onPostClick = { postId ->
-                        rootNavController.navigate("main/post_open/$postId")
-                    },
-                    onNotificationsClick = {
-                        bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE)
-                    },
-                )
-            }
+                composable(MainAppDestinations.NOTIFICATIONS_ROUTE) {
+                    NotificationScreen(navController = bottomNavController)
+                }
 
-            composable(MainAppDestinations.NOTIFICATIONS_ROUTE) {
-                NotificationScreen(
-                    navController = bottomNavController
-                )
-            }
-            composable(MainAppDestinations.PEOPLE_ROUTE) {
-                Text("Comunidade")
-            }
-            composable(MainAppDestinations.SEARCH_ROUTE) {
-                SearchScreen(
-                    navController = bottomNavController
-                )
-            }
-            composable(MainAppDestinations.CREATE_POST_ROUTE) {
-                CreatePostScreen()
-            }
-            composable(MainAppDestinations.PROFILE_ROUTE) {
-                ProfileScreen()
+                composable(MainAppDestinations.PEOPLE_ROUTE) {
+                    Text("Comunidade")
+                }
+
+                composable(MainAppDestinations.SEARCH_ROUTE) {
+                    SearchScreen(navController = bottomNavController)
+                }
+
+                composable(MainAppDestinations.CREATE_POST_ROUTE) {
+                    CreatePostScreen()
+                }
+
+                composable(MainAppDestinations.PROFILE_ROUTE) {
+                    ProfileScreen()
+                }
+
+                composable("main/post_open/{postId}") { backStackEntry ->
+                    val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
+                    PostScreen(postId = postId, navController = bottomNavController)
+                }
             }
         }
     }

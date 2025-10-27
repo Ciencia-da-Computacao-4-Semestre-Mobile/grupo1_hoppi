@@ -11,6 +11,7 @@ import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
+import com.grupo1.hoppi.ui.screens.mainapp.PostScreen
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
 object Destinations {
@@ -61,6 +62,11 @@ fun HoppiApp() {
 
         composable(Destinations.HOME_ROUTE) {
             HomeScreen(rootNavController = navController)
+        }
+
+        composable("main/post_open/{postId}") { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
+            PostScreen(postId = postId, navController = navController)
         }
     }
 }
