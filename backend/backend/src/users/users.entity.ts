@@ -15,11 +15,17 @@ export class User {
     @Column()
     display_name: string
 
+    @Column({ default: 'avatar_1' })
+    avatar_key: string;
+
     @Column({ unique: true })
     email: string
 
     @Column({ type: 'date' })
     birth_date: Date
+
+    @Column()
+    institution: string
 
     @Column()
     password_hash: string
