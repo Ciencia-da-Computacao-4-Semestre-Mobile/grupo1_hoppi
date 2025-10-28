@@ -33,3 +33,35 @@ export const ReturnPostSchema = z.object({
 })
 
 export type ReturnPostDTO = z.infer<typeof ReturnPostSchema>
+
+// schemas do feed
+
+export const FeedStrategySchema = z.enum(['main', 'community'], {
+    message: "Uma estratégia de feed deve ser informada.",
+})
+
+export const GetFeedQuerySchema = z.object({
+
+    // aqui é definido um limite de posts a serem carregados
+    limit: z.string()
+    .default('20')
+    .transform((val) => Number(val))
+    .pipe(z.number().int().min(1).max(100, "Limite não deve exceder 100.")),
+    
+    // aqui, coleta o id do último post visto pelo usuário, para que possa carregar mais
+    cursor: z.uuid("ID de cursor inválido.").optional(),
+  
+    strategy: FeedStrategySchema.default('main'),
+    communityId: z.uuid("ID de comunidade inválido.").optional(),
+
+}).refine((data) => {
+    if (data.strategy === 'community' && !data.communityId) {
+        return false;
+    }
+    return true;
+}, {
+    message: "o ID da comunidade é obrigatório na estratégia 'community'",
+    path: ["communityId"],
+})
+
+export type GetFeedQueryDTO = z.infer<typeof GetFeedQuerySchema>
