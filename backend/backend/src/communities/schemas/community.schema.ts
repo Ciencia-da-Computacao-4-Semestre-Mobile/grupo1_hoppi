@@ -45,3 +45,9 @@ export const ReturnCommunitySchema = z.object({
 })
 
 export type ReturnCommunityDTO = z.infer<typeof ReturnCommunitySchema>
+
+export const DeleteCommunityParamsSchema = z.object({
+    id: z.uuid("ID de comunidade inválido."),
+})
+
+export type DeleteCommunityDTO = z.infer<typeof DeleteCommunityParamsSchema>

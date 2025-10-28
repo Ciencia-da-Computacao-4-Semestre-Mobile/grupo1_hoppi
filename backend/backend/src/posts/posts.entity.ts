@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, One
 import { PostCount } from 'src/post_counts/post_counts.entity'
 import { User } from 'src/users/users.entity'
 import { Like } from 'src/likes/likes.entity'
+import { Community } from 'src/communities/communities.entity'
 
 @Entity('posts')
 export class Post {
@@ -30,6 +31,10 @@ export class Post {
 
     @Column({ default: false })
     is_deleted: boolean
+
+    @ManyToOne(() => Community, community => community.posts, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'community_id' })
+    community: Community
 
     @Column({ type: 'jsonb', nullable: true })
     metadata: Record<string, any>

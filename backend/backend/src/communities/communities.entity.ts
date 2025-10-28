@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { CommunityMember } from 'src/community_members/community_members.entity'
 import { User } from 'src/users/users.entity'
+import { Post } from 'src/posts/posts.entity'
 
 @Entity('communities')
 export class Community {
@@ -25,4 +26,7 @@ export class Community {
 
     @OneToMany(() => CommunityMember, (member) => member.community)
     members: CommunityMember[]
+
+    @OneToMany(() => Post, (post) => post.community) 
+    posts: Post[]
 }
