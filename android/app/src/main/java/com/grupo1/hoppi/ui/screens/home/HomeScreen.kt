@@ -32,7 +32,6 @@ object MainAppDestinations {
 }
 
 @Composable fun ProfileScreen() { Text("Perfil") }
-@Composable fun CreatePostScreen() { Text("Criar Post") }
 
 @Composable
 fun HomeScreen(rootNavController: NavHostController) {
@@ -40,14 +39,16 @@ fun HomeScreen(rootNavController: NavHostController) {
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomBarAndFab = currentRoute != MainAppDestinations.SEARCH_ROUTE
+    val showBottomBar = currentRoute != MainAppDestinations.SEARCH_ROUTE
+    val showFab = currentRoute != MainAppDestinations.SEARCH_ROUTE &&
+            currentRoute != MainAppDestinations.NOTIFICATIONS_ROUTE
 
     Scaffold(
         bottomBar = {
-            if (showBottomBarAndFab) BottomNavBar(bottomNavController)
+            if (showBottomBar) BottomNavBar(bottomNavController)
         },
         floatingActionButton = {
-            if (showBottomBarAndFab) {
+            if (showFab) {
                 FloatingActionButton(
                     onClick = { rootNavController.navigate(MainAppDestinations.CREATE_POST_ROUTE) },
                     containerColor = Color(0xFFEC8445),
@@ -94,14 +95,14 @@ fun HomeScreen(rootNavController: NavHostController) {
                 }
 
                 composable(MainAppDestinations.CREATE_POST_ROUTE) {
-                    CreatePostScreen()
+                    CreatePostScreen(navController = bottomNavController)
                 }
 
                 composable(MainAppDestinations.PROFILE_ROUTE) {
                     ProfileScreen()
                 }
 
-                composable("main/post_open/{postId}") { backStackEntry ->
+                composable(MainAppDestinations.POST_OPEN_ROUTE) { backStackEntry ->
                     val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
                     PostScreen(postId = postId, navController = bottomNavController)
                 }

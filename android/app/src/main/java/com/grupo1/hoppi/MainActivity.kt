@@ -11,6 +11,7 @@ import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
+import com.grupo1.hoppi.ui.screens.mainapp.CreatePostScreen
 import com.grupo1.hoppi.ui.screens.mainapp.PostScreen
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
@@ -33,11 +34,9 @@ fun HoppiApp() {
                 onSignUpClick = {
                     navController.navigate(Destinations.SIGNUP_ROUTE)
                 },
-
                 onForgotPasswordClick = {
                     navController.navigate(Destinations.FORGOT_PASSWORD_ROUTE)
                 },
-
                 onLoginSuccess = {
                     navController.navigate(Destinations.HOME_ROUTE) {
                         popUpTo(Destinations.LOGIN_ROUTE) { inclusive = true }
@@ -56,7 +55,12 @@ fun HoppiApp() {
 
         composable(Destinations.FORGOT_PASSWORD_ROUTE) {
             ForgotPasswordFlow(
-                onBackToLogin = { navController.popBackStack(Destinations.LOGIN_ROUTE, inclusive = false) }
+                onBackToLogin = {
+                    navController.popBackStack(
+                        Destinations.LOGIN_ROUTE,
+                        inclusive = false
+                    )
+                }
             )
         }
 
@@ -68,8 +72,13 @@ fun HoppiApp() {
             val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
             PostScreen(postId = postId, navController = navController)
         }
+
+        composable("main/create_post") {
+            CreatePostScreen(navController = navController)
+        }
     }
 }
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

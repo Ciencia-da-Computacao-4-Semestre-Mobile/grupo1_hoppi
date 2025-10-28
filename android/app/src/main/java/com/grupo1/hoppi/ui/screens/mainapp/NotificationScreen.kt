@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 
 data class NotificationItem(
     val id: Int,
