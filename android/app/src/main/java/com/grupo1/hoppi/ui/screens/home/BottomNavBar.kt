@@ -25,7 +25,7 @@ data class BottomNavItem(
 
 val items = listOf(
     BottomNavItem(MainAppDestinations.FEED_ROUTE, Icons.Default.Home, "Feed"),
-    BottomNavItem(MainAppDestinations.PEOPLE_ROUTE, Icons.Default.People, "Comunidade"),
+    BottomNavItem(MainAppDestinations.COMMUNITY_ROUTE, Icons.Default.People, "Comunidade"),
     BottomNavItem(MainAppDestinations.SEARCH_ROUTE, Icons.Default.Search, "Busca")
 )
 

@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,25 +25,47 @@ import com.grupo1.hoppi.ui.screens.mainapp.*
 
 object MainAppDestinations {
     const val FEED_ROUTE = "main/feed"
-    const val PEOPLE_ROUTE = "main/people"
+    const val COMMUNITY_ROUTE = "main/communities"
     const val SEARCH_ROUTE = "main/search"
     const val CREATE_POST_ROUTE = "main/create_post"
     const val PROFILE_ROUTE = "main/profile"
     const val NOTIFICATIONS_ROUTE = "main/notifications"
+    const val COMMUNITY_DETAIL_ROUTE = "main/community_detail/{communityName}"
     const val POST_OPEN_ROUTE = "main/post_open/{postId}"
 }
-
-@Composable fun ProfileScreen() { Text("Perfil") }
 
 @Composable
 fun HomeScreen(rootNavController: NavHostController) {
     val bottomNavController = rememberNavController()
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = false
 
     val showBottomBar = currentRoute != MainAppDestinations.SEARCH_ROUTE
     val showFab = currentRoute != MainAppDestinations.SEARCH_ROUTE &&
-            currentRoute != MainAppDestinations.NOTIFICATIONS_ROUTE
+            currentRoute != MainAppDestinations.NOTIFICATIONS_ROUTE &&
+            currentRoute != MainAppDestinations.COMMUNITY_ROUTE
+
+    LaunchedEffect(navBackStackEntry) {
+        when (currentRoute) {
+            MainAppDestinations.FEED_ROUTE,
+            MainAppDestinations.PROFILE_ROUTE,
+            MainAppDestinations.COMMUNITY_ROUTE,
+            MainAppDestinations.SEARCH_ROUTE -> {
+                systemUiController.setStatusBarColor(color = Pink, darkIcons = useDarkIcons)
+            }
+            MainAppDestinations.NOTIFICATIONS_ROUTE -> {
+                systemUiController.setStatusBarColor(color = Pink, darkIcons = useDarkIcons)
+            }
+            MainAppDestinations.CREATE_POST_ROUTE -> {
+                systemUiController.setStatusBarColor(color = Pink, darkIcons = useDarkIcons)
+            }
+            else -> {
+                systemUiController.setStatusBarColor(color = Color.White, darkIcons = true)
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -77,7 +101,10 @@ fun HomeScreen(rootNavController: NavHostController) {
                             rootNavController.navigate("main/post_open/$postId")
                         },
                         onNotificationsClick = {
-                            bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE)
+                            rootNavController.navigate("main/notifications")
+                        },
+                        onProfileClick = {
+                            bottomNavController.navigate(MainAppDestinations.PROFILE_ROUTE)
                         }
                     )
                 }
@@ -86,8 +113,17 @@ fun HomeScreen(rootNavController: NavHostController) {
                     NotificationScreen(navController = bottomNavController)
                 }
 
-                composable(MainAppDestinations.PEOPLE_ROUTE) {
-                    Text("Comunidade")
+                composable(MainAppDestinations.PROFILE_ROUTE) {
+                    ProfileScreen(
+                        navController = bottomNavController,
+                        onPostClick = { postId ->
+                            rootNavController.navigate("main/post_open/$postId")
+                        }
+                    )
+                }
+
+                composable(MainAppDestinations.COMMUNITY_ROUTE) {
+                    CommunitiesScreen(navController = bottomNavController)
                 }
 
                 composable(MainAppDestinations.SEARCH_ROUTE) {
@@ -96,10 +132,6 @@ fun HomeScreen(rootNavController: NavHostController) {
 
                 composable(MainAppDestinations.CREATE_POST_ROUTE) {
                     CreatePostScreen(navController = bottomNavController)
-                }
-
-                composable(MainAppDestinations.PROFILE_ROUTE) {
-                    ProfileScreen()
                 }
 
                 composable(MainAppDestinations.POST_OPEN_ROUTE) { backStackEntry ->

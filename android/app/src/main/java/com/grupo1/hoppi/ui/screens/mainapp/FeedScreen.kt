@@ -35,6 +35,7 @@ val mockPosts = List(10) { i ->
 fun FeedScreen(
     onPostClick: (postId: Int) -> Unit,
     onNotificationsClick: () -> Unit,
+    onProfileClick: () -> Unit,
 ) {
     val listBackgroundColor = Color.White
 
@@ -46,6 +47,7 @@ fun FeedScreen(
 
     FeedTopBarContent(
         onNotificationsClick = onNotificationsClick,
+        onProfileClick = onProfileClick
     )
     Divider(color = Color(0xFF9CBDC6).copy(alpha = 1.0f), thickness = 1.dp)
 
@@ -70,6 +72,7 @@ fun FeedScreen(
 @Composable
 fun FeedTopBarContent(
     onNotificationsClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -79,7 +82,7 @@ fun FeedTopBarContent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = { /* Navegar para Perfil */ }) {
+        IconButton(onClick = onProfileClick) {
             Image(
                 painter = painterResource(id = R.drawable.user),
                 contentDescription = "Perfil",

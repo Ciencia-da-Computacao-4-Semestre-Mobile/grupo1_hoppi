@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Divider
@@ -40,6 +40,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 
 data class NotificationItem(
@@ -75,8 +79,6 @@ val mockNotifications = listOf(
     NotificationItem(3, "Curtiu seu post.", "1 sem", NotificationType.LIKE),
     NotificationItem(4, "Curtiu seu post.", "2 sem", NotificationType.LIKE),
     NotificationItem(5, "Curtiu seu post.", "2 sem", NotificationType.LIKE),
-    NotificationItem(6, "Curtiu seu post.", "3 sem", NotificationType.LIKE),
-    NotificationItem(7, "Curtiu seu post.", "3 sem", NotificationType.LIKE),
     NotificationItem(8, "Comentou no seu post.", "3 sem", NotificationType.COMMENT),
     NotificationItem(9, "Começou a seguir você.", "3 sem", NotificationType.NEW_FOLLOWER),
 )
@@ -89,12 +91,30 @@ val NotificationColors = mapOf(
     NotificationType.NEW_FOLLOWER to Color(0xFFB56576),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(navController: NavController) {
-    Scaffold(
-        topBar = { NotificationTopBar(navController) }
-    ) { paddingValues ->
+    val color = Color(0xFFEC8445)
+    val view = LocalView.current
+    val activity = view.context as? Activity
 
+    SideEffect {
+        activity?.window?.let { window ->
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            window.statusBarColor = color.toArgb()
+            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+            insetsController?.isAppearanceLightStatusBars = false
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            NotificationTopBar(navController = navController)
+        },
+        bottomBar = { BottomNavBar(navController) },
+        contentWindowInsets = WindowInsets(0,0,0,0),
+        containerColor = Color.White
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -105,21 +125,12 @@ fun NotificationScreen(navController: NavController) {
                 NotificationRow(item = item)
                 Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
             }
-
             item {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                        .clickable { /* Lógica de carregar mais */ },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        "Mostrar mais",
-                        color = Color(0xFFA6A6A6),
-                        fontSize = 14.sp,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text("Mostrar mais", color = Color(0xFFA6A6A6))
                 }
             }
         }
@@ -133,22 +144,20 @@ fun NotificationTopBar(navController: NavController) {
         title = {
             Text(
                 text = "Notificações",
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineLarge,
+                color = Color.White
             )
         },
         navigationIcon = {
-            IconButton(onClick = {
-                navController.popBackStack()
-            }) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Voltar")
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color(0xFFEC8445),
             titleContentColor = Color.White,
             navigationIconContentColor = Color.White
-        ),
-        windowInsets = WindowInsets(0.dp)
+        )
     )
 }
 

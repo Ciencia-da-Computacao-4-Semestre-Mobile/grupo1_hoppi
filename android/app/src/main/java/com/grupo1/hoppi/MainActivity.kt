@@ -12,7 +12,10 @@ import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import com.grupo1.hoppi.ui.screens.mainapp.CreatePostScreen
+import com.grupo1.hoppi.ui.screens.mainapp.NotificationScreen
 import com.grupo1.hoppi.ui.screens.mainapp.PostScreen
+import com.grupo1.hoppi.ui.screens.mainapp.ProfileScreen
+import com.grupo1.hoppi.ui.screens.mainapp.SearchScreen
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
 object Destinations {
@@ -66,6 +69,18 @@ fun HoppiApp() {
 
         composable(Destinations.HOME_ROUTE) {
             HomeScreen(rootNavController = navController)
+        }
+
+        composable("main/search") {
+            SearchScreen(navController = navController)
+        }
+
+        composable("main/communities") {
+            NotificationScreen(navController = navController)
+        }
+
+        composable("main/notifications") {
+            NotificationScreen(navController = navController)
         }
 
         composable("main/post_open/{postId}") { backStackEntry ->
