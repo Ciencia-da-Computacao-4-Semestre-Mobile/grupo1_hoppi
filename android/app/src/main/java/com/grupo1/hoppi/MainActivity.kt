@@ -79,6 +79,10 @@ fun HoppiApp() {
             NotificationScreen(navController = navController)
         }
 
+        composable("main/create_community") {
+            NotificationScreen(navController = navController)
+        }
+
         composable("main/notifications") {
             NotificationScreen(navController = navController)
         }

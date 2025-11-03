@@ -16,21 +16,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.mainapp.*
 
 object MainAppDestinations {
     const val FEED_ROUTE = "main/feed"
     const val COMMUNITY_ROUTE = "main/communities"
+    const val CREATE_COMMUNITY_ROUTE = "main/create_community"
+    const val COMMUNITY_DETAIL_ROUTE = "main/community_detail/{communityName}"
     const val SEARCH_ROUTE = "main/search"
     const val CREATE_POST_ROUTE = "main/create_post"
     const val PROFILE_ROUTE = "main/profile"
     const val NOTIFICATIONS_ROUTE = "main/notifications"
-    const val COMMUNITY_DETAIL_ROUTE = "main/community_detail/{communityName}"
     const val POST_OPEN_ROUTE = "main/post_open/{postId}"
 }
 
@@ -42,10 +45,12 @@ fun HomeScreen(rootNavController: NavHostController) {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = false
 
-    val showBottomBar = currentRoute != MainAppDestinations.SEARCH_ROUTE
+    val showBottomBar = currentRoute != MainAppDestinations.SEARCH_ROUTE &&
+            currentRoute != MainAppDestinations.CREATE_COMMUNITY_ROUTE
     val showFab = currentRoute != MainAppDestinations.SEARCH_ROUTE &&
             currentRoute != MainAppDestinations.NOTIFICATIONS_ROUTE &&
-            currentRoute != MainAppDestinations.COMMUNITY_ROUTE
+            currentRoute != MainAppDestinations.COMMUNITY_ROUTE &&
+            currentRoute != MainAppDestinations.CREATE_COMMUNITY_ROUTE
 
     LaunchedEffect(navBackStackEntry) {
         when (currentRoute) {
@@ -124,6 +129,22 @@ fun HomeScreen(rootNavController: NavHostController) {
 
                 composable(MainAppDestinations.COMMUNITY_ROUTE) {
                     CommunitiesScreen(navController = bottomNavController)
+                }
+
+                composable(MainAppDestinations.CREATE_COMMUNITY_ROUTE) {
+                    CreateCommunityScreen(navController = bottomNavController)
+                }
+
+                composable(
+                    MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
+                    arguments = listOf(navArgument("communityName") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val communityName = backStackEntry.arguments?.getString("communityName") ?: ""
+
+                    CommunityDetailScreen(
+                        navController = bottomNavController,
+                        communityId = communityName
+                    )
                 }
 
                 composable(MainAppDestinations.SEARCH_ROUTE) {

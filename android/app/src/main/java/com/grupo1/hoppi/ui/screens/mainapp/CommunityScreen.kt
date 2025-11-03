@@ -10,8 +10,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -26,49 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
-
-val GrayColor = Color(0xFFDBD8D6)
-val HoppiOrange = Color(0xFFEC8445)
-val LightBlue = Color(0xFF9CBDC6)
-val ItemCardBackground = Color(0xFFDBDBDB)
-
-data class Community(
-    val name: String,
-    val description: String,
-    val isOfficial: Boolean = false,
-    val iconColor: Color = LightBlue
-)
-
-val homeCommunities = listOf(
-    Community("Comunidade de Estudantes", "Comunidade Oficial\nUm espaço para compartilhar ideias, tirar dúvidas e trocar experiências", isOfficial = true),
-    Community("Comunidade UNASP-SP", "Criado por UNASP-SP\nAqui você encontra novidades, comunicados e eventos relacionados ao UNASP-SP."),
-    Community("Comunidade da Graduação", "Criado por Graduação UNASP\nDiscussões, dicas acadêmicas e informações sobre o dia a dia da graduação."),
-    Community("Comunidade Hoppi", "Comunidade Oficial\nCanal de comunicação da Hoppi! Fique por dentro das atualizações e novidades.", isOfficial = true),
-    Community("Classificados - venda de produtos", "Criado por João\nEspaço destinado à compra e venda de produtos entre os alunos."),
-)
-
-val exploreCommunities = listOf(
-    Community("Compra e Venda de Materiais", "Comunidade Oficial\nLorem ipsum is simply dummy text of the printing and typesetting industry", isOfficial = true),
-    Community("Comunidade São Paulo", "Comunidade Oficial\nLorem ipsum is simply dummy text of the printing and typesetting industry", isOfficial = true),
-    Community("Comunidade Alimentação", "Comunidade Oficial\nLorem ipsum is simply dummy text of the printing and typesetting industry", isOfficial = true),
-    Community("Comunidade 1", "Criado por Fulano de Tal\nLorem ipsum is simply dummy text of the printing and typesetting industry"),
-    Community("Comunidade 2", "Criado por Fulano de Tal\nLorem ipsum is simply dummy text of the printing and typesetting industry"),
-    Community("Comunidade 3", "Criado por Fulano de Tal\nLorem ipsum is simply dummy text of the printing and typesetting industry"),
-)
 
 @Composable
 fun CommunitiesScreen(navController: NavController) {
     val tabs = listOf("Home", "Explorar")
     var selectedTabIndex by remember { mutableStateOf(0) }
-
     var isSearchActive by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
-    val currentList = if (selectedTabIndex == 0) homeCommunities else exploreCommunities
+    val dynamicHomeCommunities = remember(AppCommunityManager.userCreatedCommunities.size) {
+        initialHomeCommunities + AppCommunityManager.userCreatedCommunities
+    }
+
+    val currentList = if (selectedTabIndex == 0) dynamicHomeCommunities else initialExploreCommunities
 
     val filteredCommunities = remember(searchText, currentList) {
         if (!isSearchActive || searchText.isBlank()) {
@@ -132,7 +102,7 @@ fun CommunitiesScreen(navController: NavController) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Ação de criar post/comunidade (página diferente) */ },
+                onClick = { navController.navigate(MainAppDestinations.CREATE_COMMUNITY_ROUTE) },
                 containerColor = HoppiOrange,
                 shape = FloatingActionButtonDefaults.extendedFabShape,
                 modifier = Modifier.clip(CircleShape)
@@ -156,7 +126,10 @@ fun CommunitiesScreen(navController: NavController) {
         Box(modifier = Modifier.padding(adjustedPaddingValues)) {
             CommunityTabContent(
                 communities = filteredCommunities,
-                isExploreTab = selectedTabIndex == 1
+                isExploreTab = selectedTabIndex == 1,
+                onCommunityClick = { communityName ->
+                    navController.navigate("main/community_detail/$communityName")
+                }
             )
         }
     }
@@ -234,7 +207,7 @@ fun CommunityItem(community: Community, onCommunityClick: () -> Unit, isExploreT
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 6.dp)
+            .padding(horizontal = 20.dp, vertical = 5.dp)
             .clickable(onClick = onCommunityClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = ItemCardBackground),
@@ -309,8 +282,12 @@ fun CommunityItem(community: Community, onCommunityClick: () -> Unit, isExploreT
 }
 
 @Composable
-fun CommunityTabContent(communities: List<Community>, isExploreTab: Boolean) {
-
+fun CommunityTabContent(
+    communities: List<Community>,
+    isExploreTab: Boolean,
+    onCommunityClick: (String) -> Unit
+) {
+    Spacer(modifier = Modifier.width(20.dp))
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(1.dp)
@@ -318,7 +295,7 @@ fun CommunityTabContent(communities: List<Community>, isExploreTab: Boolean) {
         items(communities) { community ->
             CommunityItem(
                 community = community,
-                onCommunityClick = { /* Click action */ },
+                onCommunityClick = { onCommunityClick(community.name) },
                 isExploreTab = isExploreTab
             )
         }
