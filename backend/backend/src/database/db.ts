@@ -18,5 +18,5 @@ export const AppDataSource = new DataSource({
   database: 'postgres',
   entities: [User, Post, Follow, Like, PostCount, Community, CommunityMember],
   synchronize: true, // true só em dev! nunca em produção
-  ssl: true, 
+  ssl: false, 
 });
