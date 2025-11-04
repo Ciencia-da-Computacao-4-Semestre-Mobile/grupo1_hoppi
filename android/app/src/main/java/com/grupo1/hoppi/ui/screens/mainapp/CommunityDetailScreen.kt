@@ -3,42 +3,31 @@ package com.grupo1.hoppi.ui.screens.mainapp
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Comment
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 
 enum class CommunityAccessStatus {
     MEMBER,
@@ -69,66 +58,118 @@ fun CommunityDetailScreen(
     navController: NavController,
     communityId: String
 ) {
-    val communityName = if (communityId == "UnaspSP") "Comunidade Unasp SP" else "Comunidade de Estudantes"
-    val isPrivate = remember { mutableStateOf(communityId == "UnaspSP") }
+    val community = remember { findCommunityByName(communityId) }
+
+    val currentCommunity = community ?: Community(
+        name = "Comunidade Não Encontrada",
+        description = "",
+        isOfficial = false,
+        isPrivate = false
+    )
+
+    val isPrivate = currentCommunity.isPrivate
+
+    val creatorInfo = currentCommunity.description.split('\n').firstOrNull { it.startsWith("Criado por") } ?: "Comunidade Oficial"
+
 
     var accessStatus by remember {
         mutableStateOf(
-            if (isPrivate.value) CommunityAccessStatus.NOT_MEMBER_PRIVATE
+            if (isPrivate) CommunityAccessStatus.NOT_MEMBER_PRIVATE
             else CommunityAccessStatus.NOT_MEMBER_PUBLIC
         )
-    }
-
-    // Para fins de demonstração, simulamos a solicitação pendente se o ID for UnaspSP/requested
-    if (communityId == "UnaspSP/requested") {
-        isPrivate.value = true
-        accessStatus = CommunityAccessStatus.REQUEST_PENDING
     }
 
     Scaffold(
         containerColor = Color.White,
         topBar = {
             CommunityDetailTopBar(
-                title = communityName,
-                onBackClick = { navController.popBackStack() }
+                title = currentCommunity.name,
+                onBackClick = { navController.popBackStack() },
+                onSettingsClick = { navController.navigate("main/community_settings/${currentCommunity.name}") }
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            CommunityDetailHeader(
-                communityName = communityName,
-                isOfficial = true,
-                isPrivate = isPrivate.value,
-                membersCount = "1.870",
-                postsCount = "560",
-                accessStatus = accessStatus,
-                onActionButtonClick = {
-                    accessStatus = handleCommunityAction(accessStatus, isPrivate.value)
-                }
-            )
+            item {
+                CommunityDetailHeader(
+                    communityName = currentCommunity.name,
+                    creatorInfo = creatorInfo,
+                    isOfficial = currentCommunity.isOfficial,
+                    isPrivate = isPrivate,
+                    membersCount = "1.870",
+                    postsCount = "560",
+                    accessStatus = accessStatus,
+                    onActionButtonClick = {
+                        accessStatus = handleCommunityAction(accessStatus, isPrivate)
+                    }
+                )
+            }
 
-            CommunityDetailBody(accessStatus = accessStatus)
+            CommunityDetailBodyItems(accessStatus = accessStatus)
+        }
+    }
+}
+
+fun LazyListScope.CommunityDetailBodyItems(accessStatus: CommunityAccessStatus) {
+    val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
+            accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
+
+    if (hasAccess) {
+        items(mockCommunityPosts) { post ->
+            PostCardDetail(post = post)
+            Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 1.dp)
+        }
+        item { Spacer(modifier = Modifier.height(56.dp)) }
+    } else {
+        item {
+            AccessDeniedContent(accessStatus = accessStatus)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommunityDetailTopBar(title: String, onBackClick: () -> Unit) {
+fun CommunityDetailTopBar(
+    title: String,
+    onBackClick: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = { },
         navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+            Box(modifier = Modifier.padding(top = 0.dp, start = 20.dp, end = 0.dp)) {
+                IconButton(onClick = onBackClick, modifier = Modifier.offset(y = (-15).dp)) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", Modifier.size(30.dp))
+                }
             }
         },
         actions = {
-            IconButton(onClick = { }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções")
+            Box(modifier = Modifier.padding(top = 0.dp, end = 20.dp, start = 0.dp)) {
+                IconButton(onClick = { showMenu = true }, modifier = Modifier.offset(y = (-15).dp)) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções", Modifier.size(30.dp))
+                }
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Configurações") },
+                    onClick = {
+                        onSettingsClick()
+                        showMenu = false
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Filled.Settings, contentDescription = "Configurações")
+                    }
+                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -136,115 +177,10 @@ fun CommunityDetailTopBar(title: String, onBackClick: () -> Unit) {
     Divider(color = Color.Gray.copy(alpha = 0.2f), thickness = 1.dp)
 }
 
-fun handleCommunityAction(currentStatus: CommunityAccessStatus, isPrivate: Boolean): CommunityAccessStatus {
-    return when (currentStatus) {
-        CommunityAccessStatus.MEMBER -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
-        CommunityAccessStatus.NOT_MEMBER_PUBLIC -> CommunityAccessStatus.MEMBER
-        CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
-            if (isPrivate) CommunityAccessStatus.REQUEST_PENDING else CommunityAccessStatus.MEMBER
-        }
-        CommunityAccessStatus.REQUEST_PENDING -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
-    }
-}
-
-@Composable
-fun CommunityStat(count: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(count, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        Text(label, color = Color.Gray, fontSize = 14.sp)
-    }
-}
-
-@Composable
-fun PostCardDetail(post: CommunityPost) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(20.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(post.avatarColor)
-        )
-        Spacer(Modifier.width(20.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(post.username, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Spacer(Modifier.width(5.dp))
-                Text(post.handle, color = Color.Gray, fontSize = 14.sp)
-            }
-            Text(post.content, fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.FavoriteBorder, contentDescription = "Likes", modifier = Modifier.size(12.dp), tint = Color.Gray)
-                Spacer(Modifier.width(4.dp))
-                Text(post.likes, color = Color.Gray, fontSize = 12.sp)
-                Spacer(Modifier.width(16.dp))
-                Icon(Icons.Filled.Comment, contentDescription = "Comments", modifier = Modifier.size(12.dp), tint = Color.Gray)
-                Spacer(Modifier.width(4.dp))
-                Text(post.comments, color = Color.Gray, fontSize = 12.sp)
-            }
-        }
-    }
-}
-
-@Composable
-fun CommunityPostList(posts: List<CommunityPost>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(posts) { post ->
-            PostCardDetail(post = post)
-            Divider(color = Color.Gray.copy(alpha = 0.2f), thickness = 1.dp)
-        }
-        item { Spacer(modifier = Modifier.height(56.dp)) }
-    }
-}
-
-@Composable
-fun AccessDeniedContent(accessStatus: CommunityAccessStatus) {
-    val message = "Essa Comunidade é privada, para ter acesso solicite ao administrador da página"
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 40.dp, vertical = 60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.private_community),
-            contentDescription = "Acesso Negado",
-            modifier = Modifier.size(120.dp)
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = message,
-            textAlign = TextAlign.Center,
-            color = Color.Gray,
-            fontSize = 16.sp
-        )
-    }
-}
-
-@Composable
-fun CommunityDetailBody(accessStatus: CommunityAccessStatus) {
-    val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
-            accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
-
-    if (hasAccess) {
-        CommunityPostList(posts = mockCommunityPosts)
-    } else {
-        AccessDeniedContent(accessStatus = accessStatus)
-    }
-}
-
 @Composable
 fun CommunityDetailHeader(
     communityName: String,
+    creatorInfo: String,
     isOfficial: Boolean,
     isPrivate: Boolean,
     membersCount: String,
@@ -271,21 +207,21 @@ fun CommunityDetailHeader(
         CommunityAccessStatus.REQUEST_PENDING -> Triple(
             "Solicitado",
             ButtonDefaults.buttonColors(containerColor = Color.White),
-            true // O booleano 'isBordered' é o terceiro valor
+            true
         )
     }
 
-    // O ícone (icon) agora é definido separadamente ou dentro do Row do botão
     val icon = when (accessStatus) {
         CommunityAccessStatus.MEMBER -> Icons.Default.Check
-        CommunityAccessStatus.REQUEST_PENDING -> Icons.Default.Add // Simulação do ícone de relógio
+        CommunityAccessStatus.REQUEST_PENDING -> Icons.Default.Add
         else -> Icons.Default.Add
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 20.dp)
+            .offset(y = (-15).dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -301,14 +237,21 @@ fun CommunityDetailHeader(
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
+                Text(
+                    text = communityName,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 18.sp,
+                    color = Color(0xFF000000),
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = communityName,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = Color.Black
+                        text = creatorInfo,
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
                     if (isOfficial) {
                         Image(
                             painter = painterResource(id = R.drawable.oficial),
@@ -317,11 +260,6 @@ fun CommunityDetailHeader(
                         )
                     }
                 }
-                Text(
-                    text = if (isPrivate) "Comunidade Privada" else "Comunidade Oficial",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -364,5 +302,82 @@ fun CommunityDetailHeader(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+    }
+    Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 2.dp)
+}
+
+// --- Outras Funções ---
+
+fun handleCommunityAction(currentStatus: CommunityAccessStatus, isPrivate: Boolean): CommunityAccessStatus {
+    return when (currentStatus) {
+        CommunityAccessStatus.MEMBER -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
+        CommunityAccessStatus.NOT_MEMBER_PUBLIC -> CommunityAccessStatus.MEMBER
+        CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
+            if (isPrivate) CommunityAccessStatus.REQUEST_PENDING else CommunityAccessStatus.MEMBER
+        }
+        CommunityAccessStatus.REQUEST_PENDING -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
+    }
+}
+
+@Composable
+fun CommunityStat(count: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(count, fontWeight = FontWeight.Medium, fontSize = 18.sp, style = MaterialTheme.typography.bodyMedium)
+        Text(label, color = Color.Gray, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+fun PostCardDetail(post: CommunityPost) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(20.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .size(35.dp)
+                .clip(CircleShape)
+                .background(post.avatarColor)
+        )
+        Spacer(Modifier.width(20.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(post.username, fontWeight = FontWeight.Medium, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.width(5.dp))
+                Text(post.handle, color = Color.Gray, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
+            }
+            Text(post.content, fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp), style = MaterialTheme.typography.bodyMedium)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(painter = painterResource(id = R.drawable.like_detailed), contentDescription = "Curtidas", modifier = Modifier.size(12.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(post.likes, color = Color(0xFF000000), fontSize = 12.sp, style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.width(15.dp))
+                Image(painter = painterResource(id = R.drawable.comments_detailed), contentDescription = "Curtidas", modifier = Modifier.size(12.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(post.comments, color = Color(0xFF000000), fontSize = 12.sp, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+}
+
+@Composable
+fun AccessDeniedContent(accessStatus: CommunityAccessStatus) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 40.dp, vertical = 60.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.private_community),
+            contentDescription = "Acesso Negado",
+            modifier = Modifier.size(320.dp)
+        )
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

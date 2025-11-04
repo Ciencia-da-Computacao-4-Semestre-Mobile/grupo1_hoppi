@@ -13,12 +13,13 @@ data class Community(
     val name: String,
     val description: String,
     val isOfficial: Boolean = false,
+    val isPrivate: Boolean = false,
     val iconColor: Color = LightBlue
 )
 
 val initialHomeCommunities = listOf(
     Community("Comunidade de Estudantes", "Comunidade Oficial\nUm espaço para compartilhar ideias, tirar dúvidas e trocar experiências", isOfficial = true),
-    Community("Comunidade UNASP-SP", "Criado por UNASP-SP\nAqui você encontra novidades, comunicados e eventos relacionados ao UNASP-SP."),
+    Community("Comunidade UNASP-SP", "Criado por UNASP-SP\nAqui você encontra novidades, comunicados e eventos relacionados ao UNASP-SP.", isOfficial = false, isPrivate = true),
     Community("Comunidade da Graduação", "Criado por Graduação UNASP\nDiscussões, dicas acadêmicas e informações sobre o dia a dia da graduação."),
     Community("Comunidade Hoppi", "Comunidade Oficial\nCanal de comunicação da Hoppi! Fique por dentro das atualizações e novidades.", isOfficial = true),
     Community("Classificados - venda de produtos", "Criado por João\nEspaço destinado à compra e venda de produtos entre os alunos."),
@@ -32,6 +33,11 @@ val initialExploreCommunities = listOf(
     Community("Comunidade 2", "Criado por Fulano de Tal\nLorem ipsum is simply dummy text of the printing and typesetting industry"),
     Community("Comunidade 3", "Criado por Fulano de Tal\nLorem ipsum is simply dummy text of the printing and typesetting industry"),
 )
+
+fun findCommunityByName(name: String): Community? {
+    val allCommunities = initialHomeCommunities + initialExploreCommunities + AppCommunityManager.userCreatedCommunities
+    return allCommunities.find { it.name == name }
+}
 
 object AppCommunityManager {
     val userCreatedCommunities: SnapshotStateList<Community> = mutableStateListOf()

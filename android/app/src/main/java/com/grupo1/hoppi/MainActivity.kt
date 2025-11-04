@@ -16,6 +16,8 @@ import com.grupo1.hoppi.ui.screens.mainapp.NotificationScreen
 import com.grupo1.hoppi.ui.screens.mainapp.PostScreen
 import com.grupo1.hoppi.ui.screens.mainapp.ProfileScreen
 import com.grupo1.hoppi.ui.screens.mainapp.SearchScreen
+import com.grupo1.hoppi.ui.screens.mainapp.settings.SettingsDestinations
+import com.grupo1.hoppi.ui.screens.mainapp.settings.SettingsNavGraph
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
 object Destinations {
@@ -23,6 +25,7 @@ object Destinations {
     const val SIGNUP_ROUTE = "signup"
     const val FORGOT_PASSWORD_ROUTE = "forgot_password"
     const val HOME_ROUTE = "home"
+    const val SETTINGS_ROUTE = "settings"
 }
 @Composable
 fun HoppiApp() {
@@ -94,6 +97,13 @@ fun HoppiApp() {
 
         composable("main/create_post") {
             CreatePostScreen(navController = navController)
+        }
+
+        composable(Destinations.SETTINGS_ROUTE) {
+            SettingsNavGraph(
+                rootNavController = navController,
+                onLogout = { /* */ }
+            )
         }
     }
 }

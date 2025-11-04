@@ -17,6 +17,10 @@ import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +55,7 @@ val mockProfilePosts = List(10) { i ->
 @Composable
 fun ProfileScreen(
     onPostClick: (postId: Int) -> Unit,
+    onSettingsClick: () -> Unit,
     navController: NavController
 ) {
     val systemUiController = rememberSystemUiController()
@@ -69,7 +74,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         item {
-            ProfileHeaderContent(navController)
+            ProfileHeaderContent(navController, onSettingsClick)
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
 
@@ -84,9 +89,11 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileHeaderContent(navController: NavController) {
+fun ProfileHeaderContent(navController: NavController, onSettingsClick: () -> Unit) {
     val headerHeight = 230.dp
     val profileSize = 140.dp
+
+    var expanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -129,13 +136,28 @@ fun ProfileHeaderContent(navController: NavController) {
                 )
             }
 
-            IconButton(onClick = { /* ... */ }) {
-                Icon(
-                    Icons.Default.MoreVert,
-                    contentDescription = "Mais opções",
-                    tint = Color.White,
-                    modifier = Modifier.size(30.dp)
-                )
+            Box {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "Mais opções",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Configurações") },
+                        onClick = {
+                            expanded = false
+                            onSettingsClick()
+                        }
+                    )
+                }
             }
         }
 
@@ -160,7 +182,6 @@ fun ProfileHeaderContent(navController: NavController) {
         }
     }
 
-    // CONTEÚDO ABAIXO
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(top = profileSize / 2 - 10.dp)

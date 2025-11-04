@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import com.grupo1.hoppi.R
@@ -71,13 +72,14 @@ fun CreatePostScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .imePadding()
                     .padding(horizontal = 20.dp)
+                    .padding(bottom = paddingValues.calculateBottomPadding() + 60.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -123,68 +125,91 @@ fun CreatePostScreen(navController: NavController) {
                         }
                     )
                 }
-                Spacer(modifier = Modifier.height(250.dp))
-                Divider(color = Color.Black, thickness = 1.dp)
-                Spacer(modifier = Modifier.weight(1f))
+            }
 
-                Box(
+            // Box Fixa no Rodapé (Footer)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(Color.White)
+                    .imePadding()
+                    .heightIn(min = 60.dp)
+            ) {
+
+                // Divider Fixo
+                Divider(
+                    color = Color(0xFF000000),
+                    thickness = 1.dp,
                     modifier = Modifier
-                        .background(Color.White)
-                        .padding(vertical = 8.dp)
                         .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                )
+
+                // Row de Controles (Sempre Fixa na Base)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column {
-                        AnimatedVisibility(
-                            visible = showMenuTags,
-                            modifier = Modifier
-                                .offset(x = 5.dp, y = (-10).dp),
-                            enter = expandVertically(expandFrom = Alignment.Bottom),
-                            exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .width(IntrinsicSize.Max)
-                                    .shadow(8.dp, RoundedCornerShape(10.dp))
-                                    .background(Color.White, RoundedCornerShape(10.dp))
-                                    .padding(12.dp, 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ){
-                                availableTags.forEach { tag ->
-                                    TagMenuItem(
-                                        tag = tag,
-                                        onClick = {
-                                            selectedTag = it
-                                            showMenuTags = false
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        selectedTag?.let { tag ->
+                            TagDisplay(tag = tag, onDismiss = { selectedTag = null })
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+
+                        // Wrapper Box para posicionar o menu acima do botão
+                        Box(contentAlignment = Alignment.BottomStart) {
+
+                            // Menu de Tags (Camada superior, Flutuante)
+                            Column { // Adicionando Column para fornecer o ColumnScope
+                                AnimatedVisibility(
+                                    visible = showMenuTags,
+                                    modifier = Modifier
+                                        .zIndex(1f)
+                                        .offset(y = (-50).dp)
+                                        .offset(x = (-10).dp),
+                                    enter = expandVertically(expandFrom = Alignment.Bottom),
+                                    exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .width(IntrinsicSize.Max)
+                                            .shadow(8.dp, RoundedCornerShape(10.dp))
+                                            .background(Color.White, RoundedCornerShape(10.dp))
+                                            .padding(12.dp, 16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ){
+                                        availableTags.forEach { tag ->
+                                            TagMenuItem(
+                                                tag = tag,
+                                                onClick = {
+                                                    selectedTag = it
+                                                    showMenuTags = false
+                                                }
+                                            )
+                                            if (tag != availableTags.last()) {
+                                                Spacer(modifier = Modifier.height(10.dp))
+                                            }
                                         }
-                                    )
-                                    if (tag != availableTags.last()) {
-                                        Spacer(modifier = Modifier.height(10.dp))
                                     }
                                 }
                             }
-                        }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                selectedTag?.let { tag ->
-                                    TagDisplay(tag = tag, onDismiss = { selectedTag = null })
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                }
-                                AdicionarTagButton(
-                                    onClick = { showMenuTags = !showMenuTags }
-                                )
-                            }
-                            Text(
-                                text = "${postText.length}/1000 caracteres",
-                                color = CinzaClaro,
-                                fontSize = 12.sp
+                            // Botão Adicionar Tag
+                            AdicionarTagButton(
+                                onClick = { showMenuTags = !showMenuTags }
                             )
                         }
                     }
+                    Text(
+                        text = "${postText.length}/1000 caracteres",
+                        color = CinzaClaro,
+                        fontSize = 12.sp
+                    )
                 }
             }
         }

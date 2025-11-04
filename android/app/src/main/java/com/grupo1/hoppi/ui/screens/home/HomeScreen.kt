@@ -22,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.grupo1.hoppi.Destinations
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.mainapp.*
 
@@ -123,6 +124,9 @@ fun HomeScreen(rootNavController: NavHostController) {
                         navController = bottomNavController,
                         onPostClick = { postId ->
                             rootNavController.navigate("main/post_open/$postId")
+                        },
+                        onSettingsClick = {
+                            rootNavController.navigate(Destinations.SETTINGS_ROUTE)
                         }
                     )
                 }
