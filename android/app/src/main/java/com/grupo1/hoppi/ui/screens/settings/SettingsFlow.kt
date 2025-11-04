@@ -6,11 +6,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.grupo1.hoppi.ui.screens.settings.SettingsScreen
+import com.grupo1.hoppi.ui.screens.settings.account.EditInformationScreen
 
 object SettingsDestinations {
     const val SETTINGS_MAIN_SCREEN = "settings_main"
-    const val EDIT_USERNAME_ROUTE = "settings/edit_username"
-    const val EDIT_EMAIL_PHONE_ROUTE = "settings/edit_email_phone"
+    const val EDIT_INFORMATION_ROUTE = "settings/edit_information"
+    const val EDIT_EMAIL_ROUTE = "settings/edit_email"
+    const val EDIT_PHONE_ROUTE = "settings/edit_phone"
     const val CHANGE_PASSWORD_ROUTE = "settings/change_password"
     const val NOTIFICATIONS_ROUTE = "settings/notifications"
     const val PRIVACY_POLICY_ROUTE = "settings/privacy_policy"
@@ -29,8 +31,9 @@ fun SettingsNavGraph(rootNavController: NavController, onLogout: () -> Unit) {
             SettingsScreen(
                 navController = settingsNavController,
                 bottomNavController = rootNavController,
-                onEditUsernameClick = { settingsNavController.navigate(SettingsDestinations.EDIT_USERNAME_ROUTE) },
-                onEditEmailPhoneClick = { settingsNavController.navigate(SettingsDestinations.EDIT_EMAIL_PHONE_ROUTE) },
+                onEditInformationClick = { settingsNavController.navigate(SettingsDestinations.EDIT_INFORMATION_ROUTE) },
+                onEditEmailClick = { settingsNavController.navigate(SettingsDestinations.EDIT_EMAIL_ROUTE) },
+                onEditPhoneClick = { settingsNavController.navigate(SettingsDestinations.EDIT_PHONE_ROUTE) },
                 onChangePasswordClick = { settingsNavController.navigate(SettingsDestinations.CHANGE_PASSWORD_ROUTE) },
                 onNotificationsClick = { settingsNavController.navigate(SettingsDestinations.NOTIFICATIONS_ROUTE) },
                 onPrivacyPolicyClick = { settingsNavController.navigate(SettingsDestinations.PRIVACY_POLICY_ROUTE) },
@@ -39,12 +42,16 @@ fun SettingsNavGraph(rootNavController: NavController, onLogout: () -> Unit) {
             )
         }
 
-        composable(SettingsDestinations.EDIT_USERNAME_ROUTE) {
-            // EditUsernameScreen(navController = settingsNavController)
+        composable(SettingsDestinations.EDIT_INFORMATION_ROUTE) {
+            EditInformationScreen(navController = settingsNavController)
         }
 
-        composable(SettingsDestinations.EDIT_EMAIL_PHONE_ROUTE) {
-            // EditEmailPhoneScreen(navController = settingsNavController)
+        composable(SettingsDestinations.EDIT_EMAIL_ROUTE) {
+            // EditEmailScreen(navController = settingsNavController)
+        }
+
+        composable(SettingsDestinations.EDIT_PHONE_ROUTE) {
+            // EditPhoneScreen(navController = settingsNavController)
         }
 
         composable(SettingsDestinations.CHANGE_PASSWORD_ROUTE) {

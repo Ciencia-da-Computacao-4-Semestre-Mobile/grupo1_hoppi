@@ -30,8 +30,9 @@ val GrayIcon = Color(0xFF424242)
 fun SettingsScreen(
     navController: NavController,
     bottomNavController: NavController,
-    onEditUsernameClick: () -> Unit,
-    onEditEmailPhoneClick: () -> Unit,
+    onEditInformationClick: () -> Unit,
+    onEditEmailClick: () -> Unit,
+    onEditPhoneClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
@@ -43,8 +44,9 @@ fun SettingsScreen(
         content = { paddingValues ->
             SettingsContent(
                 modifier = Modifier.padding(paddingValues),
-                onEditUsernameClick = onEditUsernameClick,
-                onEditEmailPhoneClick = onEditEmailPhoneClick,
+                onEditInformationClick = onEditInformationClick,
+                onEditEmailClick = onEditEmailClick,
+                onEditPhoneClick = onEditPhoneClick,
                 onChangePasswordClick = onChangePasswordClick,
                 onNotificationsClick = onNotificationsClick,
                 onPrivacyPolicyClick = onPrivacyPolicyClick,
@@ -63,7 +65,7 @@ fun SettingsTopBar(navController: NavController) {
         title = {
             Text(
                 text = "Configurações",
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 22.sp),
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 20.sp),
                 color = Color.White
             )
         },
@@ -87,8 +89,9 @@ fun SettingsTopBar(navController: NavController) {
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier,
-    onEditUsernameClick: () -> Unit,
-    onEditEmailPhoneClick: () -> Unit,
+    onEditInformationClick: () -> Unit,
+    onEditEmailClick: () -> Unit,
+    onEditPhoneClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
@@ -105,13 +108,20 @@ fun SettingsContent(
         SettingItem(
             icon = Icons.Default.Person,
             title = "Nome de usuário",
-            onClick = onEditUsernameClick
+            onClick = onEditInformationClick
         )
         SettingItem(
             icon = Icons.Default.Email,
-            title = "E-mail / telefone",
-            onClick = onEditEmailPhoneClick
+            title = "E-mail",
+            onClick = onEditEmailClick
         )
+
+        SettingItem(
+            icon = Icons.Default.Phone,
+            title = "Telefone",
+            onClick = onEditPhoneClick
+        )
+
         SettingItem(
             icon = Icons.Default.Lock,
             title = "Alterar senha",
