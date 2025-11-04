@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.grupo1.hoppi.ui.screens.settings.SettingsScreen
+import com.grupo1.hoppi.ui.screens.settings.account.EditEmailScreen
 import com.grupo1.hoppi.ui.screens.settings.account.EditInformationScreen
 
 object SettingsDestinations {
@@ -47,7 +48,7 @@ fun SettingsNavGraph(rootNavController: NavController, onLogout: () -> Unit) {
         }
 
         composable(SettingsDestinations.EDIT_EMAIL_ROUTE) {
-            // EditEmailScreen(navController = settingsNavController)
+            EditEmailScreen(navController = settingsNavController)
         }
 
         composable(SettingsDestinations.EDIT_PHONE_ROUTE) {
