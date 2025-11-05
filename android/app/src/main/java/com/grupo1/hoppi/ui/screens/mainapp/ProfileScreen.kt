@@ -54,9 +54,9 @@ val mockProfilePosts = List(10) { i ->
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    navController: NavController,
     onPostClick: (postId: Int) -> Unit,
-    onSettingsClick: () -> Unit,
-    navController: NavController
+    onSettingsClick: () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = false

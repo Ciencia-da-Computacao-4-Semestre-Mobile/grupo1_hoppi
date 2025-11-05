@@ -116,17 +116,6 @@ fun EditEmailContent(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Título da Seção
-        Text(
-            text = "Alterar dados",
-            style = MaterialTheme.typography.titleLarge,
-            color = DarkText,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
-
-        Spacer(Modifier.height(4.dp))
-
         EditFieldGroup(
             label = "E-mail *",
             currentValue = currentEmail,
@@ -135,9 +124,6 @@ fun EditEmailContent(
             placeholder = "seuemail@email.com"
         )
 
-        Spacer(Modifier.height(32.dp))
-
-        // --- Botão Mudar E-mail (Ação de envio, não de validação) ---
         Button(
             onClick = onSendEmailAttempt,
             modifier = Modifier

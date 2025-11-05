@@ -1,12 +1,16 @@
 package com.grupo1.hoppi.ui.components.mainapp
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -15,7 +19,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 
 data class BottomNavItem(
     val route: String,
@@ -23,39 +26,38 @@ data class BottomNavItem(
     val contentDescription: String
 )
 
-val items = listOf(
-    BottomNavItem(MainAppDestinations.FEED_ROUTE, Icons.Default.Home, "Feed"),
-    BottomNavItem(MainAppDestinations.COMMUNITY_ROUTE, Icons.Default.People, "Comunidade"),
-    BottomNavItem(MainAppDestinations.SEARCH_ROUTE, Icons.Default.Search, "Busca")
+private val items = listOf(
+    BottomNavItem("main/feed", Icons.Default.Home, "Home"),
+    BottomNavItem("main/communities", Icons.Default.People, "Comunidades"),
+    BottomNavItem("main/search", Icons.Default.Search, "Buscar"),
 )
 
 @Composable
-fun BottomNavBar(navController: NavController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+fun BottomNavBar(
+    bottomNavController: NavController
+) {
+    val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
         containerColor = Color.White
     ) {
-        // Divider(color = Color.Black.copy(alpha = 1.0f), thickness = 1.dp)
         items.forEach { item ->
             val isSelected = currentRoute == item.route
 
             NavigationBarItem(
                 icon = {
                     Icon(
-                        item.icon,
+                        imageVector = item.icon,
                         contentDescription = item.contentDescription,
                         tint = if (isSelected) Color(0xFFEC8445) else Color.Black,
-                        modifier = Modifier.size(35.dp, 35.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                 },
                 selected = isSelected,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
+                    bottomNavController.navigate(item.route) {
+                        popUpTo(bottomNavController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }

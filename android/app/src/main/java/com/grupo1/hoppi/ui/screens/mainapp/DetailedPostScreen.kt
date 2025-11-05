@@ -85,7 +85,6 @@ fun PostScreen(
 
     Scaffold(
         topBar = { PostTopBar(navController) },
-        bottomBar = { BottomNavBar(navController) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

@@ -226,10 +226,10 @@ fun CustomTextField(
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = GrayTextField,
+            unfocusedContainerColor = Color.Transparent,
             disabledContainerColor = GrayTextField,
             focusedBorderColor = HoppiOrange,
-            unfocusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color(0xFF000000),
             cursorColor = HoppiOrange
         )
     )

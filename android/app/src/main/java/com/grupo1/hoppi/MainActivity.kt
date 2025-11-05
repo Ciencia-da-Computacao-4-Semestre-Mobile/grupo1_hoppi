@@ -3,20 +3,28 @@ package com.grupo1.hoppi
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
+import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
-import com.grupo1.hoppi.ui.screens.mainapp.CreatePostScreen
-import com.grupo1.hoppi.ui.screens.mainapp.NotificationScreen
-import com.grupo1.hoppi.ui.screens.mainapp.PostScreen
-import com.grupo1.hoppi.ui.screens.mainapp.ProfileScreen
-import com.grupo1.hoppi.ui.screens.mainapp.SearchScreen
-import com.grupo1.hoppi.ui.screens.mainapp.settings.SettingsDestinations
+import com.grupo1.hoppi.ui.screens.mainapp.*
 import com.grupo1.hoppi.ui.screens.mainapp.settings.SettingsNavGraph
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 
@@ -24,86 +32,133 @@ object Destinations {
     const val LOGIN_ROUTE = "login"
     const val SIGNUP_ROUTE = "signup"
     const val FORGOT_PASSWORD_ROUTE = "forgot_password"
-    const val HOME_ROUTE = "home"
-    const val SETTINGS_ROUTE = "settings"
+    const val MAIN_APP = "main_app"
 }
+
 @Composable
 fun HoppiApp() {
-    val navController = rememberNavController()
+    val rootNavController = rememberNavController()
 
     NavHost(
-        navController = navController,
+        navController = rootNavController,
         startDestination = Destinations.LOGIN_ROUTE
     ) {
         composable(Destinations.LOGIN_ROUTE) {
             LoginScreen(
-                onSignUpClick = {
-                    navController.navigate(Destinations.SIGNUP_ROUTE)
-                },
-                onForgotPasswordClick = {
-                    navController.navigate(Destinations.FORGOT_PASSWORD_ROUTE)
-                },
+                onSignUpClick = { rootNavController.navigate(Destinations.SIGNUP_ROUTE) },
+                onForgotPasswordClick = { rootNavController.navigate(Destinations.FORGOT_PASSWORD_ROUTE) },
                 onLoginSuccess = {
-                    navController.navigate(Destinations.HOME_ROUTE) {
-                        popUpTo(Destinations.LOGIN_ROUTE) { inclusive = true }
+                    rootNavController.navigate(Destinations.MAIN_APP) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
 
         composable(Destinations.SIGNUP_ROUTE) {
-            SignUpFlow(
-                onLoginClick = {
-                    navController.navigate(Destinations.LOGIN_ROUTE)
-                }
-            )
+            SignUpFlow(onLoginClick = { rootNavController.popBackStack() })
         }
 
         composable(Destinations.FORGOT_PASSWORD_ROUTE) {
-            ForgotPasswordFlow(
-                onBackToLogin = {
-                    navController.popBackStack(
-                        Destinations.LOGIN_ROUTE,
-                        inclusive = false
-                    )
+            ForgotPasswordFlow(onBackToLogin = { rootNavController.popBackStack() })
+        }
+
+        composable(Destinations.MAIN_APP) {
+            MainApp(rootNavController = rootNavController)
+        }
+    }
+}
+
+@Composable
+fun MainApp(rootNavController: NavHostController) {
+    val bottomNavController = rememberNavController()
+    val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
+    val hideBars = currentDestination == MainAppDestinations.SEARCH_ROUTE
+
+    Scaffold(
+        bottomBar = {
+            if (!hideBars) {
+                BottomNavBar(bottomNavController = bottomNavController)
+            }
+        },
+        floatingActionButton = {
+            if (!hideBars) {
+                FloatingActionButton(
+                    onClick = { bottomNavController.navigate(MainAppDestinations.CREATE_POST_ROUTE) },
+                    shape = (CircleShape),
+                    containerColor = Color(0xFFEC8445)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Criar Post", tint = Color.White)
                 }
-            )
-        }
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
+    ) { padding ->
+        NavHost(
+            navController = bottomNavController,
+            startDestination = MainAppDestinations.FEED_ROUTE,
+            modifier = Modifier.padding(padding)
+        ) {
 
-        composable(Destinations.HOME_ROUTE) {
-            HomeScreen(rootNavController = navController)
-        }
+            composable(MainAppDestinations.FEED_ROUTE) {
+                HomeScreen(
+                    rootNavController = rootNavController,
+                    bottomNavController = bottomNavController
+                )
+            }
 
-        composable("main/search") {
-            SearchScreen(navController = navController)
-        }
+            composable(MainAppDestinations.NOTIFICATIONS_ROUTE) {
+                NotificationScreen(navController = bottomNavController)
+            }
 
-        composable("main/communities") {
-            NotificationScreen(navController = navController)
-        }
+            composable(MainAppDestinations.PROFILE_ROUTE) {
+                ProfileScreen(
+                    navController = bottomNavController,
+                    onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
+                    onSettingsClick = { bottomNavController.navigate("settings_flow") }
+                )
+            }
 
-        composable("main/create_community") {
-            NotificationScreen(navController = navController)
-        }
+            composable(MainAppDestinations.COMMUNITY_ROUTE) {
+                CommunitiesScreen(navController = bottomNavController)
+            }
 
-        composable("main/notifications") {
-            NotificationScreen(navController = navController)
-        }
+            composable(MainAppDestinations.CREATE_COMMUNITY_ROUTE) {
+                CreateCommunityScreen(navController = bottomNavController)
+            }
 
-        composable("main/post_open/{postId}") { backStackEntry ->
-            val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
-            PostScreen(postId = postId, navController = navController)
-        }
+            composable(
+                MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
+                arguments = listOf(navArgument("communityName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val communityName = backStackEntry.arguments?.getString("communityName") ?: ""
+                CommunityDetailScreen(navController = bottomNavController, communityId = communityName)
+            }
 
-        composable("main/create_post") {
-            CreatePostScreen(navController = navController)
-        }
+            composable(MainAppDestinations.SEARCH_ROUTE) {
+                SearchScreen(navController = bottomNavController)
+            }
 
-        composable(Destinations.SETTINGS_ROUTE) {
-            SettingsNavGraph(
-                rootNavController = navController,
-                onLogout = { /* */ }
-            )
+            composable(MainAppDestinations.CREATE_POST_ROUTE) {
+                CreatePostScreen(navController = bottomNavController)
+            }
+
+            composable(MainAppDestinations.POST_OPEN_ROUTE) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
+                PostScreen(postId = postId, navController = bottomNavController)
+            }
+
+            composable("settings_flow") {
+                SettingsNavGraph(
+                    rootNavController = rootNavController,
+                    bottomNavController = bottomNavController,
+                    onLogout = {
+                        rootNavController.navigate(Destinations.LOGIN_ROUTE) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }

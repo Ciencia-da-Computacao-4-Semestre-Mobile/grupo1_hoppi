@@ -111,7 +111,6 @@ fun NotificationScreen(navController: NavController) {
         topBar = {
             NotificationTopBar(navController = navController)
         },
-        bottomBar = { BottomNavBar(navController) },
         contentWindowInsets = WindowInsets(0,0,0,0),
         containerColor = Color.White
     ) { paddingValues ->

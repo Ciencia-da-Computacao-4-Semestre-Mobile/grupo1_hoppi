@@ -41,6 +41,7 @@ fun SettingsScreen(
 ) {
     Scaffold(
         topBar = { SettingsTopBar(navController = navController) },
+        bottomBar = { BottomNavBar(bottomNavController) },
         content = { paddingValues ->
             SettingsContent(
                 modifier = Modifier.padding(paddingValues),
@@ -54,7 +55,6 @@ fun SettingsScreen(
                 onLogoutClick = onLogoutClick
             )
         },
-        bottomBar = { BottomNavBar(navController = bottomNavController) }
     )
 }
 
