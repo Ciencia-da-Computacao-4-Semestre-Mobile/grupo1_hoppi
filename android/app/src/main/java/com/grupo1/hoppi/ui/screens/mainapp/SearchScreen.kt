@@ -30,37 +30,32 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import kotlinx.coroutines.delay
 
 val mockSearchItems = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
 
 @Composable
-fun SearchScreen(navController: NavController) {
+fun SearchScreen(
+    navController: NavController
+) {
     var searchText by remember { mutableStateOf("") }
     var searchHistory by remember { mutableStateOf(mockSearchItems.toMutableList()) }
     val focusRequester = remember { FocusRequester() }
 
-    val searchTopBarColor = Color(0xFFEC8445)
-    val view = LocalView.current
-    val window = (view.context as? Activity)?.window
-    LaunchedEffect(Unit) {
-        window?.let {
-            WindowCompat.setDecorFitsSystemWindows(it, false)
-            it.statusBarColor = searchTopBarColor.toArgb()
-            val insetsController = WindowCompat.getInsetsController(it, view)
-            insetsController.isAppearanceLightStatusBars = false
-        }
-    }
+
 
     Scaffold(
-        topBar = { SearchTopBar(navController) }
+        topBar = { SearchTopBar(navController) },
+        modifier = Modifier
+            .fillMaxSize()
     ) { paddingValues ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
                 .background(Color.White)
         ) {
             OutlinedTextField(
@@ -84,7 +79,6 @@ fun SearchScreen(navController: NavController) {
             )
 
             LaunchedEffect(Unit) {
-                delay(300)
                 focusRequester.requestFocus()
             }
 
@@ -110,14 +104,15 @@ fun SearchScreen(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchTopBar(navController: NavController) {
+    val systemUiController = rememberSystemUiController()
+    val searchTopBarColor = Color(0xFFEC8445)
+
+    SideEffect {
+        systemUiController.setStatusBarColor(color = searchTopBarColor, darkIcons = false)
+    }
+
     TopAppBar(
-        title = {
-            Text(
-                text = "Pesquisa",
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White
-            )
-        },
+        title = { Text(text = "Pesquisa", style = MaterialTheme.typography.headlineLarge, color = Color.White) },
         navigationIcon = {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
@@ -144,7 +139,7 @@ fun SearchItemRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(item, style = MaterialTheme.typography.bodyMedium)
+            Text(item, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF000000))
 
             IconButton(onClick = { onRemoveItem(item) }) {
                 Icon(Icons.Filled.Close, contentDescription = "Remover item")

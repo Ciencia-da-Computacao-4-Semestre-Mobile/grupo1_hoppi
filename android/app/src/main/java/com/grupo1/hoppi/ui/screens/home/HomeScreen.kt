@@ -28,20 +28,13 @@ fun HomeScreen(
     rootNavController: NavHostController,
     bottomNavController: NavHostController
 ) {
-    val systemUiController = rememberSystemUiController()
-    val useDarkIcons = false
-
-    LaunchedEffect(Unit) {
-        systemUiController.setStatusBarColor(color = Color(0xFFEC8445), darkIcons = useDarkIcons)
-    }
 
     Scaffold() { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            FeedScreen(
-                onPostClick = { postId -> rootNavController.navigate("main/post_open/$postId") },
-                onNotificationsClick = { bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE) },
-                onProfileClick = { bottomNavController.navigate(MainAppDestinations.PROFILE_ROUTE) }
-            )
-        }
+        FeedScreen(
+            modifier = Modifier.padding(paddingValues),
+            onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
+            onNotificationsClick = { bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE) },
+            onProfileClick = { bottomNavController.navigate(MainAppDestinations.PROFILE_ROUTE) }
+        )
     }
 }

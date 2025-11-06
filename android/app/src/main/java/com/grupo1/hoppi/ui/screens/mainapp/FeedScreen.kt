@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.R
 
 data class Post(val id: Int, val username: String, val content: String, val isSale: Boolean = false)
@@ -33,11 +35,17 @@ val mockPosts = List(10) { i ->
 
 @Composable
 fun FeedScreen(
+    modifier: Modifier = Modifier,
     onPostClick: (postId: Int) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: () -> Unit,
 ) {
     val listBackgroundColor = Color.White
+    val systemUiController = rememberSystemUiController()
+
+    SideEffect {
+        systemUiController.setStatusBarColor(color = Color.White, darkIcons = true)
+    }
 
     Column(
         modifier = Modifier
@@ -55,7 +63,8 @@ fun FeedScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(listBackgroundColor),
-        verticalArrangement = Arrangement.spacedBy(1.dp)
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+        contentPadding = PaddingValues(bottom = 0.dp)
     ) {
 
         items(mockPosts) { post ->
@@ -139,7 +148,8 @@ fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
                             post.username,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = Color(0xFF000000)
                         )
                         Spacer(Modifier.width(5.dp))
                         Text(
@@ -156,28 +166,29 @@ fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
                 post.content,
                 style = MaterialTheme.typography.bodyMedium,
                 fontSize = 14.sp,
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                color = Color(0xFF000000)
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like),
+                    painter = painterResource(id = R.drawable.like_detailed),
                     contentDescription = "Curtidas",
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFFA6A6A6))
+                Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 
                 Image(
-                    painter = painterResource(id = R.drawable.comments),
+                    painter = painterResource(id = R.drawable.comments_detailed),
                     contentDescription = "Comentários",
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFFA6A6A6))
+                Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.weight(1f))
 

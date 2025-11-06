@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -153,8 +154,11 @@ fun ProfileHeaderContent(navController: NavController, onSettingsClick: () -> Un
                     DropdownMenuItem(
                         text = { Text("Configurações") },
                         onClick = {
-                            expanded = false
                             onSettingsClick()
+                            expanded = false
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Filled.Settings, contentDescription = "Configurações")
                         }
                     )
                 }
@@ -188,7 +192,7 @@ fun ProfileHeaderContent(navController: NavController, onSettingsClick: () -> Un
     ) {
         Text("@fulan.tal", color = LightGreyText, style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
         Spacer(Modifier.height(10.dp))
-        Text("Fulano de Tal", style = MaterialTheme.typography.headlineLarge, fontSize = 20.sp)
+        Text("Fulano de Tal", style = MaterialTheme.typography.headlineLarge, fontSize = 20.sp, color = Color(0xFF000000))
         Spacer(Modifier.height(20.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(horizontal = 85.dp)) {
@@ -203,7 +207,8 @@ fun ProfileHeaderContent(navController: NavController, onSettingsClick: () -> Un
             style = MaterialTheme.typography.bodyMedium,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 40.dp)
+            modifier = Modifier.padding(horizontal = 40.dp),
+            color = Color(0xFF000000)
         )
         Spacer(Modifier.height(20.dp))
     }
@@ -216,7 +221,7 @@ fun ProfileStat(count: String, label: String) {
             text = count,
             fontWeight = Bold,
             fontSize = 20.sp,
-            color = Black,
+            color = Color(0xFF000000),
             style = MaterialTheme.typography.bodyMedium
         )
         Text(
@@ -258,7 +263,8 @@ fun ProfilePostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
                             post.username,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = Color(0xFF000000),
                         )
                         Spacer(Modifier.width(5.dp))
                         Text(
@@ -275,28 +281,29 @@ fun ProfilePostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
                 post.content,
                 style = MaterialTheme.typography.bodyMedium,
                 fontSize = 14.sp,
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                color = Color(0xFF000000),
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like),
+                    painter = painterResource(id = R.drawable.like_detailed),
                     contentDescription = "Likes",
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("10 K", style = MaterialTheme.typography.bodySmall, color = LightGreyText)
+                Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 
                 Image(
-                    painter = painterResource(id = R.drawable.comments),
+                    painter = painterResource(id = R.drawable.comments_detailed),
                     contentDescription = "Comments",
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = LightGreyText)
+                Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.weight(1f))
             }

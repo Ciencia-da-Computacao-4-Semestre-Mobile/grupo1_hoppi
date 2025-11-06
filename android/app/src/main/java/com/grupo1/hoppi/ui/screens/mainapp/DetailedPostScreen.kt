@@ -146,14 +146,20 @@ fun PostHeader(post: DetailedPost) {
                 )
                 Spacer(Modifier.width(15.dp))
                 Column {
-                    Text(post.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, fontSize = 16.sp)
+                    Text(post.username, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, fontSize = 16.sp, color = Color(0xFF000000))
                     Text(post.userHandle, style = MaterialTheme.typography.bodyMedium, color = Color(0xFFA6A6A6), fontSize = 14.sp)
                 }
                 Spacer(Modifier.weight(1f))
                 Icon(Icons.Default.MoreVert, contentDescription = "Mais opções", modifier = Modifier.size(20.dp), tint = Color(0xFFA6A6A6))
             }
 
-            Text(post.content, style = MaterialTheme.typography.bodyMedium, fontSize = 16.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
+            Text(
+                post.content,
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                color = Color(0xFF000000)
+            )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(post.timestamp, style = MaterialTheme.typography.bodySmall, color = Color(0xFFA6A6A6), fontSize = 12.sp)
@@ -203,6 +209,7 @@ fun CommentItem(comment: Comment) {
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF000000)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
@@ -229,7 +236,13 @@ fun CommentItem(comment: Comment) {
             Icon(Icons.Default.MoreVert, contentDescription = "Mais opções", modifier = Modifier.size(20.dp), tint = Color(0xFFA6A6A6))
         }
 
-        Text(comment.content, style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp, modifier = Modifier.padding(start = 47.dp, top = 8.dp, bottom = 8.dp))
+        Text(
+            comment.content,
+            style = MaterialTheme.typography.bodyMedium,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 47.dp, top = 8.dp, bottom = 8.dp),
+            color = Color(0xFF000000)
+        )
 
         Row(
             modifier = Modifier.padding(start = 47.dp),

@@ -73,16 +73,18 @@ fun HoppiApp() {
 fun MainApp(rootNavController: NavHostController) {
     val bottomNavController = rememberNavController()
     val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
-    val hideBars = currentDestination == MainAppDestinations.SEARCH_ROUTE
+    val hideBottomBar = currentDestination == MainAppDestinations.SEARCH_ROUTE
+    val hideFab = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
+            currentDestination == MainAppDestinations.COMMUNITY_ROUTE
 
     Scaffold(
         bottomBar = {
-            if (!hideBars) {
+            if (!hideBottomBar) {
                 BottomNavBar(bottomNavController = bottomNavController)
             }
         },
         floatingActionButton = {
-            if (!hideBars) {
+            if (!hideFab) {
                 FloatingActionButton(
                     onClick = { bottomNavController.navigate(MainAppDestinations.CREATE_POST_ROUTE) },
                     shape = (CircleShape),

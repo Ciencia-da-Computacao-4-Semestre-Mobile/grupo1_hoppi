@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.R
 
@@ -33,6 +34,11 @@ fun CommunitiesScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     var isSearchActive by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
+    val systemUiController = rememberSystemUiController()
+
+    SideEffect {
+        systemUiController.setStatusBarColor(color = Color.White, darkIcons = true)
+    }
 
     val dynamicHomeCommunities = remember(AppCommunityManager.userCreatedCommunities.size) {
         initialHomeCommunities + AppCommunityManager.userCreatedCommunities

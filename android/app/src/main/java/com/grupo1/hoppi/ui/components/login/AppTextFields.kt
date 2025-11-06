@@ -47,6 +47,7 @@ fun LoginTextField(
             cursorColor = Color.DarkGray,
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
+            unfocusedPlaceholderColor = Color(0xFF000000)
         ),
         keyboardOptions = keyboardOptions
     )
@@ -132,6 +133,7 @@ fun PasswordTextField(
             cursorColor = Color.DarkGray,
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
+            unfocusedPlaceholderColor = Color(0xFF000000)
         )
     )
 }

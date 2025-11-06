@@ -193,6 +193,7 @@ fun NotificationRow(item: NotificationItem) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF000000)
                 )
 
                 if (!isFollowRequest && !isAccepted) {
@@ -209,7 +210,8 @@ fun NotificationRow(item: NotificationItem) {
                     text = item.text,
                     fontSize = 14.sp,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier.padding(top = 2.dp),
+                    color = Color(0xFF000000)
                 )
             }
             Spacer(Modifier.height(4.dp))
