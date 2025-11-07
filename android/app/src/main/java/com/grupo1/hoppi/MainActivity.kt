@@ -6,18 +6,14 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -25,7 +21,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
@@ -42,12 +37,14 @@ object Destinations {
     const val SIGNUP_ROUTE = "signup"
     const val FORGOT_PASSWORD_ROUTE = "forgot_password"
     const val MAIN_APP = "main_app"
+    const val SETTINGS_FLOW = "settings_flow"
 }
 
 @Composable
 fun HoppiApp() {
     SetStatusBarIcons()
     val rootNavController = rememberNavController()
+    val bottomNavController = rememberNavController()
 
     NavHost(
         navController = rootNavController,
@@ -83,6 +80,18 @@ fun HoppiApp() {
         composable(Destinations.MAIN_APP) {
             MainApp(rootNavController = rootNavController)
         }
+
+        composable(Destinations.SETTINGS_FLOW) {
+            SettingsNavGraph(
+                rootNavController = rootNavController,
+                bottomNavController = bottomNavController,
+                onLogout = {
+                    rootNavController.navigate(Destinations.LOGIN_ROUTE) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -90,6 +99,7 @@ fun HoppiApp() {
 fun MainApp(rootNavController: NavHostController) {
     val bottomNavController = rememberNavController()
     val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
+
     val hideBottomBar = currentDestination == MainAppDestinations.SEARCH_ROUTE
     val hideFab = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
             currentDestination == MainAppDestinations.COMMUNITY_ROUTE
@@ -104,7 +114,7 @@ fun MainApp(rootNavController: NavHostController) {
             if (!hideFab) {
                 FloatingActionButton(
                     onClick = { bottomNavController.navigate(MainAppDestinations.CREATE_POST_ROUTE) },
-                    shape = (CircleShape),
+                    shape = CircleShape,
                     containerColor = Color(0xFFEC8445)
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Criar Post", tint = Color.White)
@@ -121,20 +131,7 @@ fun MainApp(rootNavController: NavHostController) {
 
             composable(MainAppDestinations.FEED_ROUTE) {
                 HomeScreen(
-                    rootNavController = rootNavController,
                     bottomNavController = bottomNavController
-                )
-            }
-
-            composable(MainAppDestinations.NOTIFICATIONS_ROUTE) {
-                NotificationScreen(navController = bottomNavController)
-            }
-
-            composable(MainAppDestinations.PROFILE_ROUTE) {
-                ProfileScreen(
-                    navController = bottomNavController,
-                    onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
-                    onSettingsClick = { bottomNavController.navigate("settings_flow") }
                 )
             }
 
@@ -167,14 +164,12 @@ fun MainApp(rootNavController: NavHostController) {
                 PostScreen(postId = postId, navController = bottomNavController)
             }
 
-            composable("settings_flow") {
-                SettingsNavGraph(
-                    rootNavController = rootNavController,
-                    bottomNavController = bottomNavController,
-                    onLogout = {
-                        rootNavController.navigate(Destinations.LOGIN_ROUTE) {
-                            popUpTo(0) { inclusive = true }
-                        }
+            composable(MainAppDestinations.PROFILE_ROUTE) {
+                ProfileScreen(
+                    navController = bottomNavController,
+                    onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
+                    onSettingsClick = {
+                        rootNavController.navigate("${Destinations.SETTINGS_FLOW}")
                     }
                 )
             }
@@ -186,17 +181,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(
-                android.graphics.Color.TRANSPARENT
-            ),
-            navigationBarStyle = SystemBarStyle.dark(
-                android.graphics.Color.TRANSPARENT
-            )
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
 
         setContent {
-            HoppiTheme (dynamicColor = false) {
+            HoppiTheme(dynamicColor = false) {
                 HoppiApp()
             }
         }

@@ -10,7 +10,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 
@@ -30,38 +28,36 @@ val GrayIcon = Color(0xFF424242)
 
 @Composable
 fun SettingsScreen(
-    navController: NavController,
+    bottomNavController: NavController,
     onEditInformationClick: () -> Unit,
     onEditEmailClick: () -> Unit,
-    onEditPhoneClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     onAboutUsClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onBack: () -> Unit
 ) {
-
     Scaffold(
-        topBar = { SettingsTopBar(navController = navController) },
-        content = { paddingValues ->
-            SettingsContent(
-                modifier = Modifier.padding(paddingValues),
-                onEditInformationClick = onEditInformationClick,
-                onEditEmailClick = onEditEmailClick,
-                onEditPhoneClick = onEditPhoneClick,
-                onChangePasswordClick = onChangePasswordClick,
-                onNotificationsClick = onNotificationsClick,
-                onPrivacyPolicyClick = onPrivacyPolicyClick,
-                onAboutUsClick = onAboutUsClick,
-                onLogoutClick = onLogoutClick
-            )
-        },
-    )
+        topBar = { SettingsTopBar(onBack = onBack) },
+        bottomBar = { BottomNavBar(bottomNavController) }
+    ) { paddingValues ->
+        SettingsContent(
+            modifier = Modifier.padding(paddingValues),
+            onEditInformationClick = onEditInformationClick,
+            onEditEmailClick = onEditEmailClick,
+            onChangePasswordClick = onChangePasswordClick,
+            onNotificationsClick = onNotificationsClick,
+            onPrivacyPolicyClick = onPrivacyPolicyClick,
+            onAboutUsClick = onAboutUsClick,
+            onLogoutClick = onLogoutClick
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsTopBar(navController: NavController) {
+fun SettingsTopBar(onBack: () -> Unit) {
     TopAppBar(
         windowInsets = WindowInsets(0.dp),
         title = {
@@ -72,7 +68,7 @@ fun SettingsTopBar(navController: NavController) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = onBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Voltar",
@@ -81,9 +77,7 @@ fun SettingsTopBar(navController: NavController) {
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = HoppiOrange,
-            titleContentColor = Color.White,
-            navigationIconContentColor = Color.White
+            containerColor = HoppiOrange
         )
     )
 }
@@ -93,7 +87,6 @@ fun SettingsContent(
     modifier: Modifier = Modifier,
     onEditInformationClick: () -> Unit,
     onEditEmailClick: () -> Unit,
-    onEditPhoneClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
@@ -116,12 +109,6 @@ fun SettingsContent(
             icon = Icons.Default.Email,
             title = "E-mail",
             onClick = onEditEmailClick
-        )
-
-        SettingItem(
-            icon = Icons.Default.Phone,
-            title = "Telefone",
-            onClick = onEditPhoneClick
         )
 
         SettingItem(

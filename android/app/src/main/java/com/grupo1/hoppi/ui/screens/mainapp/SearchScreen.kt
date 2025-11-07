@@ -25,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
+import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 
 val mockSearchItems = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
 
@@ -98,7 +99,9 @@ fun SearchTopBar(navController: NavController) {
         windowInsets = WindowInsets(0.dp),
         title = { Text(text = "Pesquisa", style = MaterialTheme.typography.headlineLarge, color = Color.White) },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = {
+                navController.popBackStack()
+            }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
             }
         },

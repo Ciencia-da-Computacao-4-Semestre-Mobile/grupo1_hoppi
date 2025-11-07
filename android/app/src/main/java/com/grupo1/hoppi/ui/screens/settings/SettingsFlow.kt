@@ -35,15 +35,15 @@ fun SettingsNavGraph(
     ) {
         composable(SettingsDestinations.SETTINGS_MAIN_SCREEN) {
             SettingsScreen(
-                navController = settingsNavController,
+                bottomNavController = bottomNavController,
                 onEditInformationClick = { settingsNavController.navigate(SettingsDestinations.EDIT_INFORMATION_ROUTE) },
                 onEditEmailClick = { settingsNavController.navigate(SettingsDestinations.EDIT_EMAIL_ROUTE) },
-                onEditPhoneClick = { settingsNavController.navigate(SettingsDestinations.EDIT_PHONE_ROUTE) },
                 onChangePasswordClick = { settingsNavController.navigate(SettingsDestinations.CHANGE_PASSWORD_ROUTE) },
                 onNotificationsClick = { settingsNavController.navigate(SettingsDestinations.NOTIFICATIONS_ROUTE) },
                 onPrivacyPolicyClick = { settingsNavController.navigate(SettingsDestinations.PRIVACY_POLICY_ROUTE) },
                 onAboutUsClick = { settingsNavController.navigate(SettingsDestinations.ABOUT_US_ROUTE) },
-                onLogoutClick = onLogout
+                onLogoutClick = onLogout,
+                onBack = { rootNavController.popBackStack() }
             )
         }
 
@@ -53,10 +53,6 @@ fun SettingsNavGraph(
 
         composable(SettingsDestinations.EDIT_EMAIL_ROUTE) {
             EditEmailScreen(navController = settingsNavController)
-        }
-
-        composable(SettingsDestinations.EDIT_PHONE_ROUTE) {
-            // EditPhoneScreen(navController = settingsNavController)
         }
 
         composable(SettingsDestinations.CHANGE_PASSWORD_ROUTE) {

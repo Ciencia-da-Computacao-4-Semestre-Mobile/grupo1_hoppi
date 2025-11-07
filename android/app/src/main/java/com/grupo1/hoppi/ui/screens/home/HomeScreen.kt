@@ -1,13 +1,9 @@
 package com.grupo1.hoppi.ui.screens.home
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import com.grupo1.hoppi.ui.screens.mainapp.FeedScreen
 
@@ -25,7 +21,6 @@ object MainAppDestinations {
 
 @Composable
 fun HomeScreen(
-    rootNavController: NavHostController,
     bottomNavController: NavHostController
 ) {
 

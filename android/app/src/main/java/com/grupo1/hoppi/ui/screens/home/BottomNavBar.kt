@@ -56,10 +56,20 @@ fun BottomNavBar(
                 },
                 selected = isSelected,
                 onClick = {
-                    bottomNavController.navigate(item.route) {
-                        popUpTo(bottomNavController.graph.startDestinationId) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
+                    if (currentRoute != item.route) {
+
+                        if (item.route == "main/communities") {
+                            bottomNavController.navigate(item.route) {
+                                popUpTo("main/communities") { inclusive = true }
+                                launchSingleTop = true
+                            }
+
+                        } else {
+                            bottomNavController.navigate(item.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
