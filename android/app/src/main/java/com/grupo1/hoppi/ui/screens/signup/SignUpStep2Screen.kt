@@ -168,7 +168,7 @@ fun SignUpStep2Screen(
             Spacer(modifier = Modifier.height(50.dp))
 
             Button(
-                onClick = onFinish,
+                onClick = { onFinish() },
                 modifier = Modifier.width(124.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,

@@ -59,14 +59,6 @@ fun ProfileScreen(
     onPostClick: (postId: Int) -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
-    val useDarkIcons = false
-    SideEffect {
-        systemUiController.setStatusBarColor(
-            color = Pink,
-            darkIcons = useDarkIcons
-        )
-    }
 
     LazyColumn(
         modifier = Modifier

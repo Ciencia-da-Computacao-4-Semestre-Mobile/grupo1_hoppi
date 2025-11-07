@@ -109,6 +109,7 @@ fun PostScreen(
 @Composable
 fun PostTopBar(navController: NavController) {
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = {
             Text(
                 text = "Post",

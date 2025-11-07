@@ -36,7 +36,6 @@ fun SettingsNavGraph(
         composable(SettingsDestinations.SETTINGS_MAIN_SCREEN) {
             SettingsScreen(
                 navController = settingsNavController,
-                bottomNavController = bottomNavController,
                 onEditInformationClick = { settingsNavController.navigate(SettingsDestinations.EDIT_INFORMATION_ROUTE) },
                 onEditEmailClick = { settingsNavController.navigate(SettingsDestinations.EDIT_EMAIL_ROUTE) },
                 onEditPhoneClick = { settingsNavController.navigate(SettingsDestinations.EDIT_PHONE_ROUTE) },

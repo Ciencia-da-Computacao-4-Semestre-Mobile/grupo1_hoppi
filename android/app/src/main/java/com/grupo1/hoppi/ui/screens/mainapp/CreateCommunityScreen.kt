@@ -254,6 +254,7 @@ fun CreateCommunityScreen(navController: NavController) {
 @Composable
 fun CreateCommunityTopBar(onCloseClick: () -> Unit) {
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = { Text("", color = Branco, fontSize = 20.sp) },
         navigationIcon = {
             IconButton(onClick = onCloseClick) {

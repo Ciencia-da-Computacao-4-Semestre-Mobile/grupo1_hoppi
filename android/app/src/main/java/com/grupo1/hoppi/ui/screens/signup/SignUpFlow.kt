@@ -12,17 +12,20 @@ enum class SignUpStep {
 }
 
 @Composable
-fun SignUpFlow(onLoginClick: () -> Unit) {
+fun SignUpFlow(
+    onLoginClick: () -> Unit,
+    onFinish: () -> Unit
+) {
 
     var currentStep by remember { mutableStateOf(SignUpStep.PROFILE_DATA) }
 
     when (currentStep) {
         SignUpStep.PROFILE_DATA -> SignUpStep1Screen(
-            onContinue = { /* data -> */ currentStep = SignUpStep.PROFILE_PICTURE },
+            onContinue = { currentStep = SignUpStep.PROFILE_PICTURE },
             onLoginClick = onLoginClick
         )
         SignUpStep.PROFILE_PICTURE -> SignUpStep2Screen(
-            onFinish = { /* data -> */ onLoginClick() }
+            onFinish = onFinish
         )
     }
 }

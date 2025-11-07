@@ -306,8 +306,6 @@ fun CommunityDetailHeader(
     Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 2.dp)
 }
 
-// --- Outras Funções ---
-
 fun handleCommunityAction(currentStatus: CommunityAccessStatus, isPrivate: Boolean): CommunityAccessStatus {
     return when (currentStatus) {
         CommunityAccessStatus.MEMBER -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
@@ -322,7 +320,7 @@ fun handleCommunityAction(currentStatus: CommunityAccessStatus, isPrivate: Boole
 @Composable
 fun CommunityStat(count: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(count, fontWeight = FontWeight.Medium, fontSize = 18.sp, style = MaterialTheme.typography.bodyMedium)
+        Text(count, fontWeight = FontWeight.Medium, fontSize = 18.sp, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF000000))
         Text(label, color = Color.Gray, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
     }
 }
@@ -345,11 +343,11 @@ fun PostCardDetail(post: CommunityPost) {
         Spacer(Modifier.width(20.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(post.username, fontWeight = FontWeight.Medium, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
+                Text(post.username, color = Color(0xFF000000), fontWeight = FontWeight.Medium, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.width(5.dp))
                 Text(post.handle, color = Color.Gray, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
             }
-            Text(post.content, fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp), style = MaterialTheme.typography.bodyMedium)
+            Text(post.content, color = Color(0xFF000000), fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp), style = MaterialTheme.typography.bodyMedium)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(painter = painterResource(id = R.drawable.like_detailed), contentDescription = "Curtidas", modifier = Modifier.size(12.dp))
                 Spacer(Modifier.width(4.dp))

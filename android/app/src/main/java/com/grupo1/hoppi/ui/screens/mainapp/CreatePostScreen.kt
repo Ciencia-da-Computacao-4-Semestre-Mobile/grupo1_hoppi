@@ -220,6 +220,7 @@ fun CreatePostScreen(navController: NavController) {
 @Composable
 fun CreatePostTopBar(onCloseClick: () -> Unit) {
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = { Text("", color = Branco, fontSize = 20.sp) },
         navigationIcon = {
             IconButton(onClick = onCloseClick) {

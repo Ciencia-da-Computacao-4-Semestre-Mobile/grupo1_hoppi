@@ -1,6 +1,7 @@
 package com.grupo1.hoppi.ui.screens.settings.account
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -20,7 +22,7 @@ import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 val HoppiOrange = Color(0xFFEC8445)
 val GrayTextField = Color(0xFFE0E0E0)
-val DarkText = Color(0xFF424242)
+val DarkText = Color(0xFF000000)
 
 @Composable
 fun EditInformationScreen(navController: NavController) {
@@ -28,14 +30,12 @@ fun EditInformationScreen(navController: NavController) {
         topBar = { EditInformationTopBar(navController = navController) },
         content = { paddingValues ->
             EditInformationContent(
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
                 onSave = {
-                    // Lógica de salvar dados
                     println("Dados salvos. Voltando...")
                     navController.popBackStack()
                 },
                 onCancel = {
-                    // Lógica de cancelar e voltar
                     navController.popBackStack()
                 }
             )
@@ -47,6 +47,7 @@ fun EditInformationScreen(navController: NavController) {
 @Composable
 fun EditInformationTopBar(navController: NavController) {
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = {
             Text(
                 text = "Suas informações",
@@ -77,13 +78,11 @@ fun EditInformationContent(
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-    // Campos de estado editáveis
     var newName by remember { mutableStateOf(TextFieldValue("")) }
     var newUsername by remember { mutableStateOf(TextFieldValue("")) }
     var newBirthdate by remember { mutableStateOf(TextFieldValue("")) }
     var newInstitution by remember { mutableStateOf(TextFieldValue("")) }
 
-    // Valores atuais (Mocks)
     val currentName = "Fulano de Tal"
     val currentUsername = "@fulan.tal"
     val currentBirthdate = "01/01/2000"
@@ -94,19 +93,19 @@ fun EditInformationContent(
             .fillMaxSize()
             .background(Color.White)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp) // Aumenta o espaçamento entre grupos
+            .padding(horizontal = 20.dp, vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Título da Seção
         Text(
             text = "Alterar dados",
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = DarkText,
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            fontSize = 18.sp
         )
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(30.dp))
 
         EditFieldGroup(
             label = "Nome *",
@@ -116,7 +115,6 @@ fun EditInformationContent(
             placeholder = "Nome Completo"
         )
 
-        // --- Campo 1: Nome de usuário ---
         EditFieldGroup(
             label = "Nome de usuário *",
             currentValue = currentUsername,
@@ -143,33 +141,33 @@ fun EditInformationContent(
             placeholder = "Mudar instituição"
         )
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(30.dp))
 
-        // --- Botão Salvar ---
         Button(
             onClick = onSave,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+                .size(210.dp, 40.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
             colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Text("Salvar alterações", color = Color.White, fontSize = 18.sp)
+            Text("Salvar alterações", color = Color.White, style = MaterialTheme.typography.bodyMedium, fontSize = 18.sp)
         }
 
-        // --- Botão Cancelar ---
+        Spacer(Modifier.height(15.dp))
+
         Button(
             onClick = onCancel,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+                .size(210.dp, 40.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
+                containerColor = Color.White,
                 contentColor = DarkText
             ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Text("Cancelar", fontSize = 18.sp, fontWeight = FontWeight.Normal)
+            Text("Cancelar", fontSize = 18.sp, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Normal)
         }
     }
 }
@@ -186,16 +184,17 @@ fun EditFieldGroup(
         // 1. Rótulo principal (Nome do Campo)
         Text(
             text = label,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = DarkText,
-            fontSize = 18.sp
+            fontSize = 20.sp
         )
 
         // 2. Valor Atual (Mock)
         Text(
             text = currentValue,
             color = DarkText.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodyMedium,
             fontSize = 16.sp
         )
 

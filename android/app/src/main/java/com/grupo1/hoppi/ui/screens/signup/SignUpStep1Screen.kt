@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,6 +66,7 @@ fun SignUpStep1Screen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var visiblePassword by remember { mutableStateOf(false) }
+    var acceptedTerms by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -263,16 +267,64 @@ fun SignUpStep1Screen(
                 modifier = Modifier.align(Alignment.Start)
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 5.dp)
+                    .clickable { acceptedTerms = !acceptedTerms }
+            ) {
+                Checkbox(
+                    checked = acceptedTerms,
+                    onCheckedChange = { acceptedTerms = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.White,
+                        checkmarkColor = Color(0xFFC84B00),
+                        uncheckedColor = Color.White
+                    )
+                )
+                Text(
+                    text = "Aceito os termos de uso *",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            Text(
+                text = "Política de Privacidade e Termos de Uso",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textDecoration = TextDecoration.Underline,
+                    fontSize = 12.sp
+                ),
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(bottom = 30.dp)
+                    .clickable { /* */ }
+            )
 
             Button(
                 onClick = {
-                    val isValid = name.isNotEmpty() && email.isNotEmpty()
+                    val isValid = name.isNotEmpty()
+                            && birthDate.isNotEmpty()
+                            && institution.isNotEmpty()
+                            && email.isNotEmpty()
+                            && password.isNotEmpty()
+                            && acceptedTerms
                     if (isValid) {
                         onContinue()
                     }
                 },
                 Modifier.width(124.dp),
+                enabled = name.isNotEmpty()
+                        && birthDate.isNotEmpty()
+                        && institution.isNotEmpty()
+                        && email.isNotEmpty()
+                        && password.isNotEmpty()
+                        && acceptedTerms,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF4C4B4B)

@@ -1,6 +1,5 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,7 +7,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -27,12 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
-import kotlinx.coroutines.delay
 
 val mockSearchItems = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
 
@@ -43,8 +35,6 @@ fun SearchScreen(
     var searchText by remember { mutableStateOf("") }
     var searchHistory by remember { mutableStateOf(mockSearchItems.toMutableList()) }
     val focusRequester = remember { FocusRequester() }
-
-
 
     Scaffold(
         topBar = { SearchTopBar(navController) },
@@ -104,14 +94,8 @@ fun SearchScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchTopBar(navController: NavController) {
-    val systemUiController = rememberSystemUiController()
-    val searchTopBarColor = Color(0xFFEC8445)
-
-    SideEffect {
-        systemUiController.setStatusBarColor(color = searchTopBarColor, darkIcons = false)
-    }
-
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = { Text(text = "Pesquisa", style = MaterialTheme.typography.headlineLarge, color = Color.White) },
         navigationIcon = {
             IconButton(onClick = { navController.popBackStack() }) {

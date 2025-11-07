@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 
@@ -29,7 +31,6 @@ val GrayIcon = Color(0xFF424242)
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    bottomNavController: NavController,
     onEditInformationClick: () -> Unit,
     onEditEmailClick: () -> Unit,
     onEditPhoneClick: () -> Unit,
@@ -39,9 +40,9 @@ fun SettingsScreen(
     onAboutUsClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
+
     Scaffold(
         topBar = { SettingsTopBar(navController = navController) },
-        bottomBar = { BottomNavBar(bottomNavController) },
         content = { paddingValues ->
             SettingsContent(
                 modifier = Modifier.padding(paddingValues),
@@ -62,6 +63,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsTopBar(navController: NavController) {
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = {
             Text(
                 text = "Configurações",

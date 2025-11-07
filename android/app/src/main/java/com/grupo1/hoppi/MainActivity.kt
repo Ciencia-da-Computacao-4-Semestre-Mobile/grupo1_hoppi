@@ -2,22 +2,30 @@ package com.grupo1.hoppi
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
@@ -27,6 +35,7 @@ import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import com.grupo1.hoppi.ui.screens.mainapp.*
 import com.grupo1.hoppi.ui.screens.mainapp.settings.SettingsNavGraph
 import com.grupo1.hoppi.ui.theme.HoppiTheme
+import com.grupo1.hoppi.ui.util.SetStatusBarIcons
 
 object Destinations {
     const val LOGIN_ROUTE = "login"
@@ -37,6 +46,7 @@ object Destinations {
 
 @Composable
 fun HoppiApp() {
+    SetStatusBarIcons()
     val rootNavController = rememberNavController()
 
     NavHost(
@@ -56,7 +66,14 @@ fun HoppiApp() {
         }
 
         composable(Destinations.SIGNUP_ROUTE) {
-            SignUpFlow(onLoginClick = { rootNavController.popBackStack() })
+            SignUpFlow(
+                onLoginClick = { rootNavController.popBackStack() },
+                onFinish = {
+                    rootNavController.navigate(Destinations.MAIN_APP) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Destinations.FORGOT_PASSWORD_ROUTE) {
@@ -168,8 +185,18 @@ fun MainApp(rootNavController: NavHostController) {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            ),
+            navigationBarStyle = SystemBarStyle.dark(
+                android.graphics.Color.TRANSPARENT
+            )
+        )
+
         setContent {
-            HoppiTheme {
+            HoppiTheme (dynamicColor = false) {
                 HoppiApp()
             }
         }

@@ -40,11 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 
 data class NotificationItem(
     val id: Int,
@@ -94,18 +92,7 @@ val NotificationColors = mapOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(navController: NavController) {
-    val color = Color(0xFFEC8445)
     val view = LocalView.current
-    val activity = view.context as? Activity
-
-    SideEffect {
-        activity?.window?.let { window ->
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            window.statusBarColor = color.toArgb()
-            val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-            insetsController?.isAppearanceLightStatusBars = false
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -140,6 +127,7 @@ fun NotificationScreen(navController: NavController) {
 @Composable
 fun NotificationTopBar(navController: NavController) {
     TopAppBar(
+        windowInsets = WindowInsets(0.dp),
         title = {
             Text(
                 text = "Notificações",
@@ -201,6 +189,7 @@ fun NotificationRow(item: NotificationItem) {
                         text = " ${item.text}",
                         fontSize = 14.sp,
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF000000)
                     )
                 }
             }
