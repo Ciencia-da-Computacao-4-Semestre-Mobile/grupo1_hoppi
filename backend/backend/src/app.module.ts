@@ -9,6 +9,8 @@ import { LikesModule } from './likes/likes.module'
 import { PostCountsModule } from './post_counts/post_counts.module'
 import { CommunitiesModule } from './communities/communities.module'
 import { CommunityMembersModule } from './community_members/community_members.module'
+import { AuthModule } from './auth/auth.module'
+import { MailModule } from './nodemailer/mailer.module'
 
 @Module({
   imports: [
@@ -22,7 +24,8 @@ import { CommunityMembersModule } from './community_members/community_members.mo
     LikesModule,
     PostCountsModule,
     CommunitiesModule,
-    CommunityMembersModule
+    CommunityMembersModule,
+    AuthModule,
   ],
 })
 
