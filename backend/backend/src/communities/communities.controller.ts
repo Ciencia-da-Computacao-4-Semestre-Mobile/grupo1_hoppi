@@ -1,8 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common'
 import { CommunitiesService } from './communities.service';
 import { Community } from './communities.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CreateCommunityDto } from './dto/create-community.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { ListMembersQueryDto } from './dto/list-members.query.dto';
+import { ListRequestsQueryDto } from './dto/list-requests.query.dto';
+import { CommunityRequestActionDto } from './dto/community-request-action.dto';
+import { TransferOwnerDto } from './dto/transfer-owner.dto';
 
 @Controller('communities')
 export class CommunitiesController {
@@ -20,26 +25,26 @@ export class CommunitiesController {
 
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() dto: CreateCommunityDto, @Req() req) {
-    return this.communitiesService.create(dto, { id: req.user.sub } as any);
+  create(@Body() dto: CreateCommunityDto, @CurrentUser() user: any) {
+    return this.communitiesService.create(dto, { id: user.sub } as any);
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateCommunityDto>, @Req() req) {
-    return this.communitiesService.update(id, dto, { id: req.user.sub } as any);
+  update(@Param('id') id: string, @Body() dto: Partial<CreateCommunityDto>, @CurrentUser() user: any) {
+    return this.communitiesService.update(id, dto, { id: user.sub } as any);
   }
 
   @UseGuards(AuthGuard)
   @Post(':id/join')
-  join(@Param('id') id: string, @Req() req) {
-    return this.communitiesService.join(id, { id: req.user.sub } as any);
+  join(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.communitiesService.join(id, { id: user.sub } as any);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id/leave')
-  leave(@Param('id') id: string, @Req() req) {
-    return this.communitiesService.leave(id, { id: req.user.sub } as any);
+  leave(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.communitiesService.leave(id, { id: user.sub } as any);
   }
 
   @UseGuards(AuthGuard)
@@ -48,8 +53,54 @@ export class CommunitiesController {
     @Param('community') communityId: string,
     @Param('user_id') userId: string,
     @Body('role') role: 'member' | 'moderator' | 'owner',
-    @Req() req
+    @CurrentUser() user: any
   ) {
-    return this.communitiesService.updateMemberRole(communityId, userId, role, { id: req.user.sub } as any);
+    return this.communitiesService.updateMemberRole(communityId, userId, role, { id: user.sub } as any);
+  }
+
+  // Members listing with pagination and role filter
+  @UseGuards(AuthGuard)
+  @Get(':id/members')
+  listMembers(
+    @Param('id') id: string,
+    @Query() query: ListMembersQueryDto,
+  ) {
+    const page = Number(query.page ?? 1);
+    const limit = Number(query.limit ?? 20);
+    return this.communitiesService.listMembers(id, page, limit, query.role);
+  }
+
+  // Join requests listing (owner only)
+  @UseGuards(AuthGuard)
+  @Get(':id/requests')
+  listRequests(
+    @Param('id') id: string,
+    @Query() query: ListRequestsQueryDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.communitiesService.listJoinRequests(id, query.status, { id: user.sub } as any);
+  }
+
+  // Approve/Reject a join request (owner only)
+  @UseGuards(AuthGuard)
+  @Patch(':id/requests/:request_id')
+  actOnRequest(
+    @Param('id') id: string,
+    @Param('request_id') requestId: string,
+    @Body() body: CommunityRequestActionDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.communitiesService.actOnJoinRequest(id, requestId, body.action, { id: user.sub } as any);
+  }
+
+  // Transfer ownership
+  @UseGuards(AuthGuard)
+  @Patch(':id/owner')
+  transferOwner(
+    @Param('id') id: string,
+    @Body() body: TransferOwnerDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.communitiesService.transferOwnership(id, body.new_owner_user_id, { id: user.sub } as any);
   }
 }
