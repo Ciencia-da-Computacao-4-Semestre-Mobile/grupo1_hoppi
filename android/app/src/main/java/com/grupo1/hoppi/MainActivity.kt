@@ -175,12 +175,15 @@ fun MainApp(
                 CreateCommunityScreen(navController = bottomNavController)
             }
 
-            composable(
-                MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
+            composable(MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
                 arguments = listOf(navArgument("communityName") { type = NavType.StringType })
             ) { backStackEntry ->
                 val communityName = backStackEntry.arguments?.getString("communityName") ?: ""
-                CommunityDetailScreen(navController = bottomNavController, communityId = communityName)
+                CommunityDetailScreen(
+                    navController = bottomNavController,
+                    communityId = communityName,
+                    postsViewModel = postsViewModel
+                )
             }
 
             composable(MainAppDestinations.SEARCH_ROUTE) {

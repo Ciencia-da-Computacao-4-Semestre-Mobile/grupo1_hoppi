@@ -89,6 +89,10 @@ val mockComments = listOf(
     Comment(6, "Pessoa 7", "@pessoa_7", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "25", "1", "1"),
 )
 
+object SelectedPostHolder {
+    var selectedPost: DetailedPost? = null
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostScreen(

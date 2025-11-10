@@ -3,6 +3,7 @@ package com.grupo1.hoppi.ui.screens.mainapp
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -23,11 +24,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 
 enum class CommunityAccessStatus {
     MEMBER,
@@ -42,8 +43,8 @@ data class CommunityPost(
     val handle: String,
     val content: String,
     val avatarColor: Color,
-    val likes: String = "10 K",
-    val comments: String = "1.5 K"
+    val likes: Int = 0,
+    val comments: Int = 0
 )
 
 val mockCommunityPosts = listOf(
@@ -56,7 +57,8 @@ val mockCommunityPosts = listOf(
 @Composable
 fun CommunityDetailScreen(
     navController: NavController,
-    communityId: String
+    communityId: String,
+    postsViewModel: PostsViewModel
 ) {
     val community = remember { findCommunityByName(communityId) }
 
@@ -68,6 +70,8 @@ fun CommunityDetailScreen(
     )
 
     val isPrivate = currentCommunity.isPrivate
+
+    val posts = remember { mutableStateListOf<CommunityPost>().apply { addAll(mockCommunityPosts) } }
 
     val creatorInfo = currentCommunity.description.split('\n').firstOrNull { it.startsWith("Criado por") } ?: "Comunidade Oficial"
 
@@ -109,18 +113,40 @@ fun CommunityDetailScreen(
                 )
             }
 
-            CommunityDetailBodyItems(accessStatus = accessStatus)
+            CommunityDetailBodyItems(
+                accessStatus = accessStatus,
+                posts = posts,
+                navController = navController
+            )
         }
     }
 }
 
-fun LazyListScope.CommunityDetailBodyItems(accessStatus: CommunityAccessStatus) {
+fun LazyListScope.CommunityDetailBodyItems(
+    accessStatus: CommunityAccessStatus,
+    posts: MutableList<CommunityPost>,
+    navController: NavController
+) {
     val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
             accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
 
     if (hasAccess) {
-        items(mockCommunityPosts) { post ->
-            PostCardDetail(post = post)
+        items(posts) { post ->
+            PostCardDetail(
+                post = post,
+                onPostClick = { postId ->
+                    navController.navigate("main/post_open/$postId")
+                },
+                onLikeClick = {
+                    val index = posts.indexOfFirst { it.id == post.id }
+                    if (index != -1) {
+                        val updated = posts[index].copy(
+                            likes = if (post.likes > 0) (post.likes - 1) else (post.likes + 1)
+                        )
+                        posts[index] = updated
+                    }
+                }
+            )
             Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 1.dp)
         }
         item { Spacer(modifier = Modifier.height(56.dp)) }
@@ -326,7 +352,11 @@ fun CommunityStat(count: String, label: String) {
 }
 
 @Composable
-fun PostCardDetail(post: CommunityPost) {
+fun PostCardDetail(
+    post: CommunityPost,
+    onPostClick: (postId: Int) -> Unit,
+    onLikeClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -340,22 +370,79 @@ fun PostCardDetail(post: CommunityPost) {
                 .clip(CircleShape)
                 .background(post.avatarColor)
         )
+
         Spacer(Modifier.width(20.dp))
-        Column(modifier = Modifier.weight(1f)) {
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onPostClick(post.id) }
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(post.username, color = Color(0xFF000000), fontWeight = FontWeight.Medium, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = post.username,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF000000)
+                    )
+                )
                 Spacer(Modifier.width(5.dp))
-                Text(post.handle, color = Color.Gray, fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = post.handle,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                )
             }
-            Text(post.content, color = Color(0xFF000000), fontSize = 14.sp, modifier = Modifier.padding(top = 10.dp, bottom = 10.dp), style = MaterialTheme.typography.bodyMedium)
+
+            Text(
+                text = post.content,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    color = Color(0xFF000000)
+                ),
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+            )
+
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(painter = painterResource(id = R.drawable.like_detailed), contentDescription = "Curtidas", modifier = Modifier.size(12.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.like_detailed),
+                    contentDescription = "Curtidas",
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clickable { onLikeClick() }
+                )
+
                 Spacer(Modifier.width(4.dp))
-                Text(post.likes, color = Color(0xFF000000), fontSize = 12.sp, style = MaterialTheme.typography.bodyMedium)
+
+                Text(
+                    text = post.likes.toString(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 12.sp,
+                        color = Color(0xFF000000)
+                    )
+                )
+
                 Spacer(Modifier.width(15.dp))
-                Image(painter = painterResource(id = R.drawable.comments_detailed), contentDescription = "Curtidas", modifier = Modifier.size(12.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.comments_detailed),
+                    contentDescription = "Comentários",
+                    modifier = Modifier.size(12.dp)
+                )
+
                 Spacer(Modifier.width(4.dp))
-                Text(post.comments, color = Color(0xFF000000), fontSize = 12.sp, style = MaterialTheme.typography.bodyMedium)
+
+                Text(
+                    text = post.comments.toString(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 12.sp,
+                        color = Color(0xFF000000)
+                    )
+                )
             }
         }
     }
