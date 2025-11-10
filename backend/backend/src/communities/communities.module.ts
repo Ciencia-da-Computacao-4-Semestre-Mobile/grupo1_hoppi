@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { CommunitiesService } from './communities.service'
 import { CommunitiesController } from './communities.controller'
 import { Community } from './communities.entity'
+import { CommunityMember } from 'src/community_members/community_members.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Community])], 
+  imports: [TypeOrmModule.forFeature([Community, CommunityMember])], 
   controllers: [CommunitiesController],              
   providers: [CommunitiesService]
 })
