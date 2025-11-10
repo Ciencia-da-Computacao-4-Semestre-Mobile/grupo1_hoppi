@@ -14,9 +14,7 @@ object SettingsDestinations {
     const val SETTINGS_MAIN_SCREEN = "settings_main"
     const val EDIT_INFORMATION_ROUTE = "settings/edit_information"
     const val EDIT_EMAIL_ROUTE = "settings/edit_email"
-    const val EDIT_PHONE_ROUTE = "settings/edit_phone"
     const val CHANGE_PASSWORD_ROUTE = "settings/change_password"
-    const val NOTIFICATIONS_ROUTE = "settings/notifications"
     const val PRIVACY_POLICY_ROUTE = "settings/privacy_policy"
     const val ABOUT_US_ROUTE = "settings/about_us"
 }
@@ -24,7 +22,6 @@ object SettingsDestinations {
 @Composable
 fun SettingsNavGraph(
     rootNavController: NavController,
-    bottomNavController: NavController,
     onLogout: () -> Unit
 ) {
     val settingsNavController = rememberNavController()
@@ -35,11 +32,9 @@ fun SettingsNavGraph(
     ) {
         composable(SettingsDestinations.SETTINGS_MAIN_SCREEN) {
             SettingsScreen(
-                bottomNavController = bottomNavController,
                 onEditInformationClick = { settingsNavController.navigate(SettingsDestinations.EDIT_INFORMATION_ROUTE) },
                 onEditEmailClick = { settingsNavController.navigate(SettingsDestinations.EDIT_EMAIL_ROUTE) },
                 onChangePasswordClick = { settingsNavController.navigate(SettingsDestinations.CHANGE_PASSWORD_ROUTE) },
-                onNotificationsClick = { settingsNavController.navigate(SettingsDestinations.NOTIFICATIONS_ROUTE) },
                 onPrivacyPolicyClick = { settingsNavController.navigate(SettingsDestinations.PRIVACY_POLICY_ROUTE) },
                 onAboutUsClick = { settingsNavController.navigate(SettingsDestinations.ABOUT_US_ROUTE) },
                 onLogoutClick = onLogout,
@@ -57,10 +52,6 @@ fun SettingsNavGraph(
 
         composable(SettingsDestinations.CHANGE_PASSWORD_ROUTE) {
             // ChangePasswordScreen(navController = settingsNavController)
-        }
-
-        composable(SettingsDestinations.NOTIFICATIONS_ROUTE) {
-            // NotificationSettingsScreen(navController = settingsNavController)
         }
 
         composable(SettingsDestinations.PRIVACY_POLICY_ROUTE) {

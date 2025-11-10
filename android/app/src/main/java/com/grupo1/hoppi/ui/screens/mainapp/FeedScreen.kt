@@ -19,55 +19,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
-
-data class Post(val id: Int, val username: String, val content: String, val isSale: Boolean = false)
-
-val mockPosts = List(10) { i ->
-    Post(
-        id = i,
-        username = "Fulano de Tal",
-        content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry",
-        isSale = i % 3 == 0
-    )
-}
+import com.grupo1.hoppi.ui.screens.home.Post
+import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 
 @Composable
 fun FeedScreen(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
+    postsViewModel: PostsViewModel,
     onPostClick: (postId: Int) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: () -> Unit,
 ) {
-    val listBackgroundColor = Color.White
+    val posts = postsViewModel.posts
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
+        FeedTopBarContent(
+            onNotificationsClick = onNotificationsClick,
+            onProfileClick = onProfileClick
+        )
+        Divider(color = Color(0xFF9CBDC6), thickness = 1.dp)
 
-    FeedTopBarContent(
-        onNotificationsClick = onNotificationsClick,
-        onProfileClick = onProfileClick
-    )
-    Divider(color = Color(0xFF9CBDC6).copy(alpha = 1.0f), thickness = 1.dp)
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(listBackgroundColor),
-        verticalArrangement = Arrangement.spacedBy(1.dp),
-        contentPadding = PaddingValues(bottom = 0.dp)
-    ) {
-
-        items(mockPosts) { post ->
-            PostCard(
-                post = post,
-                onPostClick = onPostClick
-            )
-            Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            items(posts) { post ->
+                PostCard(
+                    post = post,
+                    onPostClick = onPostClick,
+                    onLikeClick = { postsViewModel.toggleLike(post.id) }
+                )
+                Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
+            }
         }
-    }
     }
 }
 
@@ -112,7 +100,11 @@ fun FeedTopBarContent(
 }
 
 @Composable
-fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
+fun PostCard(
+    post: Post,
+    onPostClick: (postId: Int) -> Unit,
+    onLikeClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,9 +158,11 @@ fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like_detailed),
-                    contentDescription = "Curtidas",
-                    modifier = Modifier.size(12.dp)
+                    painter = painterResource(id = if (post.isLiked) R.drawable.liked else R.drawable.like_detailed),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
                 Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
@@ -185,27 +179,28 @@ fun PostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
 
                 Spacer(Modifier.weight(1f))
 
-                if (post.isSale) {
+                post.tag?.let { tagName ->
+                    val (bgColor, textColor, iconRes) = when (tagName) {
+                        "Estudo" -> Triple(VerdeEstudo, TextColorEstudo, R.drawable.estudo_icon)
+                        "Venda" -> Triple(AzulVenda, TextColorVenda, R.drawable.venda_icon)
+                        "Info" -> Triple(LaranjaInfo, TextColorInfo, R.drawable.info_icon)
+                        else -> Triple(Color.LightGray, Color.Black, R.drawable.info_icon)
+                    }
+
                     AssistChip(
-                        onClick = { /* Sem Ação */ },
+                        onClick = { },
                         label = {
-                            Image(
-                                painter = painterResource(id = R.drawable.venda_icon),
-                                contentDescription = "Venda",
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                "Venda",
-                                fontWeight = FontWeight.Light,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontSize = 10.sp,
-                                color = Color(0xFF406B8D)
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = iconRes),
+                                    contentDescription = tagName,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(tagName, fontSize = 10.sp, color = textColor)
+                            }
                         },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = Color(0xFF9CBDC6)
-                        ),
+                        colors = AssistChipDefaults.assistChipColors(containerColor = bgColor),
                         border = null,
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier.height(20.dp)

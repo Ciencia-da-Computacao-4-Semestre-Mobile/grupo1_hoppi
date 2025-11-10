@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.grupo1.hoppi.Destinations
 
 data class BottomNavItem(
     val route: String,
@@ -34,7 +35,8 @@ private val items = listOf(
 
 @Composable
 fun BottomNavBar(
-    bottomNavController: NavController
+    bottomNavController: NavController,
+    rootNavController: NavController
 ) {
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -56,14 +58,18 @@ fun BottomNavBar(
                 },
                 selected = isSelected,
                 onClick = {
-                    if (currentRoute != item.route) {
+                    if (rootNavController.currentDestination?.route == Destinations.SETTINGS_FLOW) {
+                        rootNavController.navigate(Destinations.MAIN_APP) {
+                            popUpTo(Destinations.SETTINGS_FLOW) { inclusive = true }
+                        }
+                    }
 
+                    if (currentRoute != item.route) {
                         if (item.route == "main/communities") {
                             bottomNavController.navigate(item.route) {
                                 popUpTo("main/communities") { inclusive = true }
                                 launchSingleTop = true
                             }
-
                         } else {
                             bottomNavController.navigate(item.route) {
                                 launchSingleTop = true

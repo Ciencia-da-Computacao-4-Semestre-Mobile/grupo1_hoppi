@@ -153,7 +153,6 @@ fun NotificationRow(item: NotificationItem) {
     val avatarColor = NotificationColors[item.type] ?: Color(0xFF9CBDC6)
     val checkColor = Color(0xFF9CBDC6)
     val closeColor = Color(0xFFD9D9D9)
-    val dotColor = Color(0xFFA4485F)
 
     val isFollowRequest = item.type == NotificationType.FOLLOW_REQUEST
     val isAccepted = item.type == NotificationType.ACCEPTED

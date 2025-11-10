@@ -18,9 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 
 val HoppiOrange = Color(0xFFEC8445)
 val OrangeLight = Color(0xFFF7D9C7)
@@ -28,26 +26,25 @@ val GrayIcon = Color(0xFF424242)
 
 @Composable
 fun SettingsScreen(
-    bottomNavController: NavController,
     onEditInformationClick: () -> Unit,
     onEditEmailClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
-    onNotificationsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     onAboutUsClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onBack: () -> Unit
 ) {
-    Scaffold(
-        topBar = { SettingsTopBar(onBack = onBack) },
-        bottomBar = { BottomNavBar(bottomNavController) }
-    ) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        SettingsTopBar(onBack = onBack)
         SettingsContent(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(),
             onEditInformationClick = onEditInformationClick,
             onEditEmailClick = onEditEmailClick,
             onChangePasswordClick = onChangePasswordClick,
-            onNotificationsClick = onNotificationsClick,
             onPrivacyPolicyClick = onPrivacyPolicyClick,
             onAboutUsClick = onAboutUsClick,
             onLogoutClick = onLogoutClick
@@ -59,7 +56,10 @@ fun SettingsScreen(
 @Composable
 fun SettingsTopBar(onBack: () -> Unit) {
     TopAppBar(
-        windowInsets = WindowInsets(0.dp),
+        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(HoppiOrange),
         title = {
             Text(
                 text = "Configurações",
@@ -77,7 +77,7 @@ fun SettingsTopBar(onBack: () -> Unit) {
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = HoppiOrange
+            containerColor = Color.Transparent
         )
     )
 }
@@ -88,14 +88,13 @@ fun SettingsContent(
     onEditInformationClick: () -> Unit,
     onEditEmailClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
-    onNotificationsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     onAboutUsClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .background(Color.White)
             .padding(horizontal = 10.dp)
     ) {
@@ -117,14 +116,9 @@ fun SettingsContent(
             onClick = onChangePasswordClick
         )
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(10.dp))
 
         SettingSectionHeader(title = "Privacidade e segurança")
-        SettingItem(
-            icon = Icons.Default.Notifications,
-            title = "Notificações",
-            onClick = onNotificationsClick
-        )
         SettingItem(
             icon = Icons.Default.Help,
             title = "Política de privacidade",
@@ -151,7 +145,7 @@ fun SettingsContent(
             Image(
                 painter = painterResource(id = R.drawable.hoppi_watermark),
                 contentDescription = "Hoppi Watermark",
-                modifier = Modifier.size(300.dp)
+                modifier = Modifier.size(200.dp)
             )
         }
     }

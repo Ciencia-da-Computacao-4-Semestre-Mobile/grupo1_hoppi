@@ -21,11 +21,13 @@ object MainAppDestinations {
 
 @Composable
 fun HomeScreen(
-    bottomNavController: NavHostController
+    bottomNavController: NavHostController,
+    postsViewModel: PostsViewModel
 ) {
 
     Scaffold() { paddingValues ->
         FeedScreen(
+            postsViewModel = postsViewModel,
             modifier = Modifier.padding(paddingValues),
             onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
             onNotificationsClick = { bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE) },

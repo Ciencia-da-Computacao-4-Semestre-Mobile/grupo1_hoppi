@@ -37,28 +37,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.home.Post
+import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 
 val ProfileGray = Color(0xFFDBD8D6)
 val Pink = Color(0xFFA4485F)
 val LightBlueDivider = Color(0xFF9CBDC6)
 val LightGreyText = Color(0xFFA6A6A6)
 
-val mockProfilePosts = List(10) { i ->
-    Post(
-        id = i,
-        username = "Fulano de Tal",
-        content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry",
-        isSale = i % 3 == 0
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
+    postsViewModel: PostsViewModel,
     onPostClick: (postId: Int) -> Unit,
     onSettingsClick: () -> Unit
 ) {
+    val posts = postsViewModel.posts
 
     LazyColumn(
         modifier = Modifier
@@ -71,10 +66,11 @@ fun ProfileScreen(
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
 
-        items(mockProfilePosts) { post ->
+        items(posts) { post ->
             ProfilePostCard(
                 post = post,
-                onPostClick = onPostClick
+                onPostClick = onPostClick,
+                onLikeClick = { postsViewModel.toggleLike(post.id) }
             )
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
@@ -226,7 +222,11 @@ fun ProfileStat(count: String, label: String) {
 }
 
 @Composable
-fun ProfilePostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
+fun ProfilePostCard(
+    post: Post,
+    onPostClick: (postId: Int) -> Unit,
+    onLikeClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -280,9 +280,11 @@ fun ProfilePostCard(post: Post, onPostClick: (postId: Int) -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like_detailed),
-                    contentDescription = "Likes",
-                    modifier = Modifier.size(12.dp)
+                    painter = painterResource(id = if (post.isLiked) R.drawable.liked else R.drawable.like_detailed),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
                 Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))

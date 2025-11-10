@@ -28,6 +28,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 
 val Laranja = Color(0xFFEC8445)
 val Rosa = Color(0xFFA4485F)
@@ -48,7 +49,10 @@ data class TagItem(
 )
 
 @Composable
-fun CreatePostScreen(navController: NavController) {
+fun CreatePostScreen(
+    navController: NavController,
+    postsViewModel: PostsViewModel
+    ) {
     var postText by remember { mutableStateOf("") }
     var selectedTag by remember { mutableStateOf<TagItem?>(null) }
     var showMenuTags by remember { mutableStateOf(false) }
@@ -66,7 +70,24 @@ fun CreatePostScreen(navController: NavController) {
     }
 
     Scaffold(
-        topBar = { CreatePostTopBar(onCloseClick = { navController.popBackStack() }) }
+        topBar = {
+            CreatePostTopBar(
+                postText = postText,
+                selectedTag = selectedTag,
+                onCloseClick = { navController.popBackStack() },
+                onPublish = {
+                    if (postText.isNotBlank()) {
+                        postsViewModel.addPost(
+                            content = postText.trim(),
+                            username = "Fulano de Tal",
+                            isSale = selectedTag?.name == "Venda",
+                            tag = selectedTag?.name
+                        )
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -127,7 +148,6 @@ fun CreatePostScreen(navController: NavController) {
                 }
             }
 
-            // Box Fixa no Rodapé (Footer)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,8 +156,6 @@ fun CreatePostScreen(navController: NavController) {
                     .imePadding()
                     .heightIn(min = 60.dp)
             ) {
-
-                // Divider Fixo
                 Divider(
                     color = Color(0xFF000000),
                     thickness = 1.dp,
@@ -146,7 +164,6 @@ fun CreatePostScreen(navController: NavController) {
                         .align(Alignment.TopCenter)
                 )
 
-                // Row de Controles (Sempre Fixa na Base)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -161,45 +178,7 @@ fun CreatePostScreen(navController: NavController) {
                             Spacer(modifier = Modifier.width(8.dp))
                         }
 
-                        // Wrapper Box para posicionar o menu acima do botão
                         Box(contentAlignment = Alignment.BottomStart) {
-
-                            // Menu de Tags (Camada superior, Flutuante)
-                            Column { // Adicionando Column para fornecer o ColumnScope
-                                AnimatedVisibility(
-                                    visible = showMenuTags,
-                                    modifier = Modifier
-                                        .zIndex(1f)
-                                        .offset(y = (-50).dp)
-                                        .offset(x = (-10).dp),
-                                    enter = expandVertically(expandFrom = Alignment.Bottom),
-                                    exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .width(IntrinsicSize.Max)
-                                            .shadow(8.dp, RoundedCornerShape(10.dp))
-                                            .background(Color.White, RoundedCornerShape(10.dp))
-                                            .padding(12.dp, 16.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ){
-                                        availableTags.forEach { tag ->
-                                            TagMenuItem(
-                                                tag = tag,
-                                                onClick = {
-                                                    selectedTag = it
-                                                    showMenuTags = false
-                                                }
-                                            )
-                                            if (tag != availableTags.last()) {
-                                                Spacer(modifier = Modifier.height(10.dp))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Botão Adicionar Tag
                             AdicionarTagButton(
                                 onClick = { showMenuTags = !showMenuTags }
                             )
@@ -212,13 +191,51 @@ fun CreatePostScreen(navController: NavController) {
                     )
                 }
             }
+
+            AnimatedVisibility(
+                visible = showMenuTags,
+                modifier = Modifier
+                    .imePadding()
+                    .align(Alignment.BottomStart)
+                    .padding(start = 20.dp, bottom = 50.dp)
+                    .offset(y = (-10).dp)
+                    .zIndex(5f),
+                enter = expandVertically(expandFrom = Alignment.Bottom),
+                exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .shadow(8.dp, RoundedCornerShape(10.dp))
+                        .background(Color.White, RoundedCornerShape(10.dp))
+                        .padding(12.dp, 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    availableTags.forEach { tag ->
+                        TagMenuItem(
+                            tag = tag,
+                            onClick = {
+                                selectedTag = it
+                                showMenuTags = false
+                            }
+                        )
+                        if (tag != availableTags.last()) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreatePostTopBar(onCloseClick: () -> Unit) {
+fun CreatePostTopBar(
+    postText: String,
+    selectedTag: TagItem?,
+    onCloseClick: () -> Unit,
+    onPublish: () -> Unit
+) {
     TopAppBar(
         windowInsets = WindowInsets(0.dp),
         title = { Text("", color = Branco, fontSize = 20.sp) },
@@ -229,7 +246,7 @@ fun CreatePostTopBar(onCloseClick: () -> Unit) {
         },
         actions = {
             Button(
-                onClick = { },
+                onClick = onPublish,
                 colors = ButtonDefaults.buttonColors(containerColor = Branco, contentColor = Laranja),
                 shape = RoundedCornerShape(50),
                 modifier = Modifier.padding(5.dp)

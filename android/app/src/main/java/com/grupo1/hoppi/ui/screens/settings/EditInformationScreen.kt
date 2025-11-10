@@ -47,7 +47,10 @@ fun EditInformationScreen(navController: NavController) {
 @Composable
 fun EditInformationTopBar(navController: NavController) {
     TopAppBar(
-        windowInsets = WindowInsets(0.dp),
+        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(HoppiOrange),
         title = {
             Text(
                 text = "Suas informações",
@@ -94,7 +97,6 @@ fun EditInformationContent(
             .background(Color.White)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
@@ -105,7 +107,7 @@ fun EditInformationContent(
             fontSize = 18.sp
         )
 
-        Spacer(Modifier.height(30.dp))
+        // Spacer(Modifier.height(30.dp))
 
         EditFieldGroup(
             label = "Nome *",
@@ -146,6 +148,7 @@ fun EditInformationContent(
         Button(
             onClick = onSave,
             modifier = Modifier
+                .align(Alignment.CenterHorizontally)
                 .size(210.dp, 40.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
             colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
@@ -154,11 +157,12 @@ fun EditInformationContent(
             Text("Salvar alterações", color = Color.White, style = MaterialTheme.typography.bodyMedium, fontSize = 18.sp)
         }
 
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(5.dp))
 
         Button(
             onClick = onCancel,
             modifier = Modifier
+                .align(Alignment.CenterHorizontally)
                 .size(210.dp, 40.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
@@ -181,7 +185,6 @@ fun EditFieldGroup(
     placeholder: String
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // 1. Rótulo principal (Nome do Campo)
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
@@ -233,5 +236,3 @@ fun CustomTextField(
         )
     )
 }
-
-// Removidas as funções FormLabel e CustomReadOnlyField, que não são mais usadas

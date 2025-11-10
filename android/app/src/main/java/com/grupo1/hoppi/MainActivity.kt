@@ -24,6 +24,7 @@ import androidx.navigation.navArgument
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
+import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
@@ -78,13 +79,15 @@ fun HoppiApp() {
         }
 
         composable(Destinations.MAIN_APP) {
-            MainApp(rootNavController = rootNavController)
+            MainApp(
+                rootNavController = rootNavController,
+                bottomNavController = bottomNavController
+            )
         }
 
-        composable(Destinations.SETTINGS_FLOW) {
+        composable("${Destinations.SETTINGS_FLOW}/{pass}") {
             SettingsNavGraph(
                 rootNavController = rootNavController,
-                bottomNavController = bottomNavController,
                 onLogout = {
                     rootNavController.navigate(Destinations.LOGIN_ROUTE) {
                         popUpTo(0) { inclusive = true }
@@ -96,18 +99,28 @@ fun HoppiApp() {
 }
 
 @Composable
-fun MainApp(rootNavController: NavHostController) {
-    val bottomNavController = rememberNavController()
+fun MainApp(
+    rootNavController: NavHostController,
+    bottomNavController: NavHostController
+) {
+    val postsViewModel: PostsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
     val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
 
-    val hideBottomBar = currentDestination == MainAppDestinations.SEARCH_ROUTE
+    val hideBottomBar = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
+            currentDestination == MainAppDestinations.CREATE_POST_ROUTE
     val hideFab = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
-            currentDestination == MainAppDestinations.COMMUNITY_ROUTE
+            currentDestination == MainAppDestinations.COMMUNITY_ROUTE ||
+            currentDestination == MainAppDestinations.CREATE_POST_ROUTE ||
+            currentDestination == MainAppDestinations.POST_OPEN_ROUTE
 
     Scaffold(
         bottomBar = {
             if (!hideBottomBar) {
-                BottomNavBar(bottomNavController = bottomNavController)
+                BottomNavBar(
+                    bottomNavController = bottomNavController,
+                    rootNavController = rootNavController
+                )
             }
         },
         floatingActionButton = {
@@ -129,9 +142,28 @@ fun MainApp(rootNavController: NavHostController) {
             modifier = Modifier.padding(padding)
         ) {
 
+            composable(MainAppDestinations.PROFILE_ROUTE) {
+                ProfileScreen(
+                    navController = bottomNavController,
+                    postsViewModel = postsViewModel,
+                    onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
+                    onSettingsClick = {
+                        rootNavController.navigate(Destinations.SETTINGS_FLOW + "/pass")
+                    }
+                )
+            }
+
+            composable(MainAppDestinations.CREATE_POST_ROUTE) {
+                CreatePostScreen(
+                    navController = bottomNavController,
+                    postsViewModel = postsViewModel
+                )
+            }
+
             composable(MainAppDestinations.FEED_ROUTE) {
                 HomeScreen(
-                    bottomNavController = bottomNavController
+                    bottomNavController = bottomNavController,
+                    postsViewModel = postsViewModel
                 )
             }
 
@@ -155,23 +187,17 @@ fun MainApp(rootNavController: NavHostController) {
                 SearchScreen(navController = bottomNavController)
             }
 
-            composable(MainAppDestinations.CREATE_POST_ROUTE) {
-                CreatePostScreen(navController = bottomNavController)
-            }
-
             composable(MainAppDestinations.POST_OPEN_ROUTE) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
-                PostScreen(postId = postId, navController = bottomNavController)
+                PostScreen(
+                    postId = postId,
+                    navController = bottomNavController,
+                    postsViewModel = postsViewModel
+                )
             }
 
-            composable(MainAppDestinations.PROFILE_ROUTE) {
-                ProfileScreen(
-                    navController = bottomNavController,
-                    onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
-                    onSettingsClick = {
-                        rootNavController.navigate("${Destinations.SETTINGS_FLOW}")
-                    }
-                )
+            composable(MainAppDestinations.NOTIFICATIONS_ROUTE) {
+                NotificationScreen(navController = bottomNavController)
             }
         }
     }
