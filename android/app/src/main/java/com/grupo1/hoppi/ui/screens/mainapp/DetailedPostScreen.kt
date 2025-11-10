@@ -105,7 +105,8 @@ fun PostScreen(
     var newCommentText by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { PostTopBar(navController) }
+        topBar = { PostTopBar(navController) },
+        contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         Box(
             modifier = Modifier
