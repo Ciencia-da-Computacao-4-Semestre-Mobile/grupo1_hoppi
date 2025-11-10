@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsArray, IsBoolean } from 'class-validator';
 
 export class CreateCommunityDto {
     @IsNotEmpty()
@@ -16,4 +16,8 @@ export class CreateCommunityDto {
     @IsArray()
     @IsOptional()
     tags?: string[];
+
+    @IsBoolean()
+    @IsOptional() // default will be false in service
+    is_private?: boolean;
 }
