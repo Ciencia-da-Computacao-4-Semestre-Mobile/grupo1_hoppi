@@ -3,6 +3,9 @@ import { AuthService } from "./auth.service";
 import { AuthLoginDto } from "./dto/auth.login.dto";
 import { RegisterDto } from "./dto/auth.register.dto";
 import { AuthGuard } from "./guards/auth.guard";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
+import { VerifyCodeDto } from "./dto/verify-code.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -23,15 +26,29 @@ export class AuthController {
         return this.authService.register(registerDto);
     }
 
-    @Post("forgot")
+    // NOVAS ROTAS PARA RECUPERAÇÃO DE SENHA
+    
+    @Post("forgot-password")
     @HttpCode(HttpStatus.OK)
-    async forgot() {
-        return this.authService.forgot()
+    async forgotPassword(@Body() dto: ForgotPasswordDto) {
+        return this.authService.forgotPassword(dto.email);
+    }
+
+    @Post("verify-reset-code")
+    @HttpCode(HttpStatus.OK)
+    async verifyCode(@Body() dto: VerifyCodeDto) {
+        return this.authService.verifyResetCode(dto.email, dto.code);
+    }
+
+    @Post("reset-password")
+    @HttpCode(HttpStatus.OK)
+    async resetPassword(@Body() dto: ResetPasswordDto) {
+        return this.authService.resetPassword(dto.email, dto.code, dto.newPassword);
     }
 
     @Post("me")
     @UseGuards(AuthGuard)
-    async getMe(@Req() req) {
+    async getMe(@Req() req: { user: { sub: string } }) {
         return this.authService.getMe(req.user.sub);
     }
 }

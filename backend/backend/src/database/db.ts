@@ -7,6 +7,8 @@ import { Like } from '../likes/likes.entity'
 import { PostCount } from '../post_counts/post_counts.entity'
 import { Community } from '../communities/communities.entity'
 import { CommunityMember } from '../community_members/community_members.entity'
+import { CommunityJoinRequest } from '../communities/entities/community-join-request.entity'
+import { PasswordReset } from '../auth/entities/password-reset.entity'
 import { env } from 'src/config/env'
 
 export const AppDataSource = new DataSource({
@@ -16,7 +18,7 @@ export const AppDataSource = new DataSource({
   username: env.DB_USERNAME,
   password: env.DB_PASSWORD,
   database: 'postgres',
-  entities: [User, Post, Follow, Like, PostCount, Community, CommunityMember],
+  entities: [User, Post, Follow, Like, PostCount, Community, CommunityMember, CommunityJoinRequest, PasswordReset],
   synchronize: true, // true só em dev! nunca em produção
   ssl: false, 
 });

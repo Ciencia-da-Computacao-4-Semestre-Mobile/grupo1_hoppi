@@ -14,7 +14,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req) {
-    return req.user;
+  getProfile(@Request() req: { user?: unknown }) {
+    return req.user ?? null;
   }
 }

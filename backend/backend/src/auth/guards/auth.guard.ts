@@ -6,9 +6,9 @@ export class AuthGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService
     ) {}
+    
     canActivate(context: ExecutionContext): boolean {
-
-        const request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest<{ headers: Record<string, string>, user?: unknown }>();
         const authHeader = request.headers['authorization'];
         if (!authHeader) {
             return false;
@@ -20,9 +20,10 @@ export class AuthGuard implements CanActivate {
         }
 
         try {
-            this.jwtService.verify(token);
-            request.user = this.jwtService.decode(token);
-        } catch (error) {
+            const decoded = this.jwtService.verify(token);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            request.user = decoded as unknown;
+        } catch {
             return false;
         }
 

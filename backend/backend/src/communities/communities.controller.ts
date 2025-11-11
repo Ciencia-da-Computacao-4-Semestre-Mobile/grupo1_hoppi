@@ -4,6 +4,8 @@ import { Community } from './communities.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+// Usamos 'import type' para evitar emissão de metadata indevida em parâmetros decorados
+import type { JwtPayloadUser } from 'src/auth/decorators/current-user.decorator';
 import { ListMembersQueryDto } from './dto/list-members.query.dto';
 import { ListRequestsQueryDto } from './dto/list-requests.query.dto';
 import { CommunityRequestActionDto } from './dto/community-request-action.dto';
@@ -25,26 +27,26 @@ export class CommunitiesController {
 
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() dto: CreateCommunityDto, @CurrentUser() user: any) {
-    return this.communitiesService.create(dto, { id: user.sub } as any);
+  create(@Body() dto: CreateCommunityDto, @CurrentUser() user: JwtPayloadUser) {
+    return this.communitiesService.create(dto, { id: user.sub } as unknown as any);
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateCommunityDto>, @CurrentUser() user: any) {
-    return this.communitiesService.update(id, dto, { id: user.sub } as any);
+  update(@Param('id') id: string, @Body() dto: Partial<CreateCommunityDto>, @CurrentUser() user: JwtPayloadUser) {
+    return this.communitiesService.update(id, dto, { id: user.sub } as unknown as any);
   }
 
   @UseGuards(AuthGuard)
   @Post(':id/join')
-  join(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.communitiesService.join(id, { id: user.sub } as any);
+  join(@Param('id') id: string, @CurrentUser() user: JwtPayloadUser) {
+    return this.communitiesService.join(id, { id: user.sub } as unknown as any);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id/leave')
-  leave(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.communitiesService.leave(id, { id: user.sub } as any);
+  leave(@Param('id') id: string, @CurrentUser() user: JwtPayloadUser) {
+    return this.communitiesService.leave(id, { id: user.sub } as unknown as any);
   }
 
   @UseGuards(AuthGuard)
@@ -53,9 +55,9 @@ export class CommunitiesController {
     @Param('community') communityId: string,
     @Param('user_id') userId: string,
     @Body('role') role: 'member' | 'moderator' | 'owner',
-    @CurrentUser() user: any
+    @CurrentUser() user: JwtPayloadUser
   ) {
-    return this.communitiesService.updateMemberRole(communityId, userId, role, { id: user.sub } as any);
+    return this.communitiesService.updateMemberRole(communityId, userId, role, { id: user.sub } as unknown as any);
   }
 
   // Members listing with pagination and role filter
@@ -76,9 +78,9 @@ export class CommunitiesController {
   listRequests(
     @Param('id') id: string,
     @Query() query: ListRequestsQueryDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtPayloadUser,
   ) {
-    return this.communitiesService.listJoinRequests(id, query.status, { id: user.sub } as any);
+    return this.communitiesService.listJoinRequests(id, query.status, { id: user.sub } as unknown as any);
   }
 
   // Approve/Reject a join request (owner only)
@@ -88,9 +90,9 @@ export class CommunitiesController {
     @Param('id') id: string,
     @Param('request_id') requestId: string,
     @Body() body: CommunityRequestActionDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtPayloadUser,
   ) {
-    return this.communitiesService.actOnJoinRequest(id, requestId, body.action, { id: user.sub } as any);
+    return this.communitiesService.actOnJoinRequest(id, requestId, body.action, { id: user.sub } as unknown as any);
   }
 
   // Transfer ownership
@@ -99,8 +101,8 @@ export class CommunitiesController {
   transferOwner(
     @Param('id') id: string,
     @Body() body: TransferOwnerDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtPayloadUser,
   ) {
-    return this.communitiesService.transferOwnership(id, body.new_owner_user_id, { id: user.sub } as any);
+    return this.communitiesService.transferOwnership(id, body.new_owner_user_id, { id: user.sub } as unknown as any);
   }
 }

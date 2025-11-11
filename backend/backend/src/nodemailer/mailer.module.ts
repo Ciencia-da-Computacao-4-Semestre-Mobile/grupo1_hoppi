@@ -1,4 +1,4 @@
-import { MailerModule, MailerService } from "@nestjs-modules/mailer";
+import { MailerModule } from "@nestjs-modules/mailer";
 import { Module } from "@nestjs/common";
 import { MailService } from "./mailer.service";
 
@@ -10,12 +10,12 @@ import { MailService } from "./mailer.service";
                 port: 587,
                 secure: false,
                 auth: {
-                    user: 'suporte@hoppiiiiii.com',
-                    pass: '8dbf6177b040352bad975cd8c4982780'
+                    user: process.env.EMAIL_USER || 'example@example.com',
+                    pass: process.env.EMAIL_PASSWORD || 'password'
                 }
             },
             defaults: {
-                from: '"No Reply" <suporte@hoppiiiiii.com>'
+                from: '"No Reply" <no-reply@example.com>'
             }
         })
     ],

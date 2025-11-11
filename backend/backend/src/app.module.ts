@@ -10,7 +10,7 @@ import { PostCountsModule } from './post_counts/post_counts.module'
 import { CommunitiesModule } from './communities/communities.module'
 import { CommunityMembersModule } from './community_members/community_members.module'
 import { AuthModule } from './auth/auth.module'
-import { MailModule } from './nodemailer/mailer.module'
+// MailModule removido: não utilizado diretamente aqui
 
 @Module({
   imports: [

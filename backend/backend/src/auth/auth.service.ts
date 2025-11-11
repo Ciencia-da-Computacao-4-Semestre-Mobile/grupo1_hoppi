@@ -3,28 +3,39 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/users/users.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { RegisterDto } from "./dto/auth.register.dto";
 import { AuthLoginDto } from "./dto/auth.login.dto";
-import { MailService } from "src/nodemailer/mailer.service";
+// import { MailService } from "src/nodemailer/mailer.service";
+import { PasswordReset } from "./entities/password-reset.entity";
+import { EmailService } from "./email.service";
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(User) private readonly userRepository: Repository<User>,
+        @InjectRepository(PasswordReset) private readonly passwordResetRepository: Repository<PasswordReset>,
         private readonly jwtService: JwtService,
-        private readonly mailService: MailService
+
+        private readonly emailService: EmailService
     ) {}
 
     async login(dto: AuthLoginDto) {
         const user = await this.userRepository.findOneBy({ email: dto.email });
 
-        if (!user || !(await bcrypt.compare(dto.password, user.password_hash))) {
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const passwordOk = await bcrypt.compare(dto.password, user.password_hash);
+        if (!passwordOk) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const token = await this.createToken(user);
+         
+        const token = this.createToken(user);
 
         return {
             access_token: token,
@@ -49,13 +60,13 @@ export class AuthService {
             throw new ConflictException('Username already taken');
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-        const date = dto.birth_date.getDate() + 1;
-        dto.birth_date.setDate(date);
-
+         
         const newUser = this.userRepository.create({
             email: dto.email,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             password_hash: hashedPassword,
             username: dto.username,
             display_name: dto.display_name,
@@ -64,7 +75,8 @@ export class AuthService {
         });
 
         const savedUser = await this.userRepository.save(newUser);
-        const token = await this.createToken(savedUser);
+         
+        const token = this.createToken(savedUser);
 
         return {
             message: "Registration successful",
@@ -73,11 +85,107 @@ export class AuthService {
         };
     }
 
-    async forgot() {
-        return "Password reset link sent";
+    // Método legado não utilizado removido para limpar lint
+
+    // NOVAS FUNCIONALIDADES DE RECUPERAÇÃO DE SENHA
+    
+    async forgotPassword(email: string): Promise<{ message: string; canProceed: boolean }> {
+        // Verifica se o usuário existe
+        const user = await this.userRepository.findOne({ where: { email } });
+        
+        if (!user) {
+            // Por segurança, não revela se o email existe ou não
+            return { 
+                message: 'Se o e-mail existir, um código foi enviado.',
+                canProceed: false 
+            };
+        }
+
+        // Gera código aleatório de 4 dígitos
+        const code = crypto.randomInt(1000, 9999).toString();
+
+        // Define expiração de 10 minutos
+        const expiresAt = new Date();
+        expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+        // Invalida códigos anteriores deste email
+        await this.passwordResetRepository.update(
+            { email, used: false },
+            { used: true }
+        );
+
+        // Salva o novo código no banco
+        const passwordReset = this.passwordResetRepository.create({
+            email,
+            code,
+            expiresAt,
+        });
+        await this.passwordResetRepository.save(passwordReset);
+
+        // Envia o e-mail
+        await this.emailService.sendPasswordResetCode(email, code);
+
+        return { 
+            message: 'Código enviado com sucesso!',
+            canProceed: true // Permite navegar para tela de validação
+        };
     }
 
-    private async createToken(user: User) {
+    async verifyResetCode(email: string, code: string): Promise<{ valid: boolean; message: string }> {
+        const resetRequest = await this.passwordResetRepository.findOne({
+            where: { email, code, used: false },
+            order: { createdAt: 'DESC' },
+        });
+
+        if (!resetRequest) {
+            return { valid: false, message: 'Código inválido' };
+        }
+
+        if (new Date() > resetRequest.expiresAt) {
+            return { valid: false, message: 'Código expirado. Solicite um novo.' };
+        }
+
+        return { valid: true, message: 'Código validado com sucesso!' };
+    }
+
+    async resetPassword(email: string, code: string, newPassword: string): Promise<{ message: string }> {
+        // Verifica novamente o código
+        const verification = await this.verifyResetCode(email, code);
+        if (!verification.valid) {
+            throw new UnauthorizedException(verification.message);
+        }
+
+        // Busca o código
+        const resetRequest = await this.passwordResetRepository.findOne({
+            where: { email, code, used: false },
+            order: { createdAt: 'DESC' },
+        });
+
+        if (!resetRequest) {
+            throw new UnauthorizedException('Código não encontrado');
+        }
+
+        // Busca o usuário
+        const user = await this.userRepository.findOne({ where: { email } });
+        if (!user) {
+            throw new UnauthorizedException('Usuário não encontrado');
+        }
+
+        // Atualiza a senha
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        user.password_hash = hashedPassword;
+        await this.userRepository.save(user);
+
+        // Marca o código como usado
+        resetRequest.used = true;
+        await this.passwordResetRepository.save(resetRequest);
+
+        return { message: 'Senha alterada com sucesso!' };
+    }
+
+    private createToken(user: User) {
         const payload = { 
             sub: user.id,
             email: user.email,
@@ -88,19 +196,16 @@ export class AuthService {
     }
 
     private sanitizeUser(user: User) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password_hash, ...sanitizedUser } = user;
         return sanitizedUser;
     }
 
     async getMe(id: string) {
-
-        this.mailService.sendMail('email@teste.com');
-
-      const user = await this.userRepository.findOneBy({ id: id });
-      if (!user) {
-          throw new UnauthorizedException('User not found');
-      }
-
-      return user;
+        const user = await this.userRepository.findOneBy({ id });
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+        return this.sanitizeUser(user);
     }
 }

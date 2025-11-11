@@ -2,10 +2,9 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommunityPost } from './entities/community-post.entity';
-import { Community } from './communities.entity';
 import { User } from '../users/users.entity';
 import { CreatePostDto } from './dto/create-post.dto';
-import { CommunityMember, MemberRole } from './entities/community-member.entity';
+import { CommunityMember } from './entities/community-member.entity';
 
 @Injectable()
 export class CommunityPostsService {
@@ -17,7 +16,7 @@ export class CommunityPostsService {
     ) {}
 
     async createPost(
-        communityId: number,
+    communityId: number,
         createPostDto: CreatePostDto,
         author: User
     ): Promise<CommunityPost> {
@@ -44,8 +43,8 @@ export class CommunityPostsService {
 
     async findCommunityPosts(
         communityId: number,
-        page: number = 1,
-        limit: number = 10
+    page = 1,
+    limit = 10
     ): Promise<{ posts: CommunityPost[]; total: number }> {
         const [posts, total] = await this.postsRepository.findAndCount({
             where: { community: { id: communityId.toString() } },
@@ -58,7 +57,7 @@ export class CommunityPostsService {
         return { posts, total };
     }
 
-    async likePost(postId: number, userId: number): Promise<CommunityPost> {
+    async likePost(postId: number): Promise<CommunityPost> {
         const post = await this.postsRepository.findOne({
             where: { id: postId }
         });

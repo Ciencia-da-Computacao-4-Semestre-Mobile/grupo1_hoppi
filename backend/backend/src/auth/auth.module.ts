@@ -6,10 +6,12 @@ import { User } from 'src/users/users.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MailModule } from 'src/nodemailer/mailer.module';
+import { PasswordReset } from './entities/password-reset.entity';
+import { EmailService } from './email.service';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([User, PasswordReset]),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
             global: true,
@@ -21,7 +23,7 @@ import { MailModule } from 'src/nodemailer/mailer.module';
         MailModule
     ],
     controllers: [AuthController],
-    providers: [AuthService],
+    providers: [AuthService, EmailService],
     exports: [AuthService, PassportModule],
 })
 export class AuthModule {}

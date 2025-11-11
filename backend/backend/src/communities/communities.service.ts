@@ -140,7 +140,7 @@ export class CommunitiesService {
     const owner = await this.communityMembersRepository.findOne({ where: { community: { id: communityId }, user: { id: actor.id }, role: 'owner' } });
     if (!owner) throw new UnauthorizedException('Only owner can view join requests');
 
-    const where: any = { community: { id: communityId } };
+    const where: { community: { id: string }; status?: 'pending' | 'approved' | 'rejected' } = { community: { id: communityId } };
     if (status) where.status = status;
     return this.joinRequestsRepository.find({ where, relations: ['user'], order: { created_at: 'DESC' } });
   }

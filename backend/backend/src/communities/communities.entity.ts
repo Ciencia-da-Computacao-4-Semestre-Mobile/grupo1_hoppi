@@ -17,6 +17,9 @@ export class Community {
     @Column({ default: false })
     is_private: boolean
 
+    @Column({ default: 0 })
+    member_count: number
+
     @ManyToOne(() => User, { onDelete: 'SET NULL' })
     @JoinColumn({ name: 'created_by' })
     created_by: User
