@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -125,7 +126,9 @@ fun SignUpStep2Screen(
                         AvatarSelectionItem(
                             avatarResId = avatarResId,
                             isSelected = selectedAvatarIndex == index,
-                            onClick = { selectedAvatarIndex = index }
+                            onClick = { selectedAvatarIndex = index },
+                            modifier = Modifier.testTag("Avatar$index"),
+                            index = index
                         )
                     }
                 }
@@ -142,7 +145,9 @@ fun SignUpStep2Screen(
                         AvatarSelectionItem(
                             avatarResId = avatarResId,
                             isSelected = selectedAvatarIndex == actualIndex,
-                            onClick = { selectedAvatarIndex = actualIndex }
+                            onClick = { selectedAvatarIndex = actualIndex },
+                            modifier = Modifier.testTag("Avatar$actualIndex"),
+                            index = actualIndex
                         )
                     }
                 }
@@ -159,7 +164,9 @@ fun SignUpStep2Screen(
                         AvatarSelectionItem(
                             avatarResId = avatarResId,
                             isSelected = selectedAvatarIndex == actualIndex,
-                            onClick = { selectedAvatarIndex = actualIndex }
+                            onClick = { selectedAvatarIndex = actualIndex },
+                            modifier = Modifier.testTag("Avatar$actualIndex"),
+                            index = actualIndex
                         )
                     }
                 }
@@ -169,7 +176,9 @@ fun SignUpStep2Screen(
 
             Button(
                 onClick = { onFinish() },
-                modifier = Modifier.width(124.dp),
+                modifier = Modifier
+                    .width(124.dp)
+                    .testTag("FinishSignUp"),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF4C4B4B)
@@ -190,13 +199,14 @@ fun SignUpStep2Screen(
 
 @Composable
 fun AvatarSelectionItem(
-    @DrawableRes avatarResId: Int, // Adicione a anotação para drawable resources
+    @DrawableRes avatarResId: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    index: Int
 ) {
     val borderColor = if (isSelected) Color.White else Color.Transparent
-    val borderWidth = if (isSelected) 3.dp else 0.dp // 3.dp para a borda branca
+    val borderWidth = if (isSelected) 3.dp else 0.dp
 
     Box(
         modifier = modifier
@@ -204,7 +214,8 @@ fun AvatarSelectionItem(
             .clip(CircleShape)
             .clickable(onClick = onClick)
             .border(borderWidth, borderColor, CircleShape)
-            .padding(2.dp),
+            .padding(2.dp)
+            .testTag("Avatar$index"),
         contentAlignment = Alignment.Center
     ) {
         Image(

@@ -32,15 +32,15 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.components.login.DateTextField
 import com.grupo1.hoppi.ui.components.login.LoginTextField
@@ -58,15 +59,10 @@ import java.util.Date
 @Composable
 fun SignUpStep1Screen(
     onContinue: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    viewModel: SignUpViewModel = viewModel()
 ) {
-    var name by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var institution by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var visiblePassword by remember { mutableStateOf(false) }
-    var acceptedTerms by remember { mutableStateOf(false) }
+    val state by viewModel.state.collectAsState()
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -78,7 +74,7 @@ fun SignUpStep1Screen(
         DatePickerDialog(
             context,
             { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-                birthDate = "$dayOfMonth/${month + 1}/$year"
+                viewModel.onBirthDateChange("$dayOfMonth/${month + 1}/$year")
             }, initialYear, initialMonth, initialDay
         ).apply {
             datePicker.maxDate = Date().time
@@ -141,8 +137,8 @@ fun SignUpStep1Screen(
             LoginTextField(
                 label = "Digite seu nome completo",
                 placeholder = "Digite seu nome completo",
-                value = name,
-                onValueChange = { name = it },
+                value = state.name,
+                onValueChange = viewModel::onNameChange,
                 leadingIcon = Icons.Filled.Person,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
@@ -161,11 +157,12 @@ fun SignUpStep1Screen(
             DateTextField(
                 label = "Selecione sua data de nascimento",
                 placeholder = "Selecione sua data de nascimento",
-                value = birthDate,
+                value = state.birthDate,
                 leadingIcon = Icons.Filled.CalendarMonth,
                 onShowDatePicker = {
                     datePickerDialog.show()
-                }
+                },
+                modifier = Modifier.testTag("BirthDateInput")
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -182,8 +179,8 @@ fun SignUpStep1Screen(
             LoginTextField(
                 label = "Digite sua instituição de ensino",
                 placeholder = "Digite sua instituição de ensino",
-                value = institution,
-                onValueChange = { institution = it },
+                value = state.institution,
+                onValueChange = viewModel::onInstitutionChange,
                 leadingIcon = Icons.Filled.School,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
@@ -202,8 +199,8 @@ fun SignUpStep1Screen(
             LoginTextField(
                 label = "Digite seu email",
                 placeholder = "Digite seu email",
-                value = email,
-                onValueChange = { email = it },
+                value = state.email,
+                onValueChange = viewModel::onEmailChange,
                 leadingIcon = Icons.Filled.Email,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
@@ -222,11 +219,11 @@ fun SignUpStep1Screen(
             PasswordTextField(
                 label = "Digite sua senha",
                 placeholder = "Digite sua senha",
-                value = password,
-                onValueChange = { password = it },
+                value = state.password,
+                onValueChange = viewModel::onPasswordChange,
                 leadingIcon = Icons.Filled.Lock,
-                visiblePassword = visiblePassword,
-                onToggleVisibility = { visiblePassword = !visiblePassword }
+                visiblePassword = state.isPasswordVisible,
+                onToggleVisibility = viewModel::onTogglePasswordVisibility
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -275,16 +272,17 @@ fun SignUpStep1Screen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp)
-                    .clickable { acceptedTerms = !acceptedTerms }
+                    .clickable { viewModel.onToggleTerms(!state.acceptedTerms) }
             ) {
                 Checkbox(
-                    checked = acceptedTerms,
-                    onCheckedChange = { acceptedTerms = it },
+                    checked = state.acceptedTerms,
+                    onCheckedChange = viewModel::onToggleTerms,
                     colors = CheckboxDefaults.colors(
                         checkedColor = Color.White,
                         checkmarkColor = Color(0xFFC84B00),
                         uncheckedColor = Color.White
-                    )
+                    ),
+                    modifier = Modifier.testTag("AcceptTerms")
                 )
                 Text(
                     text = "Aceito os termos de uso *",
@@ -303,28 +301,19 @@ fun SignUpStep1Screen(
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(bottom = 30.dp)
-                    .clickable { /* */ }
+                    .clickable {  }
             )
 
             Button(
                 onClick = {
-                    val isValid = name.isNotEmpty()
-                            && birthDate.isNotEmpty()
-                            && institution.isNotEmpty()
-                            && email.isNotEmpty()
-                            && password.isNotEmpty()
-                            && acceptedTerms
-                    if (isValid) {
+                    if (state.isButtonEnabled) {
                         onContinue()
                     }
                 },
-                Modifier.width(124.dp),
-                enabled = name.isNotEmpty()
-                        && birthDate.isNotEmpty()
-                        && institution.isNotEmpty()
-                        && email.isNotEmpty()
-                        && password.isNotEmpty()
-                        && acceptedTerms,
+                Modifier
+                    .width(124.dp)
+                    .testTag("SignUpButton"),
+                enabled = state.isButtonEnabled,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF4C4B4B)
@@ -344,9 +333,9 @@ fun SignUpStep1Screen(
                 style = MaterialTheme.typography.bodyMedium.copy(
                     textDecoration = TextDecoration.Underline
                 ),
-                modifier = Modifier.clickable {
-                    onLoginClick()
-                }
+                modifier = Modifier
+                    .clickable { onLoginClick() }
+                    .testTag("AlreadyRegistered")
             )
 
             Spacer(modifier = Modifier.height(85.dp))

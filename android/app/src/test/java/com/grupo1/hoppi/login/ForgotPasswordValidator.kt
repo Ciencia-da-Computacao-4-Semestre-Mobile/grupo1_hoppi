@@ -6,7 +6,7 @@ enum class RecoveryStep {
     SET_NEW_PASSWORD
 }
 
-class ForgotPasswordFlowLogic(
+class ForgotPasswordValidator(
     private val onBackToLogin: () -> Unit
 ) {
     var currentStep: RecoveryStep = RecoveryStep.SELECT_METHOD

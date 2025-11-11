@@ -24,11 +24,9 @@ class ForgotPasswordFlowTest {
             )
         }
 
-        // Step 1: Seleciona método de recuperação
         composeTestRule.onNodeWithText("Ful*****@*****.com").performClick()
         composeTestRule.onNodeWithText("Digite o código").assertExists()
 
-        // Step 2: Digita o código
         val codeFields = composeTestRule.onAllNodes(hasSetTextAction())
         codeFields[0].performTextInput("1")
         codeFields[1].performTextInput("2")

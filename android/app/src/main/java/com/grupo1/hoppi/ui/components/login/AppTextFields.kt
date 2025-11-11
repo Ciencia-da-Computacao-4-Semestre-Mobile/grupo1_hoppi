@@ -104,7 +104,7 @@ fun PasswordTextField(
     onValueChange: (String) -> Unit,
     leadingIcon: ImageVector,
     visiblePassword: Boolean,
-    onToggleVisibility: () -> Unit
+    onToggleVisibility: () -> Unit,
 ) {
     OutlinedTextField(
         value = value,
