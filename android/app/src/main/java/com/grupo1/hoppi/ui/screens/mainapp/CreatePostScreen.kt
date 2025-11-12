@@ -118,7 +118,7 @@ fun CreatePostScreen(
 
                     BasicTextField(
                         value = postText,
-                        onValueChange = { if (it.length <= 1000) postText = it },
+                        onValueChange = { if (it.length <= 300) postText = it },
                         modifier = Modifier
                             .fillMaxSize()
                             .focusRequester(focusRequester),
@@ -185,7 +185,7 @@ fun CreatePostScreen(
                         }
                     }
                     Text(
-                        text = "${postText.length}/1000 caracteres",
+                        text = "${postText.length}/300 caracteres",
                         color = CinzaClaro,
                         fontSize = 12.sp
                     )

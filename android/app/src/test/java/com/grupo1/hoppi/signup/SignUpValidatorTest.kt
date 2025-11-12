@@ -25,7 +25,7 @@ class SignUpValidatorTest {
             name = "",
             birthDate = "10/11/2003",
             institution = "UCLA",
-            email = "caio@example.com",
+            email = "email@example.com",
             password = "Senha123",
             acceptedTerms = true
         )
@@ -35,10 +35,10 @@ class SignUpValidatorTest {
     @Test
     fun `invalid email fails validation`() {
         val canProceed = SignUpValidator.canProceed(
-            name = "Caio Danjo",
+            name = "Nome Usuário",
             birthDate = "10/11/2003",
             institution = "UCLA",
-            email = "caioexample.com",
+            email = "emailexample.com",
             password = "Senha123",
             acceptedTerms = true
         )
@@ -48,11 +48,11 @@ class SignUpValidatorTest {
     @Test
     fun `weak password fails validation`() {
         val canProceed = SignUpValidator.canProceed(
-            name = "Caio Danjo",
+            name = "Nome Usuário",
             birthDate = "10/11/2003",
             institution = "UCLA",
-            email = "caio@example.com",
-            password = "senha", // fraca
+            email = "email@example.com",
+            password = "senha",
             acceptedTerms = true
         )
         assertFalse(canProceed)
@@ -61,10 +61,10 @@ class SignUpValidatorTest {
     @Test
     fun `terms not accepted fails validation`() {
         val canProceed = SignUpValidator.canProceed(
-            name = "Caio Danjo",
+            name = "Nome Usuário",
             birthDate = "10/11/2003",
             institution = "UCLA",
-            email = "caio@example.com",
+            email = "email@example.com",
             password = "Senha123",
             acceptedTerms = false
         )

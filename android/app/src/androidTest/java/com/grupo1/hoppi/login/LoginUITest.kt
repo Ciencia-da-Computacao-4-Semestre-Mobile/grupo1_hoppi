@@ -1,4 +1,4 @@
-package login
+package com.grupo1.hoppi.login
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule

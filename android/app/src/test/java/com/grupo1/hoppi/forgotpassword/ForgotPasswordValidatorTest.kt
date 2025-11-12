@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.login
+package com.grupo1.hoppi.forgotpassword
 
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse

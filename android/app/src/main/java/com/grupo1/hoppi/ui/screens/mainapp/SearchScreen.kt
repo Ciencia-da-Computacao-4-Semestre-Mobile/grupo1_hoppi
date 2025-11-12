@@ -25,7 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
-import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
+import androidx.compose.ui.platform.testTag
 
 val mockSearchItems = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
 
@@ -57,7 +57,8 @@ fun SearchScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 20.dp)
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    .testTag("SearchTextField"),
                 shape = RoundedCornerShape(50.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -128,7 +129,10 @@ fun SearchItemRow(
         ) {
             Text(item, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF000000))
 
-            IconButton(onClick = { onRemoveItem(item) }) {
+            IconButton(
+                onClick = { onRemoveItem(item) },
+                modifier = Modifier.testTag("RemoveButton_$item")
+            ) {
                 Icon(Icons.Filled.Close, contentDescription = "Remover item")
             }
         }

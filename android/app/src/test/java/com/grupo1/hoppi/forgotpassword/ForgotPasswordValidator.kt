@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.login
+package com.grupo1.hoppi.forgotpassword
 
 enum class RecoveryStep {
     SELECT_METHOD,

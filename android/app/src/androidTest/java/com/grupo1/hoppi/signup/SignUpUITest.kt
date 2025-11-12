@@ -1,4 +1,4 @@
-package signup
+package com.grupo1.hoppi.signup
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
