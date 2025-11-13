@@ -53,7 +53,7 @@ fun SearchScreen(
                 value = searchText,
                 onValueChange = { searchText = it },
                 placeholder = { Text("O que você está buscando?") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Busca") },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Busca", tint = Color(0xFF000000)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 20.dp)
@@ -66,7 +66,15 @@ fun SearchScreen(
                     focusedContainerColor = Color(0xFFF0F0F0),
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedPlaceholderColor = Color(0xFF000000),
+                    unfocusedPlaceholderColor = Color(0xFF000000),
+                    focusedLabelColor = Color(0xFF000000),
+                    unfocusedLabelColor = Color(0xFF000000),
+                    focusedLeadingIconColor = Color(0xFF000000),
+                    unfocusedLeadingIconColor = Color(0xFF000000),
+                    focusedTextColor = Color(0xFF000000),
+                    unfocusedTextColor = Color(0xFF000000)
                 )
             )
 

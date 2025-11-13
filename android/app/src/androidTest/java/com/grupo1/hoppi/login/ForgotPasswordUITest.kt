@@ -3,8 +3,8 @@ package com.grupo1.hoppi.login
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import org.junit.Rule
 import org.junit.Test
@@ -40,9 +40,8 @@ class ForgotPasswordFlowTest {
         passwordFields[0].performTextInput("Senha123")
         passwordFields[1].performTextInput("Senha123")
 
-        composeTestRule.onNodeWithText("Cadastrar").performClick()
-
-        composeTestRule.onNodeWithText("Voltar", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithText("Alterar Senha").performClick()
+        composeTestRule.onNodeWithText("Voltar").performClick()
 
         assert(backToLoginCalled)
     }

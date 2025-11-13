@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.SpanStyle
@@ -270,6 +271,7 @@ fun PostHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
+            .testTag("PostPrincipal")
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -344,7 +346,9 @@ fun PostHeader(
                 post.content,
                 style = MaterialTheme.typography.bodyMedium,
                 fontSize = 16.sp,
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 10.dp)
+                    .testTag("PostContent_${post.id}"),
                 color = Color(0xFF000000)
             )
 
@@ -390,7 +394,7 @@ fun PostHeader(
                 count = post.likes,
                 iconSize = 25.dp,
                 textSize = 14.sp,
-                onClick = onLikeClick
+                onClick = onLikeClick,
             )
             InteractionIcon(
                 R.drawable.comments_detailed,

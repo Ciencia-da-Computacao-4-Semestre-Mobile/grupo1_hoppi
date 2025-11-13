@@ -101,7 +101,7 @@ fun SettingsContent(
         SettingSectionHeader(title = "Conta")
         SettingItem(
             icon = Icons.Default.Person,
-            title = "Nome de usuário",
+            title = "Editar informações",
             onClick = onEditInformationClick
         )
         SettingItem(

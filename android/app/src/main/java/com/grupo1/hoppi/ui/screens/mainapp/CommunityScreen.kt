@@ -197,6 +197,14 @@ fun CommunitiesTopBar(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = HoppiOrange,
                     unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                    focusedPlaceholderColor = Color(0xFF000000),
+                    unfocusedPlaceholderColor = Color(0xFF000000),
+                    focusedLabelColor = Color(0xFF000000),
+                    unfocusedLabelColor = Color(0xFF000000),
+                    focusedLeadingIconColor = Color(0xFF000000),
+                    unfocusedLeadingIconColor = Color(0xFF000000),
+                    focusedTextColor = Color(0xFF000000),
+                    unfocusedTextColor = Color(0xFF000000)
                 )
             )
         }
