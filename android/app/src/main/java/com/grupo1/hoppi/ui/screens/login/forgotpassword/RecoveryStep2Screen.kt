@@ -156,14 +156,14 @@ fun RecoveryStep2Screen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
+            /* Text(
                 text = "Escolher outra validação",
                 color = Color.White,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     textDecoration = TextDecoration.Underline
                 ),
                 modifier = Modifier.clickable { onRetry() }
-            )
+            ) */
         }
     }
 }

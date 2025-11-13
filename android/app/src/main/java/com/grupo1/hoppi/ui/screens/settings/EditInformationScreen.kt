@@ -1,7 +1,6 @@
 package com.grupo1.hoppi.ui.screens.settings.account
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.CheckboxDefaults.colors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -193,7 +193,6 @@ fun EditFieldGroup(
             fontSize = 20.sp
         )
 
-        // 2. Valor Atual (Mock)
         Text(
             text = currentValue,
             color = DarkText.copy(alpha = 0.6f),
@@ -203,11 +202,10 @@ fun EditFieldGroup(
 
         Spacer(Modifier.height(4.dp))
 
-        // 3. Campo de Input (Para a nova alteração)
         CustomTextField(
             value = textFieldValue,
             onValueChange = onValueChange,
-            placeholder = placeholder
+            placeholder = placeholder,
         )
     }
 }
@@ -217,7 +215,7 @@ fun EditFieldGroup(
 fun CustomTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
-    placeholder: String
+    placeholder: String,
 ) {
     OutlinedTextField(
         value = value,
@@ -232,6 +230,8 @@ fun CustomTextField(
             disabledContainerColor = GrayTextField,
             focusedBorderColor = HoppiOrange,
             unfocusedBorderColor = Color(0xFF000000),
+            focusedTextColor = Color(0xFF000000),
+            unfocusedTextColor = Color(0xFF000000),
             cursorColor = HoppiOrange
         )
     )

@@ -1,38 +1,17 @@
 package com.grupo1.hoppi.forgotpassword
 
-enum class RecoveryStep {
-    SELECT_METHOD,
-    VERIFY_CODE,
-    SET_NEW_PASSWORD
-}
+object ForgotPasswordValidator {
+    private val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$")
 
-class ForgotPasswordValidator(
-    private val onBackToLogin: () -> Unit
-) {
-    var currentStep: RecoveryStep = RecoveryStep.SELECT_METHOD
-        private set
-
-    fun codeSent() {
-        if (currentStep == RecoveryStep.SELECT_METHOD) {
-            currentStep = RecoveryStep.VERIFY_CODE
-        }
+    fun validateEmail(email: String): Boolean {
+        return email.isNotBlank() && emailRegex.matches(email)
     }
 
-    fun verificationSuccess() {
-        if (currentStep == RecoveryStep.VERIFY_CODE) {
-            currentStep = RecoveryStep.SET_NEW_PASSWORD
-        }
+    fun validateCode(code: String): Boolean {
+        return code.length == 4 && code.all { it.isDigit() }
     }
 
-    fun passwordChangeSuccess() {
-        if (currentStep == RecoveryStep.SET_NEW_PASSWORD) {
-            onBackToLogin()
-        }
-    }
-
-    fun retry() {
-        if (currentStep == RecoveryStep.VERIFY_CODE) {
-            currentStep = RecoveryStep.SELECT_METHOD
-        }
+    fun validateNewPassword(password: String, confirmPassword: String): Boolean {
+        return password.length >= 6 && password == confirmPassword
     }
 }

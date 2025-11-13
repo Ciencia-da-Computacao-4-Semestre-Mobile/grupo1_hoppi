@@ -83,10 +83,9 @@ fun EditEmailContent(
 
     val currentEmail = currentEmailState
 
-    // 1. Ação para enviar o código (Mudar E-mail)
     val onSendEmailAttempt: () -> Unit = {
         if (newEmail.text.isNotEmpty() && newEmail.text != currentEmail) {
-            keyboardController?.hide() // <--- FECHA O TECLADO
+            keyboardController?.hide()
             println("Código enviado para: ${newEmail.text}")
             showVerificationCode = true
         } else {
@@ -94,7 +93,6 @@ fun EditEmailContent(
         }
     }
 
-    // 2. Ação para validar o código (Botão Validar)
     val onCodeValidation: () -> Unit = {
         if (verificationCode == MOCK_CODE) {
             keyboardController?.hide()
@@ -121,7 +119,7 @@ fun EditEmailContent(
             currentValue = currentEmail,
             textFieldValue = newEmail,
             onValueChange = { newEmail = it },
-            placeholder = "seuemail@email.com"
+            placeholder = "seuemail@email.com",
         )
 
         Button(
@@ -133,13 +131,12 @@ fun EditEmailContent(
             shape = RoundedCornerShape(8.dp)
         ) {
             Text(
-                "Mudar e-mail", // Texto fixo
+                "Mudar e-mail",
                 color = Color.White,
                 fontSize = 18.sp
             )
         }
 
-        // --- Botão Cancelar ---
         Button(
             onClick = onCancel,
             modifier = Modifier
@@ -154,7 +151,6 @@ fun EditEmailContent(
             Text("Cancelar", fontSize = 18.sp, fontWeight = FontWeight.Normal)
         }
 
-        // --- CAMPO DE VALIDAÇÃO E NOVO BOTÃO VALIDAR ---
         if (showVerificationCode) {
             Spacer(Modifier.height(32.dp))
             VerificationCodeInput(
@@ -164,7 +160,6 @@ fun EditEmailContent(
 
             Spacer(Modifier.height(16.dp))
 
-            // NOVO BOTÃO VALIDAR
             Button(
                 onClick = onCodeValidation,
                 modifier = Modifier
@@ -172,7 +167,7 @@ fun EditEmailContent(
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
                 shape = RoundedCornerShape(8.dp),
-                enabled = verificationCode.length == 4 // Habilita quando o código está completo
+                enabled = verificationCode.length == 4
             ) {
                 Text(
                     "Validar",
@@ -183,7 +178,6 @@ fun EditEmailContent(
         }
     }
 
-    // --- POPUP DE SUCESSO ---
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { showSuccessDialog = false },
@@ -215,7 +209,8 @@ fun VerificationCodeInput(code: String, onCodeChange: (String) -> Unit) {
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 24.dp),
+            color = Color(0xFF000000)
         )
 
         BasicTextField(

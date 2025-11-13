@@ -43,7 +43,7 @@ fun RecoveryOptionCard(
             if (title != null) {
                 Text(
                     text = title,
-                    color = Color.Black.copy(alpha = 0.7f),
+                    color = Color(0xFF000000).copy(alpha = 0.7f),
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 4.dp),
@@ -53,7 +53,7 @@ fun RecoveryOptionCard(
 
             Text(
                 text = value,
-                color = Color.Black,
+                color = Color(0xFF000000),
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,

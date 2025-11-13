@@ -47,7 +47,14 @@ fun LoginTextField(
             cursorColor = Color.DarkGray,
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
-            unfocusedPlaceholderColor = Color(0xFF000000)
+            focusedPlaceholderColor = Color(0xFF000000),
+            unfocusedPlaceholderColor = Color(0xFF000000),
+            focusedLabelColor = Color(0xFF000000),
+            unfocusedLabelColor = Color(0xFF000000),
+            focusedLeadingIconColor = Color(0xFF000000),
+            unfocusedLeadingIconColor = Color(0xFF000000),
+            focusedTextColor = Color(0xFF000000),
+            unfocusedTextColor = Color(0xFF000000)
         ),
         keyboardOptions = keyboardOptions
     )
@@ -63,7 +70,6 @@ fun DateTextField(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
-        // 1. O Campo de Texto (readOnly)
         OutlinedTextField(
             value = value,
             onValueChange = { /* Não permite alteração manual */ },
@@ -86,6 +92,14 @@ fun DateTextField(
                 cursorColor = Color.DarkGray,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
+                focusedPlaceholderColor = Color(0xFF000000),
+                unfocusedPlaceholderColor = Color(0xFF000000),
+                focusedLabelColor = Color(0xFF000000),
+                unfocusedLabelColor = Color(0xFF000000),
+                focusedLeadingIconColor = Color(0xFF000000),
+                unfocusedLeadingIconColor = Color(0xFF000000),
+                focusedTextColor = Color(0xFF000000),
+                unfocusedTextColor = Color(0xFF000000)
             )
         )
 
@@ -116,7 +130,8 @@ fun PasswordTextField(
             IconButton(onClick = onToggleVisibility) {
                 Icon(
                     imageVector = if (visiblePassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                    contentDescription = if (visiblePassword) "Esconder Senha" else "Mostrar Senha"
+                    contentDescription = if (visiblePassword) "Esconder Senha" else "Mostrar Senha",
+                    tint = Color(0xFF000000)
                 )
             }
         },
@@ -133,7 +148,14 @@ fun PasswordTextField(
             cursorColor = Color.DarkGray,
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
-            unfocusedPlaceholderColor = Color(0xFF000000)
+            focusedPlaceholderColor = Color(0xFF000000),
+            unfocusedPlaceholderColor = Color(0xFF000000),
+            focusedLabelColor = Color(0xFF000000),
+            unfocusedLabelColor = Color(0xFF000000),
+            focusedLeadingIconColor = Color(0xFF000000),
+            unfocusedLeadingIconColor = Color(0xFF000000),
+            focusedTextColor = Color(0xFF000000),
+            unfocusedTextColor = Color(0xFF000000)
         )
     )
 }

@@ -1,65 +1,49 @@
 package com.grupo1.hoppi.forgotpassword
 
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class ForgotPasswordValidatorTest {
 
     @Test
-    fun forgotPassword_flow_transitionsCorrectly() {
-        var backToLoginCalled = false
-
-        val flow = ForgotPasswordValidator(
-            onBackToLogin = { backToLoginCalled = true }
-        )
-
-        assertEquals(RecoveryStep.SELECT_METHOD, flow.currentStep)
-
-        flow.codeSent()
-        assertEquals(RecoveryStep.VERIFY_CODE, flow.currentStep)
-
-        flow.verificationSuccess()
-        assertEquals(RecoveryStep.SET_NEW_PASSWORD, flow.currentStep)
-
-        flow.passwordChangeSuccess()
-        assertTrue(backToLoginCalled)
+    fun `email valido retorna true`() {
+        val result = ForgotPasswordValidator.validateEmail("teste@exemplo.com")
+        assertTrue(result)
     }
 
     @Test
-    fun forgotPassword_flow_retryWorks() {
-        val flow = ForgotPasswordValidator(
-            onBackToLogin = {}
-        )
-
-        flow.codeSent()
-        assertEquals(RecoveryStep.VERIFY_CODE, flow.currentStep)
-
-        flow.retry()
-        assertEquals(RecoveryStep.SELECT_METHOD, flow.currentStep)
+    fun `email invalido retorna false`() {
+        val result = ForgotPasswordValidator.validateEmail("email_invalido")
+        assertFalse(result)
     }
 
     @Test
-    fun forgotPassword_flow_doesNothing_whenCalledInWrongStep() {
-        val flow = ForgotPasswordValidator(onBackToLogin = {})
+    fun `codigo valido retorna true`() {
+        val result = ForgotPasswordValidator.validateCode("1234")
+        assertTrue(result)
+    }
 
-        flow.codeSent()
-        flow.codeSent()
-        assertEquals(RecoveryStep.VERIFY_CODE, flow.currentStep)
+    @Test
+    fun `codigo invalido retorna false`() {
+        val result = ForgotPasswordValidator.validateCode("12a4")
+        assertFalse(result)
+    }
 
-        flow.verificationSuccess()
-        flow.verificationSuccess()
-        assertEquals(RecoveryStep.SET_NEW_PASSWORD, flow.currentStep)
+    @Test
+    fun `senha valida retorna true`() {
+        val result = ForgotPasswordValidator.validateNewPassword("123456", "123456")
+        assertTrue(result)
+    }
 
-        flow.retry()
-        assertEquals(RecoveryStep.SET_NEW_PASSWORD, flow.currentStep)
+    @Test
+    fun `senha curta retorna false`() {
+        val result = ForgotPasswordValidator.validateNewPassword("123", "123")
+        assertFalse(result)
+    }
 
-        var backToLoginCalled = false
-        val flow2 = ForgotPasswordValidator { backToLoginCalled = true }
-
-        flow2.passwordChangeSuccess()
-        assertFalse(backToLoginCalled)
-        assertEquals(RecoveryStep.SELECT_METHOD, flow2.currentStep)
+    @Test
+    fun `senhas diferentes retorna false`() {
+        val result = ForgotPasswordValidator.validateNewPassword("123456", "654321")
+        assertFalse(result)
     }
 }

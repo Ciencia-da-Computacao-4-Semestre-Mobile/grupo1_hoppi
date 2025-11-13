@@ -239,8 +239,9 @@ fun RecoveryStep3Screen(
                 )
             ) {
                 Text(
-                    "Cadastrar",
+                    "Alterar Senha",
                     style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFF000000),
                     modifier = Modifier.padding(vertical = 3.dp))
             }
         }

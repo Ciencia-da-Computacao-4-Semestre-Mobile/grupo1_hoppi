@@ -116,7 +116,7 @@ fun RecoveryStep1Screen(
                 ) {
                     Text(
                         text = "Enviar código para o email",
-                        color = Color.Black.copy(alpha = 0.7f),
+                        color = Color(0xFF000000).copy(alpha = 0.7f),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             textAlign = TextAlign.Center,
                             fontSize = 18.sp
@@ -125,23 +125,6 @@ fun RecoveryStep1Screen(
                     )
                     RecoveryOptionCard(
                         value = "Ful*****@*****.com",
-                        backgroundColor = Color.White,
-                        onClick = onCodeSent
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "Enviar código para o número",
-                        color = Color.Black.copy(alpha = 0.7f),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp
-                        ),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    RecoveryOptionCard(
-                        value = "(11) 32**-***57",
                         backgroundColor = Color.White,
                         onClick = onCodeSent
                     )
