@@ -9,6 +9,7 @@ data class Post(
     val content: String,
     val isSale: Boolean = false,
     val tag: String? = null,
+    val communityId: String? = null,
 
     val likes: Int = 0,
     val isLiked: Boolean = false,
@@ -25,24 +26,40 @@ class PostsViewModel : ViewModel() {
                     content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry",
                     isSale = i % 3 == 0,
                     likes = (5..40).random(),
-                    isLiked = false
+                    isLiked = false,
+                    communityId = if (i % 4 == 0) "Comunidade Estudo" else null
                 )
             }
         )
     }
     val posts: List<Post> = _posts
 
-    fun addPost(content: String, username: String, isSale: Boolean, tag: String?) {
+    private fun addNewPost(
+        content: String,
+        username: String,
+        isSale: Boolean,
+        tag: String?,
+        communityId: String?
+    ) {
         val newPost = Post(
             id = _posts.size + 1,
             username = username,
             content = content,
             isSale = isSale,
             tag = tag,
+            communityId = communityId,
             likes = 0,
             isLiked = false
         )
         _posts.add(0, newPost)
+    }
+
+    fun addPost(content: String, username: String, isSale: Boolean, tag: String?) {
+        addNewPost(content, username, isSale, tag, communityId = null)
+    }
+
+    fun addCommunityPost(content: String, username: String, isSale: Boolean, tag: String?, communityId: String) {
+        addNewPost(content, username, isSale, tag, communityId = communityId)
     }
 
     fun toggleLike(postId: Int) {

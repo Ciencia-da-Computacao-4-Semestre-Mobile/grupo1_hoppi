@@ -26,8 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 
 enum class CommunityAccessStatus {
@@ -83,6 +85,9 @@ fun CommunityDetailScreen(
         )
     }
 
+    val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
+            accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
+
     Scaffold(
         containerColor = Color.White,
         topBar = {
@@ -91,7 +96,21 @@ fun CommunityDetailScreen(
                 onBackClick = { navController.popBackStack() },
                 onSettingsClick = { navController.navigate("main/community_settings/${currentCommunity.name}") }
             )
-        }
+        },
+        floatingActionButton = {
+            if (hasAccess) {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/$communityId")
+                    },
+                    shape = CircleShape,
+                    containerColor = Color(0xFFEC8445)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Criar Post", tint = Color.White)
+                }
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

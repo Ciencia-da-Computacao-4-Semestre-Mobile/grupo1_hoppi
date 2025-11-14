@@ -180,7 +180,9 @@ fun PostScreen(
                     TextField(
                         value = newCommentText,
                         onValueChange = { newCommentText = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("CommentField"),
                         placeholder = { Text("Escreva um comentário...") },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
@@ -220,6 +222,7 @@ fun PostScreen(
                                 showCommentBox = false
                             }
                         },
+                        modifier = Modifier.testTag("SendCommentButton"),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEC8445))
                     ) {
                         Text("Enviar")

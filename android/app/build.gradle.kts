@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.grupo1.hoppi"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.testing)
     implementation(libs.androidx.ui.test.junit4)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.junit)
     debugImplementation("androidx.compose.ui:ui-test-manifest")

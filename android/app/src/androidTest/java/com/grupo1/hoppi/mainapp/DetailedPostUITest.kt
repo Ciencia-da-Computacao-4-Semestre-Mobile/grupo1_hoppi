@@ -35,28 +35,32 @@ class DetailedPostUITest {
 
         val post = postsViewModel.posts.first()
 
-        // ===== Verifica post principal =====
         composeTestRule.onNodeWithTag("PostPrincipal").assertExists()
         composeTestRule.onNodeWithTag("PostContent_${post.id}")
             .assertExists()
             .assertTextContains(post.content.take(50), substring = true)
 
-        // ===== Likes =====
         composeTestRule.onAllNodes(
             hasText(post.likes.toString()) and hasClickAction()
         ).onFirst().performClick()
 
-        // ===== Comentários =====
-        val commentField = composeTestRule.onAllNodes(hasSetTextAction()).onFirst()
-        commentField.performTextInput("Comentário de teste")
+        composeTestRule.onAllNodes(
+            hasText(post.comments.toString()) and hasClickAction()
+        ).get(0).performClick()
 
-        composeTestRule.onAllNodes(hasText("Enviar") and hasClickAction())
-            .get(0)
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("CommentField").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("CommentField")
+            .assertExists()
+            .performTextInput("Comentário de teste")
+
+        composeTestRule.onNodeWithTag("SendCommentButton")
             .performClick()
 
         composeTestRule.onNodeWithText("Comentário de teste").assertExists()
 
-        // ===== Denunciar / Excluir =====
         composeTestRule.onAllNodes(
             hasContentDescription("Mais opções") and hasClickAction()
         ).get(0).performClick()

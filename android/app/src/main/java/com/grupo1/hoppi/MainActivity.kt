@@ -108,11 +108,14 @@ fun MainApp(
     val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
 
     val hideBottomBar = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
-            currentDestination == MainAppDestinations.CREATE_POST_ROUTE
+            currentDestination == MainAppDestinations.CREATE_POST_ROUTE  ||
+            currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true
     val hideFab = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
             currentDestination == MainAppDestinations.COMMUNITY_ROUTE ||
             currentDestination == MainAppDestinations.CREATE_POST_ROUTE ||
-            currentDestination == MainAppDestinations.POST_OPEN_ROUTE
+            currentDestination == MainAppDestinations.POST_OPEN_ROUTE ||
+            currentDestination == MainAppDestinations.COMMUNITY_DETAIL_ROUTE  ||
+            currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true
 
     Scaffold(
         bottomBar = {
@@ -183,6 +186,18 @@ fun MainApp(
                     navController = bottomNavController,
                     communityId = communityName,
                     postsViewModel = postsViewModel
+                )
+            }
+
+            composable(
+                "${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/{communityId}", // Rota com argumento
+                arguments = listOf(navArgument("communityId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val communityId = backStackEntry.arguments?.getString("communityId") ?: ""
+                CreatePostCommunityScreen(
+                    navController = bottomNavController,
+                    postsViewModel = postsViewModel,
+                    communityId = communityId
                 )
             }
 

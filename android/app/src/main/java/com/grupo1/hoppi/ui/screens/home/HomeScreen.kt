@@ -14,6 +14,7 @@ object MainAppDestinations {
     const val COMMUNITY_DETAIL_ROUTE = "main/community_detail/{communityName}"
     const val SEARCH_ROUTE = "main/search"
     const val CREATE_POST_ROUTE = "main/create_post"
+    const val CREATE_POST_COMMUNITY_ROUTE = "main/create_post_community"
     const val PROFILE_ROUTE = "main/profile"
     const val NOTIFICATIONS_ROUTE = "main/notifications"
     const val POST_OPEN_ROUTE = "main/post_open/{postId}"
