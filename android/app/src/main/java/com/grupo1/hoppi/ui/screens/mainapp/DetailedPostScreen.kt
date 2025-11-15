@@ -138,6 +138,7 @@ fun PostScreen(
                                 tag = post.tag,
                                 isLiked = post.isLiked
                             ),
+                            postsViewModel = postsViewModel,
                             onLikeClick = { postsViewModel.toggleLike(post.id) },
                             onDeletePost = {
                                 postsViewModel.deletePost(post.id)
@@ -262,6 +263,7 @@ fun PostTopBar(navController: NavController) {
 @Composable
 fun PostHeader(
     post: DetailedPost,
+    postsViewModel: PostsViewModel,
     onLikeClick: () -> Unit,
     onDeletePost: () -> Unit,
     onCommentClick: () -> Unit
@@ -324,14 +326,17 @@ fun PostHeader(
                             }
                         )
 
-                        DropdownMenuItem(
-                            text = { Text("Excluir Post", color = Color.Red) },
-                            onClick = {
-                                menuExpanded = false
-                                showDeleteDialog = true
-                            }
-                        )
+                        if (post.username == postsViewModel.currentUser) {
+                            DropdownMenuItem(
+                                text = { Text("Excluir Post", color = Color.Red) },
+                                onClick = {
+                                    menuExpanded = false
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
                     }
+
 
                     if (showReportDialog) {
                         ReportDialog(

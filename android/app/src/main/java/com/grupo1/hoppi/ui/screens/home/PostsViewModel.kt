@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 data class Post(
     val id: Int,
     val username: String,
+    val handle: String,
     val content: String,
     val isSale: Boolean = false,
     val tag: String? = null,
@@ -16,23 +17,33 @@ data class Post(
     val comments: Int = 0,
     val shares: Int = 0
 )
+
 class PostsViewModel : ViewModel() {
+    var currentUser: String = "Fulano de Tal"
+        private set
+
+    fun setCurrentUser(username: String) {
+        currentUser = username
+    }
     private val _posts = mutableStateListOf<Post>().apply {
         addAll(
             List(10) { i ->
                 Post(
                     id = i,
                     username = "Fulano de Tal",
-                    content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry",
+                    handle = "@fulan.tal",
+                    content = "Lorem Ipsum is simply dummy text of the printing industry.",
                     isSale = i % 3 == 0,
                     likes = (5..40).random(),
                     isLiked = false,
-                    communityId = if (i % 4 == 0) "Comunidade Estudo" else null
+                    communityId = if (i % 4 == 0) "Comunidade Estudo" else null,
+                    tag = null
                 )
             }
         )
     }
-    val posts: List<Post> = _posts
+
+    val posts: List<Post> get() = _posts
 
     private fun addNewPost(
         content: String,
@@ -44,6 +55,7 @@ class PostsViewModel : ViewModel() {
         val newPost = Post(
             id = _posts.size + 1,
             username = username,
+            handle = "@fulan.tal",
             content = content,
             isSale = isSale,
             tag = tag,
@@ -59,18 +71,37 @@ class PostsViewModel : ViewModel() {
     }
 
     fun addCommunityPost(content: String, username: String, isSale: Boolean, tag: String?, communityId: String) {
-        addNewPost(content, username, isSale, tag, communityId = communityId)
+        addNewPost(content, username, isSale, tag, communityId)
+    }
+
+    private fun ensureMockCommunityPosts(communityId: String) {
+        val existing = posts.filter { it.communityId == communityId }
+        if (existing.isNotEmpty()) return
+
+        repeat(5) { i ->
+            addNewPost(
+                content = "Conteúdo de exemplo #$i da comunidade $communityId",
+                username = "Usuário $i",
+                isSale = false,
+                tag = null,
+                communityId = communityId
+            )
+        }
+    }
+
+    fun getCommunityPosts(communityId: String): List<Post> {
+        ensureMockCommunityPosts(communityId)
+        return posts.filter { it.communityId == communityId }
     }
 
     fun toggleLike(postId: Int) {
         val index = _posts.indexOfFirst { it.id == postId }
         if (index != -1) {
             val post = _posts[index]
-            val updatedPost = post.copy(
+            _posts[index] = post.copy(
                 isLiked = !post.isLiked,
                 likes = if (post.isLiked) post.likes - 1 else post.likes + 1
             )
-            _posts[index] = updatedPost
         }
     }
 
@@ -84,5 +115,9 @@ class PostsViewModel : ViewModel() {
 
     fun deletePost(id: Int) {
         _posts.removeAll { it.id == id }
+    }
+
+    fun getUserPosts(username: String): List<Post> {
+        return posts.filter { it.username == username }
     }
 }

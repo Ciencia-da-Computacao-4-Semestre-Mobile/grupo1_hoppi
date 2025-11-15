@@ -138,7 +138,7 @@ fun PostCard(
                         )
                         Spacer(Modifier.width(5.dp))
                         Text(
-                            "@fulan.tal",
+                            post.handle,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFFA6A6A6),
                             fontSize = 14.sp
@@ -165,7 +165,7 @@ fun PostCard(
                         .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(post.likes.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 
@@ -175,7 +175,7 @@ fun PostCard(
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(post.comments.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.weight(1f))
 

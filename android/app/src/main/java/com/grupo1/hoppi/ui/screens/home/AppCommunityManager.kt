@@ -12,9 +12,11 @@ val ItemCardBackground = Color(0xFFDBDBDB)
 data class Community(
     val name: String,
     val description: String,
+    val id: String = name,
     val isOfficial: Boolean = false,
     val isPrivate: Boolean = false,
-    val iconColor: Color = LightBlue
+    val iconColor: Color = LightBlue,
+    val creatorUsername: String = "Sistema"
 )
 
 val initialHomeCommunities = listOf(

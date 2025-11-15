@@ -101,6 +101,7 @@ fun CommunitiesScreen(navController: NavController) {
                 }
             }
         },
+        contentWindowInsets = WindowInsets(0,0,0,0),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(MainAppDestinations.CREATE_COMMUNITY_ROUTE) },

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -51,7 +52,7 @@ fun ProfileScreen(
     onPostClick: (postId: Int) -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    val posts = postsViewModel.posts
+    val posts = postsViewModel.getUserPosts("Fulano de Tal")
 
     LazyColumn(
         modifier = Modifier
@@ -258,7 +259,7 @@ fun ProfilePostCard(
                         )
                         Spacer(Modifier.width(5.dp))
                         Text(
-                            "@fulan.tal",
+                            post.handle,
                             style = MaterialTheme.typography.bodyMedium,
                             color = LightGreyText,
                             fontSize = 14.sp
@@ -285,7 +286,7 @@ fun ProfilePostCard(
                         .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("10 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(post.likes.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 
@@ -295,9 +296,37 @@ fun ProfilePostCard(
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("1,5 K", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(post.comments.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.weight(1f))
+
+                post.tag?.let { tagName ->
+                    val (bgColor, textColor, iconRes) = when (tagName) {
+                        "Estudo" -> Triple(VerdeEstudo, TextColorEstudo, R.drawable.estudo_icon)
+                        "Venda" -> Triple(AzulVenda, TextColorVenda, R.drawable.venda_icon)
+                        "Info" -> Triple(LaranjaInfo, TextColorInfo, R.drawable.info_icon)
+                        else -> Triple(Color.LightGray, Color.Black, R.drawable.info_icon)
+                    }
+
+                    AssistChip(
+                        onClick = { },
+                        label = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = iconRes),
+                                    contentDescription = tagName,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(tagName, fontSize = 10.sp, color = textColor)
+                            }
+                        },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = bgColor),
+                        border = null,
+                        shape = RoundedCornerShape(5.dp),
+                        modifier = Modifier.height(20.dp)
+                    )
+                }
             }
         }
     }

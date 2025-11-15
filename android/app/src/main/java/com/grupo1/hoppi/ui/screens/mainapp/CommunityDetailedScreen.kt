@@ -15,7 +15,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,12 +23,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
+import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 
 enum class CommunityAccessStatus {
@@ -38,23 +38,6 @@ enum class CommunityAccessStatus {
     NOT_MEMBER_PRIVATE,
     REQUEST_PENDING
 }
-
-data class CommunityPost(
-    val id: Int,
-    val username: String,
-    val handle: String,
-    val content: String,
-    val avatarColor: Color,
-    val likes: Int = 0,
-    val comments: Int = 0
-)
-
-val mockCommunityPosts = listOf(
-    CommunityPost(1, "Fulano de Tal", "@fulan.tal", "Lorem ipsum is simply dummy text of the printing and typesetting industry", Color(0xFFB56576)),
-    CommunityPost(2, "Ciclano", "@cicl.ano", "Lorem ipsum is simply dummy text of the printing and typesetting industry", Color(0xFFFF9800)),
-    CommunityPost(3, "Estudante", "@estudante123", "Lorem ipsum is simply dummy text of the printing and typesetting industry", Color(0xFF3F51B5)),
-    CommunityPost(4, "Ciclano", "@cicl.ano", "Lorem ipsum is simply dummy text of the printing and typesetting industry", Color(0xFFFF9800)),
-)
 
 @Composable
 fun CommunityDetailScreen(
@@ -65,18 +48,27 @@ fun CommunityDetailScreen(
     val community = remember { findCommunityByName(communityId) }
 
     val currentCommunity = community ?: Community(
+        id = "not_found",
         name = "Comunidade Não Encontrada",
-        description = "",
+        description = "Esta comunidade não existe ou não foi encontrada.",
+        creatorUsername = "Sistema",
         isOfficial = false,
-        isPrivate = false
     )
 
     val isPrivate = currentCommunity.isPrivate
 
-    val posts = remember { mutableStateListOf<CommunityPost>().apply { addAll(mockCommunityPosts) } }
+    val posts by remember {
+        derivedStateOf {
+            postsViewModel.getCommunityPosts(communityId)
+        }
+    }
 
-    val creatorInfo = currentCommunity.description.split('\n').firstOrNull { it.startsWith("Criado por") } ?: "Comunidade Oficial"
+    val creatorInfo = currentCommunity.description
+        .split('\n')
+        .firstOrNull { it.startsWith("Criado por") }
+        ?: "Comunidade Oficial"
 
+    val realCreator = creatorInfo.removePrefix("Criado por ").trim()
 
     var accessStatus by remember {
         mutableStateOf(
@@ -88,15 +80,36 @@ fun CommunityDetailScreen(
     val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
             accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
 
+    val isCreator = realCreator == postsViewModel.currentUser
+    val isMember = accessStatus == CommunityAccessStatus.MEMBER
+    var showReportDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = Color.White,
         topBar = {
             CommunityDetailTopBar(
                 title = currentCommunity.name,
                 onBackClick = { navController.popBackStack() },
-                onSettingsClick = { navController.navigate("main/community_settings/${currentCommunity.name}") }
+                onSettingsClick = {
+                    navController.navigate("main/community_settings/${currentCommunity.name}")
+                },
+                isOfficial = currentCommunity.isOfficial,
+                isCreator = isCreator,
+                isMember = accessStatus == CommunityAccessStatus.MEMBER,
+                onReportClick = { showReportDialog = true },
+                onFollowClick = {
+                    accessStatus = handleCommunityAction(accessStatus, isPrivate)
+                },
+                onUnfollowClick = { accessStatus = CommunityAccessStatus.NOT_MEMBER_PUBLIC },
+                onDeleteCommunityClick = {
+                },
+                onEditCommunityClick = {
+                    navController.navigate("editCommunity/${currentCommunity.name}")
+                }
             )
+
         },
+        contentWindowInsets = WindowInsets(0,0,0,0),
         floatingActionButton = {
             if (hasAccess) {
                 FloatingActionButton(
@@ -112,6 +125,7 @@ fun CommunityDetailScreen(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -122,20 +136,23 @@ fun CommunityDetailScreen(
                     communityName = currentCommunity.name,
                     creatorInfo = creatorInfo,
                     isOfficial = currentCommunity.isOfficial,
+                    communityDescription = currentCommunity.description,
                     isPrivate = isPrivate,
                     membersCount = "1.870",
-                    postsCount = "560",
+                    postsCount = posts.size.toString(),
                     accessStatus = accessStatus,
                     onActionButtonClick = {
                         accessStatus = handleCommunityAction(accessStatus, isPrivate)
-                    }
+                    },
+                    isCreator = isCreator
                 )
             }
 
             CommunityDetailBodyItems(
                 accessStatus = accessStatus,
                 posts = posts,
-                navController = navController
+                navController = navController,
+                postsViewModel = postsViewModel
             )
         }
     }
@@ -143,36 +160,32 @@ fun CommunityDetailScreen(
 
 fun LazyListScope.CommunityDetailBodyItems(
     accessStatus: CommunityAccessStatus,
-    posts: MutableList<CommunityPost>,
-    navController: NavController
+    posts: List<Post>,
+    navController: NavController,
+    postsViewModel: PostsViewModel
 ) {
     val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
             accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
 
     if (hasAccess) {
         items(posts) { post ->
+
             PostCardDetail(
                 post = post,
                 onPostClick = { postId ->
                     navController.navigate("main/post_open/$postId")
                 },
                 onLikeClick = {
-                    val index = posts.indexOfFirst { it.id == post.id }
-                    if (index != -1) {
-                        val updated = posts[index].copy(
-                            likes = if (post.likes > 0) (post.likes - 1) else (post.likes + 1)
-                        )
-                        posts[index] = updated
-                    }
+                    postsViewModel.toggleLike(post.id)
                 }
             )
+
             Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 1.dp)
         }
+
         item { Spacer(modifier = Modifier.height(56.dp)) }
     } else {
-        item {
-            AccessDeniedContent(accessStatus = accessStatus)
-        }
+        item { AccessDeniedContent(accessStatus) }
     }
 }
 
@@ -181,7 +194,15 @@ fun LazyListScope.CommunityDetailBodyItems(
 fun CommunityDetailTopBar(
     title: String,
     onBackClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    isOfficial: Boolean,
+    isCreator: Boolean,
+    isMember: Boolean,
+    onReportClick: () -> Unit,
+    onFollowClick: () -> Unit,
+    onUnfollowClick: () -> Unit,
+    onDeleteCommunityClick: () -> Unit,
+    onEditCommunityClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -189,15 +210,31 @@ fun CommunityDetailTopBar(
         title = { },
         navigationIcon = {
             Box(modifier = Modifier.padding(top = 0.dp, start = 20.dp, end = 0.dp)) {
-                IconButton(onClick = onBackClick, modifier = Modifier.offset(y = (-15).dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", Modifier.size(30.dp))
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.offset(y = (-15).dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Voltar",
+                        tint = Color(0xFF000000),
+                        modifier = Modifier.size(30.dp)
+                    )
                 }
             }
         },
         actions = {
             Box(modifier = Modifier.padding(top = 0.dp, end = 20.dp, start = 0.dp)) {
-                IconButton(onClick = { showMenu = true }, modifier = Modifier.offset(y = (-15).dp)) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções", Modifier.size(30.dp))
+                IconButton(
+                    onClick = { showMenu = true },
+                    modifier = Modifier.offset(y = (-15).dp)
+                ) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = "Voltar",
+                        tint = Color(0xFF000000),
+                        modifier = Modifier.size(30.dp)
+                    )
                 }
             }
 
@@ -205,17 +242,69 @@ fun CommunityDetailTopBar(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
-                DropdownMenuItem(
-                    text = { Text("Configurações") },
-                    onClick = {
-                        onSettingsClick()
-                        showMenu = false
-                    },
-                    leadingIcon = {
-                        Icon(Icons.Filled.Settings, contentDescription = "Configurações")
+                if (isOfficial) {
+                    DropdownMenuItem(
+                        text = { Text(if (isMember) "Sair" else "Seguir") },
+                        onClick = {
+                            showMenu = false
+                            if (isMember) {
+                                onUnfollowClick()
+                            } else {
+                                onFollowClick()
+                            }
+                        }
+                    )
+                } else if (isCreator) {
+                    DropdownMenuItem(
+                        text = { Text("Editar Comunidade") },
+                        onClick = {
+                            showMenu = false
+                            onEditCommunityClick()
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Excluir Comunidade", color = Color.Red) },
+                        onClick = {
+                            showMenu = false
+                            onDeleteCommunityClick()
+                        }
+                    )
+                    if (isCreator) {
+                        DropdownMenuItem(
+                            text = { Text("Editar Comunidade") },
+                            onClick = {
+                                showMenu = false
+                                onEditCommunityClick()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Excluir Comunidade", color = Color.Red) },
+                            onClick = {
+                                showMenu = false
+                                onDeleteCommunityClick()
+                            }
+                        )
+                    } else {
+                        DropdownMenuItem(
+                            text = { Text("Denunciar Comunidade") },
+                            onClick = {
+                                showMenu = false
+                                onReportClick()
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text(if (isMember) "Sair" else "Seguir") },
+                            onClick = {
+                                showMenu = false
+                                if (isMember) onUnfollowClick() else onFollowClick()
+                            }
+                        )
                     }
-                )
+                }
             }
+
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
@@ -227,11 +316,13 @@ fun CommunityDetailHeader(
     communityName: String,
     creatorInfo: String,
     isOfficial: Boolean,
+    communityDescription: String,
     isPrivate: Boolean,
     membersCount: String,
     postsCount: String,
     accessStatus: CommunityAccessStatus,
-    onActionButtonClick: () -> Unit
+    onActionButtonClick: () -> Unit,
+    isCreator: Boolean
 ) {
     val (buttonText, buttonColors, isBordered) = when (accessStatus) {
         CommunityAccessStatus.MEMBER -> Triple(
@@ -261,6 +352,9 @@ fun CommunityDetailHeader(
         CommunityAccessStatus.REQUEST_PENDING -> Icons.Default.Add
         else -> Icons.Default.Add
     }
+
+    val descriptionLines = communityDescription.split("\n")
+    val descriptionOnly = descriptionLines.drop(1).joinToString("\n")
 
     Column(
         modifier = Modifier
@@ -308,6 +402,21 @@ fun CommunityDetailHeader(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = descriptionOnly,
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 40.dp),
+                color = Color(0xFF000000)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -317,32 +426,34 @@ fun CommunityDetailHeader(
             CommunityStat(count = postsCount, label = "Posts")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onActionButtonClick,
-            modifier = Modifier
-                .width(160.dp)
-                .height(40.dp)
-                .clip(RoundedCornerShape(30.dp))
-                .run {
-                    if (isBordered) {
-                        border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
-                            .background(Color.White)
-                    } else this
-                },
-            colors = buttonColors,
-            contentPadding = PaddingValues(horizontal = 16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (accessStatus == CommunityAccessStatus.MEMBER) {
-                    Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(buttonText, color = Color.White, fontWeight = FontWeight.SemiBold)
-                } else if (accessStatus == CommunityAccessStatus.REQUEST_PENDING) {
-                    Text(buttonText, color = Color.Gray, fontWeight = FontWeight.SemiBold)
-                } else {
-                    Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(buttonText, color = Color.White, fontWeight = FontWeight.SemiBold)
+        if (!isCreator) {
+            Button(
+                onClick = onActionButtonClick,
+                modifier = Modifier
+                    .width(160.dp)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(30.dp))
+                    .run {
+                        if (isBordered) {
+                            border(1.dp, Color.Gray, RoundedCornerShape(30.dp))
+                                .background(Color.White)
+                        } else this
+                    },
+                colors = buttonColors,
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (accessStatus == CommunityAccessStatus.MEMBER) {
+                        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(buttonText, color = Color.White, fontWeight = FontWeight.SemiBold)
+                    } else if (accessStatus == CommunityAccessStatus.REQUEST_PENDING) {
+                        Text(buttonText, color = Color.Gray, fontWeight = FontWeight.SemiBold)
+                    } else {
+                        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(buttonText, color = Color.White, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
@@ -372,8 +483,8 @@ fun CommunityStat(count: String, label: String) {
 
 @Composable
 fun PostCardDetail(
-    post: CommunityPost,
-    onPostClick: (postId: Int) -> Unit,
+    post: Post,
+    onPostClick: (Int) -> Unit,
     onLikeClick: () -> Unit
 ) {
     Row(
@@ -383,11 +494,12 @@ fun PostCardDetail(
             .padding(20.dp),
         verticalAlignment = Alignment.Top
     ) {
+
         Box(
             modifier = Modifier
                 .size(35.dp)
                 .clip(CircleShape)
-                .background(post.avatarColor)
+                .background(Color(0xFF3F51B5))
         )
 
         Spacer(Modifier.width(20.dp))
@@ -397,71 +509,85 @@ fun PostCardDetail(
                 .weight(1f)
                 .clickable { onPostClick(post.id) }
         ) {
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = post.username,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF000000)
-                    )
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 14.sp,
+                    color = Color(0xFF000000),
                 )
+
                 Spacer(Modifier.width(5.dp))
+
                 Text(
-                    text = post.handle,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+                    text = "@${post.username.replace(" ", "").lowercase()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 14.sp,
+                    color = Color.Gray
                 )
             }
 
             Text(
-                text = post.content,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    color = Color(0xFF000000)
-                ),
-                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                post.content,
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                color = Color(0xFF000000),
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like_detailed),
-                    contentDescription = "Curtidas",
+                    painter = painterResource(id = if (post.isLiked) R.drawable.liked else R.drawable.like_detailed),
+                    contentDescription = null,
                     modifier = Modifier
-                        .size(12.dp)
+                        .size(20.dp)
                         .clickable { onLikeClick() }
                 )
-
                 Spacer(Modifier.width(4.dp))
+                Text(post.likes.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
-                Text(
-                    text = post.likes.toString(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 12.sp,
-                        color = Color(0xFF000000)
-                    )
-                )
-
-                Spacer(Modifier.width(15.dp))
+                Spacer(Modifier.width(16.dp))
 
                 Image(
                     painter = painterResource(id = R.drawable.comments_detailed),
-                    contentDescription = "Comentários",
+                    contentDescription = "Comments",
                     modifier = Modifier.size(12.dp)
                 )
-
                 Spacer(Modifier.width(4.dp))
+                Text(post.comments.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
-                Text(
-                    text = post.comments.toString(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 12.sp,
-                        color = Color(0xFF000000)
+                Spacer(Modifier.weight(1f))
+
+                post.tag?.let { tagName ->
+                    val (bgColor, textColor, iconRes) = when (tagName) {
+                        "Estudo" -> Triple(VerdeEstudo, TextColorEstudo, R.drawable.estudo_icon)
+                        "Venda" -> Triple(AzulVenda, TextColorVenda, R.drawable.venda_icon)
+                        "Info" -> Triple(LaranjaInfo, TextColorInfo, R.drawable.info_icon)
+                        else -> Triple(Color.LightGray, Color.Black, R.drawable.info_icon)
+                    }
+
+                    AssistChip(
+                        onClick = { },
+                        label = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = iconRes),
+                                    contentDescription = tagName,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(tagName, fontSize = 10.sp, color = textColor)
+                            }
+                        },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = bgColor),
+                        border = null,
+                        shape = RoundedCornerShape(5.dp),
+                        modifier = Modifier.height(20.dp)
                     )
-                )
+                }
             }
         }
     }
