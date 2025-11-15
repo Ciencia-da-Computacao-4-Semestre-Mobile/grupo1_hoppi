@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommunityPost } from './entities/community-post.entity';
 import { User } from '../users/users.entity';
-import { CreatePostDto } from './dto/create-post.dto';
 import { CommunityMember } from './entities/community-member.entity';
+
+// REVISAR
 
 @Injectable()
 export class CommunityPostsService {

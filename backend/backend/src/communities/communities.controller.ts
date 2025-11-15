@@ -1,15 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common'
 import { CommunitiesService } from './communities.service';
 import { Community } from './communities.entity';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CreateCommunityDto } from './dto/create-community.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-// Usamos 'import type' para evitar emissão de metadata indevida em parâmetros decorados
 import type { JwtPayloadUser } from 'src/auth/decorators/current-user.decorator';
-import { ListMembersQueryDto } from './dto/list-members.query.dto';
-import { ListRequestsQueryDto } from './dto/list-requests.query.dto';
-import { CommunityRequestActionDto } from './dto/community-request-action.dto';
-import { TransferOwnerDto } from './dto/transfer-owner.dto';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { CommunityRequestActionSchema, CreateCommunitySchema, DeleteCommunityParamsSchema, ListMembersQuerySchema, ListRequestsQuerySchema, TransferOwnerSchema, UpdateCommunitySchema } from './schemas/community.schema'
+import type { CreateCommunityDTO, UpdateCommunityDTO } from './schemas/community.schema'
+import { z } from 'zod'
 
 @Controller('communities')
 export class CommunitiesController {
@@ -21,20 +19,25 @@ export class CommunitiesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Community> {
-    return this.communitiesService.findOne(id);
+  async findOne(@Param(new ZodValidationPipe(DeleteCommunityParamsSchema)) params: { id: string }){
+    return await this.communitiesService.findOne(params.id)
   }
 
   @UseGuards(AuthGuard)
   @Post()
-  create(@Body() dto: CreateCommunityDto, @CurrentUser() user: JwtPayloadUser) {
-    return this.communitiesService.create(dto, { id: user.sub } as unknown as any);
+  async create(
+    @Body(new ZodValidationPipe(CreateCommunitySchema)) 
+    data: CreateCommunityDTO,
+    @CurrentUser() user: JwtPayloadUser
+  ) {
+    return await this.communitiesService.create(data, { id: user.sub } as unknown as any)
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateCommunityDto>, @CurrentUser() user: JwtPayloadUser) {
-    return this.communitiesService.update(id, dto, { id: user.sub } as unknown as any);
+  async update(@Param(new ZodValidationPipe(DeleteCommunityParamsSchema)) params: { id: string }, 
+  @Body(new ZodValidationPipe(UpdateCommunitySchema)) data: UpdateCommunityDTO, @CurrentUser() user: JwtPayloadUser) {
+    return await this.communitiesService.update(params.id, data, { id: user.sub } as unknown as any)
   }
 
   @UseGuards(AuthGuard)
@@ -60,49 +63,67 @@ export class CommunitiesController {
     return this.communitiesService.updateMemberRole(communityId, userId, role, { id: user.sub } as unknown as any);
   }
 
-  // Members listing with pagination and role filter
   @UseGuards(AuthGuard)
   @Get(':id/members')
   listMembers(
     @Param('id') id: string,
-    @Query() query: ListMembersQueryDto,
+    @Query() query: any,
   ) {
-    const page = Number(query.page ?? 1);
-    const limit = Number(query.limit ?? 20);
-    return this.communitiesService.listMembers(id, page, limit, query.role);
+    const parsed = ListMembersQuerySchema.safeParse(query)
+    if (!parsed.success) {
+      throw new BadRequestException(z.treeifyError(parsed.error))
+    }
+
+    const data = parsed.data
+    const page = Number(data.page ?? 1)
+    const limit = Number(data.limit ?? 20)
+
+    return this.communitiesService.listMembers(id, page, limit, data.role)
   }
 
-  // Join requests listing (owner only)
   @UseGuards(AuthGuard)
   @Get(':id/requests')
   listRequests(
     @Param('id') id: string,
-    @Query() query: ListRequestsQueryDto,
+    @Query() query: any,
     @CurrentUser() user: JwtPayloadUser,
   ) {
-    return this.communitiesService.listJoinRequests(id, query.status, { id: user.sub } as unknown as any);
+    const parsed = ListRequestsQuerySchema.safeParse(query)
+    if (!parsed.success) {
+      throw new BadRequestException(z.treeifyError(parsed.error))
+    }
+
+    return this.communitiesService.listJoinRequests(id, parsed.data.status, { id: user.sub } as unknown as any)
   }
 
-  // Approve/Reject a join request (owner only)
   @UseGuards(AuthGuard)
   @Patch(':id/requests/:request_id')
   actOnRequest(
     @Param('id') id: string,
     @Param('request_id') requestId: string,
-    @Body() body: CommunityRequestActionDto,
+    @Body() body: any,
     @CurrentUser() user: JwtPayloadUser,
   ) {
-    return this.communitiesService.actOnJoinRequest(id, requestId, body.action, { id: user.sub } as unknown as any);
+    const parsed = CommunityRequestActionSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new BadRequestException(z.treeifyError(parsed.error))
+    }
+
+    return this.communitiesService.actOnJoinRequest(id, requestId, parsed.data.action, { id: user.sub } as unknown as any)
   }
 
-  // Transfer ownership
   @UseGuards(AuthGuard)
   @Patch(':id/owner')
   transferOwner(
     @Param('id') id: string,
-    @Body() body: TransferOwnerDto,
+    @Body() body: any,
     @CurrentUser() user: JwtPayloadUser,
   ) {
-    return this.communitiesService.transferOwnership(id, body.new_owner_user_id, { id: user.sub } as unknown as any);
+    const parsed = TransferOwnerSchema.safeParse(body)
+    if (!parsed.success) {
+      throw new BadRequestException(z.treeifyError(parsed.error))
+    }
+
+    return this.communitiesService.transferOwnership(id, parsed.data.new_owner_user_id, { id: user.sub } as unknown as any)
   }
 }

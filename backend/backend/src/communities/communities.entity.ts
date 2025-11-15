@@ -11,11 +11,17 @@ export class Community {
     @Column({ unique: true })
     name: string
 
+    @Column({ default: 'avatar_1' })
+    avatar: string
+
     @Column({ type: 'text' })
     description: string
 
     @Column({ default: false })
     is_private: boolean
+
+    @Column({ default: false })
+    requires_approval: boolean
 
     @Column({ default: 0 })
     member_count: number

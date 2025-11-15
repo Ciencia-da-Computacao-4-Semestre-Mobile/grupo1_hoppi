@@ -11,7 +11,11 @@ export const CreateCommunitySchema = z.object({
     .min(5, { message: "A descrição deve ter ao menos 5 caracteres." })
     .max(200, { message: "A descrição não deve exceder 200 caracteres." }),
 
-    is_private: z.boolean().optional()
+    is_private: z.boolean().optional(),
+
+    requires_approval: z.boolean().default(false),
+
+    avatar: z.string().default('avatar_1')
 })
 
 export type CreateCommunityDTO = z.infer<typeof CreateCommunitySchema>
@@ -28,7 +32,9 @@ export const UpdateCommunitySchema = z.object({
     .max(200, { message: "A descrição não deve exceder 200 caracteres." })
     .optional(),
 
-    is_private: z.boolean().optional()
+    is_private: z.boolean().optional(),
+
+    requires_approval: z.boolean().default(false)
 })
 
 export type UpdateCommunityDTO = z.infer<typeof UpdateCommunitySchema>
@@ -37,6 +43,7 @@ export type UpdateCommunityDTO = z.infer<typeof UpdateCommunitySchema>
 export const ReturnCommunitySchema = z.object({
   id: z.uuid(),
   name: z.string(),
+  avatar: z.string(),
   description: z.string(),
   is_private: z.boolean(),
   created_at: z.date(),
@@ -51,3 +58,25 @@ export const DeleteCommunityParamsSchema = z.object({
 })
 
 export type DeleteCommunityDTO = z.infer<typeof DeleteCommunityParamsSchema>
+
+export const UpdateMemberRoleSchema = z.object({
+  role: z.enum(['member', 'moderator', 'owner']),
+})
+
+export const ListMembersQuerySchema = z.object({
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  role: z.enum(['member', 'moderator', 'owner']).optional(),
+})
+
+export const ListRequestsQuerySchema = z.object({
+  status: z.enum(['pending', 'approved', 'rejected']).optional(),
+})
+
+export const CommunityRequestActionSchema = z.object({
+  action: z.enum(['approve', 'reject']),
+})
+
+export const TransferOwnerSchema = z.object({
+  new_owner_user_id: z.uuid(),
+})
