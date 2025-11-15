@@ -1,11 +1,11 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common'
+import { Controller, Get, UseGuards, Request, Param } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { User } from './users.entity'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get()
   findAll(): Promise<User[]> {
@@ -16,5 +16,10 @@ export class UsersController {
   @Get('me')
   getProfile(@Request() req: { user?: unknown }) {
     return req.user ?? null;
+  }
+
+  @Get('posts/:id')
+  async getUserPosts(@Param('id') id: string) {
+    return this.usersService.getUserPosts(id);
   }
 }

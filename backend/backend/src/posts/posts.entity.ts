@@ -37,7 +37,7 @@ export class Post {
     community: Community
 
     @Column({ type: 'jsonb', nullable: true })
-    metadata: Record<string, any>
+    metadata: Record<string, any> | null
 
     @OneToMany(() => Like, (like) => like.post)
     likes: Like[]
