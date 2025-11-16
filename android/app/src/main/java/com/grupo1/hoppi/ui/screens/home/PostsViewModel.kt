@@ -10,7 +10,7 @@ data class Post(
     val content: String,
     val isSale: Boolean = false,
     val tag: String? = null,
-    val communityId: String? = null,
+    val communityId: Int? = null,
 
     val likes: Int = 0,
     val isLiked: Boolean = false,
@@ -19,12 +19,14 @@ data class Post(
 )
 
 class PostsViewModel : ViewModel() {
+
     var currentUser: String = "Fulano de Tal"
         private set
 
     fun setCurrentUser(username: String) {
         currentUser = username
     }
+
     private val _posts = mutableStateListOf<Post>().apply {
         addAll(
             List(10) { i ->
@@ -36,7 +38,7 @@ class PostsViewModel : ViewModel() {
                     isSale = i % 3 == 0,
                     likes = (5..40).random(),
                     isLiked = false,
-                    communityId = if (i % 4 == 0) "Comunidade Estudo" else null,
+                    communityId = if (i % 4 == 0) 1 else null,
                     tag = null
                 )
             }
@@ -50,7 +52,7 @@ class PostsViewModel : ViewModel() {
         username: String,
         isSale: Boolean,
         tag: String?,
-        communityId: String?
+        communityId: Int?
     ) {
         val newPost = Post(
             id = _posts.size + 1,
@@ -70,11 +72,11 @@ class PostsViewModel : ViewModel() {
         addNewPost(content, username, isSale, tag, communityId = null)
     }
 
-    fun addCommunityPost(content: String, username: String, isSale: Boolean, tag: String?, communityId: String) {
+    fun addCommunityPost(content: String, username: String, isSale: Boolean, tag: String?, communityId: Int) {
         addNewPost(content, username, isSale, tag, communityId)
     }
 
-    private fun ensureMockCommunityPosts(communityId: String) {
+    private fun ensureMockCommunityPosts(communityId: Int) {
         val existing = posts.filter { it.communityId == communityId }
         if (existing.isNotEmpty()) return
 
@@ -89,7 +91,7 @@ class PostsViewModel : ViewModel() {
         }
     }
 
-    fun getCommunityPosts(communityId: String): List<Post> {
+    fun getCommunityPosts(communityId: Int): List<Post> {
         ensureMockCommunityPosts(communityId)
         return posts.filter { it.communityId == communityId }
     }

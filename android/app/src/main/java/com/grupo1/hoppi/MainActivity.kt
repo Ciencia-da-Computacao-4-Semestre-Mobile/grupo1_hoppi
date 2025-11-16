@@ -111,10 +111,13 @@ fun MainApp(
             currentDestination == MainAppDestinations.CREATE_POST_ROUTE  ||
             currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true
     val hideFab = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
+            currentDestination == MainAppDestinations.NOTIFICATIONS_ROUTE ||
             currentDestination == MainAppDestinations.COMMUNITY_ROUTE ||
             currentDestination == MainAppDestinations.CREATE_POST_ROUTE ||
             currentDestination == MainAppDestinations.POST_OPEN_ROUTE ||
             currentDestination == MainAppDestinations.COMMUNITY_DETAIL_ROUTE  ||
+            currentDestination == MainAppDestinations.CREATE_COMMUNITY_ROUTE  ||
+            currentDestination == MainAppDestinations.EDIT_COMMUNITY_ROUTE  ||
             currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true
 
     Scaffold(
@@ -179,24 +182,36 @@ fun MainApp(
             }
 
             composable(MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
-                arguments = listOf(navArgument("communityName") { type = NavType.StringType })
+                arguments = listOf(navArgument("communityId") { type = NavType.IntType })
             ) { backStackEntry ->
-                val communityName = backStackEntry.arguments?.getString("communityName") ?: ""
+                val communityId = backStackEntry.arguments?.getInt("communityId") ?: -1
                 CommunityDetailScreen(
                     navController = bottomNavController,
-                    communityId = communityName,
+                    communityId = communityId,
                     postsViewModel = postsViewModel
                 )
             }
 
             composable(
-                "${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/{communityId}", // Rota com argumento
-                arguments = listOf(navArgument("communityId") { type = NavType.StringType })
+                "${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/{communityId}",
+                arguments = listOf(navArgument("communityId") { type = NavType.IntType })
             ) { backStackEntry ->
-                val communityId = backStackEntry.arguments?.getString("communityId") ?: ""
+                val communityId = backStackEntry.arguments?.getInt("communityId") ?: -1
+
                 CreatePostCommunityScreen(
                     navController = bottomNavController,
                     postsViewModel = postsViewModel,
+                    communityId = communityId
+                )
+            }
+
+            composable(
+                "${MainAppDestinations.EDIT_COMMUNITY_ROUTE}/{communityId}",
+                arguments = listOf(navArgument("communityId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val communityId = backStackEntry.arguments?.getInt("communityId") ?: 0
+                EditCommunityScreen(
+                    navController = bottomNavController,
                     communityId = communityId
                 )
             }

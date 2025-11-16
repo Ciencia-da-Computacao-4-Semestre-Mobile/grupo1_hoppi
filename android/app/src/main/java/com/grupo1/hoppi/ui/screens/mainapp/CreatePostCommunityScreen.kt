@@ -34,7 +34,7 @@ import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 fun CreatePostCommunityScreen(
     navController: NavController,
     postsViewModel: PostsViewModel,
-    communityId: String
+    communityId: Int
 ) {
     var postText by remember { mutableStateOf("") }
     var selectedTag by remember { mutableStateOf<TagItem?>(null) }

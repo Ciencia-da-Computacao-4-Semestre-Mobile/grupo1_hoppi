@@ -1,6 +1,5 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,9 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
 data class NotificationItem(
     val id: Int,
@@ -91,7 +88,10 @@ val NotificationColors = mapOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(navController: NavController) {
+fun NotificationScreen(
+    navController: NavController,
+    viewModel: NotificationsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val view = LocalView.current
 
     Scaffold(
@@ -107,17 +107,13 @@ fun NotificationScreen(navController: NavController) {
                 .padding(paddingValues)
                 .background(Color.White)
         ) {
-            items(mockNotifications) { item ->
-                NotificationRow(item = item)
+            items(viewModel.notifications) { item ->
+                NotificationRow(
+                    item = item,
+                    onAccept = { viewModel.acceptRequest(item.id) },
+                    onDeny = { viewModel.denyRequest(item.id) }
+                )
                 Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text("Mostrar mais", color = Color(0xFFA6A6A6))
-                }
             }
         }
     }
@@ -149,7 +145,11 @@ fun NotificationTopBar(navController: NavController) {
 }
 
 @Composable
-fun NotificationRow(item: NotificationItem) {
+fun NotificationRow(
+    item: NotificationItem,
+    onAccept: () -> Unit = {},
+    onDeny: () -> Unit = {}
+    ) {
     val avatarColor = NotificationColors[item.type] ?: Color(0xFF9CBDC6)
     val checkColor = Color(0xFF9CBDC6)
     val closeColor = Color(0xFFD9D9D9)
@@ -220,7 +220,7 @@ fun NotificationRow(item: NotificationItem) {
                             .size(25.dp)
                             .clip(CircleShape)
                             .background(checkColor)
-                            .clickable { /* Aceitar */ }
+                            .clickable { onAccept() }
                     ) {
                         Icon(
                             Icons.Default.Check,
@@ -237,7 +237,7 @@ fun NotificationRow(item: NotificationItem) {
                             .size(25.dp)
                             .clip(CircleShape)
                             .background(closeColor)
-                            .clickable { /* Recusar */ }
+                            .clickable { onDeny() }
                     ) {
                         Icon(
                             Icons.Default.Close,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -27,6 +28,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun CommunitiesScreen(navController: NavController) {
@@ -35,32 +37,31 @@ fun CommunitiesScreen(navController: NavController) {
     var isSearchActive by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
-    val dynamicHomeCommunities = remember(AppCommunityManager.userCreatedCommunities.size) {
-        initialHomeCommunities + AppCommunityManager.userCreatedCommunities
-    }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    val currentList = if (selectedTabIndex == 0) dynamicHomeCommunities else initialExploreCommunities
+    val homeCommunities = AppCommunityManager.allCommunities.filter { AppCommunityManager.isFollowing(it.name) }
+    val exploreCommunities = AppCommunityManager.allCommunities.filter { !AppCommunityManager.isFollowing(it.name) }
 
-    val filteredCommunities = remember(searchText, currentList) {
-        if (!isSearchActive || searchText.isBlank()) {
-            currentList
-        } else {
-            currentList.filter { community ->
-                val query = searchText.trim().lowercase()
-                community.name.lowercase().contains(query) ||
-                        community.description.lowercase().contains(query)
-            }
+    val currentList = if (selectedTabIndex == 0) homeCommunities else exploreCommunities
+
+    val filteredCommunities = if (!isSearchActive || searchText.isBlank()) {
+        currentList
+    } else {
+        val q = searchText.trim().lowercase()
+        currentList.filter { community ->
+            community.name.lowercase().contains(q) ||
+                    community.description.lowercase().contains(q)
         }
     }
 
     Scaffold(
         containerColor = Color.White,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             Column(modifier = Modifier.background(Color.White)) {
                 CommunitiesTopBar(
-                    onProfileClick = {
-                        navController.navigate(MainAppDestinations.PROFILE_ROUTE)
-                    },
+                    onProfileClick = { navController.navigate(MainAppDestinations.PROFILE_ROUTE) },
                     onSearchClick = {
                         isSearchActive = !isSearchActive
                         if (!isSearchActive) searchText = ""
@@ -101,7 +102,7 @@ fun CommunitiesScreen(navController: NavController) {
                 }
             }
         },
-        contentWindowInsets = WindowInsets(0,0,0,0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(MainAppDestinations.CREATE_COMMUNITY_ROUTE) },
@@ -111,7 +112,7 @@ fun CommunitiesScreen(navController: NavController) {
             ) {
                 Icon(
                     Icons.Filled.Add,
-                    contentDescription = "Criar Post",
+                    contentDescription = "Criar Comunidade",
                     tint = Color.White,
                     modifier = Modifier.size(30.dp)
                 )
@@ -129,8 +130,17 @@ fun CommunitiesScreen(navController: NavController) {
             CommunityTabContent(
                 communities = filteredCommunities,
                 isExploreTab = selectedTabIndex == 1,
-                onCommunityClick = { communityName ->
-                    navController.navigate("main/community_detail/$communityName")
+                onCommunityClick = { communityId ->
+                    navController.navigate("main/community_detail/$communityId")
+                },
+                onFollowToggle = { communityName ->
+                    if (AppCommunityManager.isFollowing(communityName)) {
+                        AppCommunityManager.unfollowCommunity(communityName)
+                        scope.launch { snackbarHostState.showSnackbar("Você deixou a comunidade") }
+                    } else {
+                        AppCommunityManager.followCommunity(communityName)
+                        scope.launch { snackbarHostState.showSnackbar("Você seguiu a comunidade") }
+                    }
                 }
             )
         }
@@ -213,7 +223,35 @@ fun CommunitiesTopBar(
 }
 
 @Composable
-fun CommunityItem(community: Community, onCommunityClick: () -> Unit, isExploreTab: Boolean) {
+fun CommunityTabContent(
+    communities: List<Community>,
+    isExploreTab: Boolean,
+    onCommunityClick: (Int) -> Unit,
+    onFollowToggle: (String) -> Unit
+) {
+    Spacer(modifier = Modifier.width(20.dp))
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(1.dp)
+    ) {
+        items(communities) { community ->
+            CommunityItem(
+                community = community,
+                onCommunityClick = { onCommunityClick(community.id) },
+                isExploreTab = isExploreTab,
+                onFollowToggle = onFollowToggle
+            )
+        }
+    }
+}
+
+@Composable
+fun CommunityItem(
+    community: Community,
+    onCommunityClick: () -> Unit,
+    isExploreTab: Boolean,
+    onFollowToggle: (String) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -222,7 +260,6 @@ fun CommunityItem(community: Community, onCommunityClick: () -> Unit, isExploreT
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = ItemCardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-
     ) {
         Row(
             modifier = Modifier
@@ -247,11 +284,9 @@ fun CommunityItem(community: Community, onCommunityClick: () -> Unit, isExploreT
                     color = Color.Black
                 )
 
-                val descriptionLines = community.description.split('\n')
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = descriptionLines.getOrNull(0) ?: "",
+                        text = community.creatorUsername,
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
@@ -265,49 +300,40 @@ fun CommunityItem(community: Community, onCommunityClick: () -> Unit, isExploreT
                     }
                 }
 
-                descriptionLines.getOrNull(1)?.let {
-                    Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontSize = 14.sp,
-                        color = Color.Black
-                    )
-                }
+                Text(
+                    text = community.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            if (isExploreTab) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Join Community",
-                    tint = HoppiOrange,
-                    modifier = Modifier.size(28.dp)
-                )
+            val isFollowing = AppCommunityManager.isFollowing(community.name)
+            IconButton(onClick = {
+                onFollowToggle(community.name)
+            }) {
+                if (isFollowing) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Seguindo",
+                        tint = HoppiOrange,
+                        modifier = Modifier.size(28.dp)
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Seguir",
+                        tint = HoppiOrange,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
-        }
-    }
-}
-
-@Composable
-fun CommunityTabContent(
-    communities: List<Community>,
-    isExploreTab: Boolean,
-    onCommunityClick: (String) -> Unit
-) {
-    Spacer(modifier = Modifier.width(20.dp))
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(1.dp)
-    ) {
-        items(communities) { community ->
-            CommunityItem(
-                community = community,
-                onCommunityClick = { onCommunityClick(community.name) },
-                isExploreTab = isExploreTab
-            )
         }
     }
 }
