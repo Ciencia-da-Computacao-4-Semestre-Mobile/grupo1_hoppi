@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards, Request, Param } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { User } from './users.entity'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import type { AuthRequest } from '../auth/interfaces/auth-request.interface'
 
 @Controller('users')
 export class UsersController {
@@ -14,7 +15,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req: { user?: unknown }) {
+  getProfile(@Request() req: AuthRequest) {
     return req.user ?? null;
   }
 

@@ -1,5 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import type { AuthRequest } from "../interfaces/auth-request.interface";
+import type { JwtPayloadUser } from "../decorators/current-user.decorator";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -8,9 +10,9 @@ export class AuthGuard implements CanActivate {
     ) {}
     
     canActivate(context: ExecutionContext): boolean {
-        const request = context.switchToHttp().getRequest<{ headers: Record<string, string>, user?: unknown }>();
+        const request = context.switchToHttp().getRequest<AuthRequest>();
         const authHeader = request.headers['authorization'];
-        if (!authHeader) {
+        if (!authHeader || typeof authHeader !== 'string') {
             return false;
         }
         const token = this.extractToken(authHeader);
@@ -20,9 +22,8 @@ export class AuthGuard implements CanActivate {
         }
 
         try {
-            const decoded = this.jwtService.verify(token);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            request.user = decoded as unknown;
+            const decoded = this.jwtService.verify(token) as JwtPayloadUser;
+            request.user = decoded;
         } catch {
             return false;
         }
