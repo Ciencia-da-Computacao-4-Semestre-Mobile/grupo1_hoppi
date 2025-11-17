@@ -1,12 +1,20 @@
 import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Req, BadRequestException } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthLoginDto } from "./dto/auth.login.dto";
-import { RegisterDto } from "./dto/auth.register.dto";
 import { AuthGuard } from "./guards/auth.guard";
-import { ForgotPasswordDto } from "./dto/forgot-password.dto";
-import { VerifyCodeDto } from "./dto/verify-code.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
 import type { AuthRequest } from "./interfaces/auth-request.interface";
+import { ZodValidationPipe } from 'nestjs-zod';
+import { 
+  AuthLoginSchema, 
+  RegisterSchema, 
+  ForgotPasswordSchema, 
+  VerifyCodeSchema, 
+  ResetPasswordSchema,
+  type AuthLoginDTO,
+  type RegisterDTO,
+  type ForgotPasswordDTO,
+  type VerifyCodeDTO,
+  type ResetPasswordDTO
+} from "./schemas/auth.schema";
 
 @Controller("auth")
 export class AuthController {
@@ -17,13 +25,13 @@ export class AuthController {
     
     @Post("login")
     @HttpCode(HttpStatus.OK)
-    async login(@Body() loginDto: AuthLoginDto) {
+    async login(@Body(new ZodValidationPipe(AuthLoginSchema)) loginDto: AuthLoginDTO) {
         return this.authService.login(loginDto);
     }
 
     @Post("register")
     @HttpCode(HttpStatus.CREATED)
-    async register(@Body() registerDto: RegisterDto) {
+    async register(@Body(new ZodValidationPipe(RegisterSchema)) registerDto: RegisterDTO) {
         return this.authService.register(registerDto);
     }
 
@@ -31,19 +39,19 @@ export class AuthController {
     
     @Post("forgot-password")
     @HttpCode(HttpStatus.OK)
-    async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    async forgotPassword(@Body(new ZodValidationPipe(ForgotPasswordSchema)) dto: ForgotPasswordDTO) {
         return this.authService.forgotPassword(dto.email);
     }
 
     @Post("verify-reset-code")
     @HttpCode(HttpStatus.OK)
-    async verifyCode(@Body() dto: VerifyCodeDto) {
+    async verifyCode(@Body(new ZodValidationPipe(VerifyCodeSchema)) dto: VerifyCodeDTO) {
         return this.authService.verifyResetCode(dto.email, dto.code);
     }
 
     @Post("reset-password")
     @HttpCode(HttpStatus.OK)
-    async resetPassword(@Body() dto: ResetPasswordDto) {
+    async resetPassword(@Body(new ZodValidationPipe(ResetPasswordSchema)) dto: ResetPasswordDTO) {
         return this.authService.resetPassword(dto.email, dto.code, dto.newPassword);
     }
 
