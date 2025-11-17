@@ -2,6 +2,7 @@ package com.grupo1.hoppi.ui.screens.mainapp
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,10 +11,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,16 +25,20 @@ import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.ProfileImage
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
 
 @Composable
 fun FeedScreen(
     modifier: Modifier,
     postsViewModel: PostsViewModel,
+    userViewModel: UserViewModel,
     onPostClick: (postId: Int) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: () -> Unit,
 ) {
     val posts = postsViewModel.posts
+    val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
 
     Column(
         modifier = Modifier
@@ -49,6 +57,7 @@ fun FeedScreen(
         ) {
             items(posts) { post ->
                 PostCard(
+                    avatarIndex,
                     post = post,
                     onPostClick = onPostClick,
                     onLikeClick = { postsViewModel.toggleLike(post.id) }
@@ -101,6 +110,7 @@ fun FeedTopBarContent(
 
 @Composable
 fun PostCard(
+    avatarIndex: Int,
     post: Post,
     onPostClick: (postId: Int) -> Unit,
     onLikeClick: () -> Unit
@@ -113,12 +123,15 @@ fun PostCard(
             .padding(20.dp),
         verticalAlignment = Alignment.Top
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFB56576))
-        )
+        Box (
+            modifier = Modifier.border(0.5.dp, Black, CircleShape)
+        ) {
+            ProfileImage(
+                option = avatarIndex,
+                profileSize = 30.dp,
+                backgroundSize = 40.dp - 1.dp,
+            )
+        }
 
         Spacer(Modifier.width(20.dp))
 

@@ -2,6 +2,7 @@ package com.grupo1.hoppi.ui.screens.mainapp
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -40,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
 import androidx.navigation.NavController
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.ProfileImage
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
 
 data class DetailedPost(
     val id: Int,
@@ -98,9 +103,11 @@ object SelectedPostHolder {
 @Composable
 fun PostScreen(
     postId: Int?,
+    userViewModel: UserViewModel,
     navController: NavController,
     postsViewModel: PostsViewModel
 ) {
+    val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
     val commentList = remember { mutableStateListOf<Comment>().apply { addAll(mockComments) } }
     var showCommentBox by remember { mutableStateOf(false) }
     var newCommentText by remember { mutableStateOf("") }
@@ -125,6 +132,7 @@ fun PostScreen(
 
                     if (post != null) {
                         PostHeader(
+                            avatarIndex,
                             post = DetailedPost(
                                 id = post.id,
                                 username = post.username,
@@ -155,6 +163,7 @@ fun PostScreen(
 
                 items(commentList) { comment ->
                     CommentItem(
+                        avatarIndex,
                         comment = comment,
                         onLikeClick = { /* atualizar likes */ },
                         onDeleteComment = {
@@ -262,6 +271,7 @@ fun PostTopBar(navController: NavController) {
 
 @Composable
 fun PostHeader(
+    avatarIndex: Int,
     post: DetailedPost,
     postsViewModel: PostsViewModel,
     onLikeClick: () -> Unit,
@@ -280,12 +290,15 @@ fun PostHeader(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(post.avatarColor)
-                )
+                Box (
+                    modifier = Modifier.border(1.dp, Black, CircleShape)
+                ) {
+                    ProfileImage(
+                        option = avatarIndex,
+                        profileSize = 35.dp,
+                        backgroundSize = 50.dp - 2.dp,
+                    )
+                }
                 Spacer(Modifier.width(15.dp))
                 Column {
                     Text(
@@ -445,6 +458,7 @@ fun PostHeader(
 
 @Composable
 fun CommentItem(
+    avatarIndex: Int,
     comment: Comment,
     onLikeClick: () -> Unit,
     onDeleteComment: () -> Unit
@@ -459,12 +473,15 @@ fun CommentItem(
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(35.dp)
-                    .clip(CircleShape)
-                    .background(comment.avatarColor)
-            )
+            Box (
+                modifier = Modifier.border(0.5.dp, Black, CircleShape)
+            ) {
+                ProfileImage(
+                    option = avatarIndex,
+                    profileSize = 30.dp,
+                    backgroundSize = 40.dp - 1.dp,
+                )
+            }
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

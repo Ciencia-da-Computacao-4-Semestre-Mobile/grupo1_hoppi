@@ -1,5 +1,6 @@
 package com.grupo1.hoppi
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -14,7 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -25,6 +31,8 @@ import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UserViewModelFactory
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
@@ -98,12 +106,19 @@ fun HoppiApp() {
     }
 }
 
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
+
 @Composable
 fun MainApp(
     rootNavController: NavHostController,
     bottomNavController: NavHostController
 ) {
     val postsViewModel: PostsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
+    val context = LocalContext.current
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(context.dataStore)
+    )
 
     val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
 
@@ -152,6 +167,7 @@ fun MainApp(
                 ProfileScreen(
                     navController = bottomNavController,
                     postsViewModel = postsViewModel,
+                    userViewModel = userViewModel,
                     onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
                     onSettingsClick = {
                         rootNavController.navigate(Destinations.SETTINGS_FLOW + "/pass")
@@ -162,6 +178,7 @@ fun MainApp(
             composable(MainAppDestinations.CREATE_POST_ROUTE) {
                 CreatePostScreen(
                     navController = bottomNavController,
+                    userViewModel = userViewModel,
                     postsViewModel = postsViewModel
                 )
             }
@@ -188,6 +205,7 @@ fun MainApp(
                 CommunityDetailScreen(
                     navController = bottomNavController,
                     communityId = communityId,
+                    userViewModel = userViewModel,
                     postsViewModel = postsViewModel
                 )
             }
@@ -200,6 +218,7 @@ fun MainApp(
 
                 CreatePostCommunityScreen(
                     navController = bottomNavController,
+                    userViewModel = userViewModel,
                     postsViewModel = postsViewModel,
                     communityId = communityId
                 )
@@ -225,6 +244,7 @@ fun MainApp(
                 PostScreen(
                     postId = postId,
                     navController = bottomNavController,
+                    userViewModel = userViewModel,
                     postsViewModel = postsViewModel
                 )
             }

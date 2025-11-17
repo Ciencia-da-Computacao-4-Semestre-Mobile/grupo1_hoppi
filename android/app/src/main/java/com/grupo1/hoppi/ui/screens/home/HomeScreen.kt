@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.grupo1.hoppi.dataStore
 import com.grupo1.hoppi.ui.screens.mainapp.FeedScreen
 
 object MainAppDestinations {
@@ -26,11 +29,16 @@ fun HomeScreen(
     bottomNavController: NavHostController,
     postsViewModel: PostsViewModel
 ) {
+    val context = LocalContext.current
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(context.dataStore)
+    )
 
     Scaffold() { paddingValues ->
         FeedScreen(
             postsViewModel = postsViewModel,
             modifier = Modifier.padding(paddingValues),
+            userViewModel = userViewModel,
             onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
             onNotificationsClick = { bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE) },
             onProfileClick = { bottomNavController.navigate(MainAppDestinations.PROFILE_ROUTE) }

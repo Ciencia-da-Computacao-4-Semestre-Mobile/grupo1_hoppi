@@ -34,12 +34,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.home.saveProfileAvatar
 
 val profileAvatars = listOf(
     R.drawable.profile1,
@@ -55,7 +57,7 @@ val profileAvatars = listOf(
 fun SignUpStep2Screen(
     onFinish: () -> Unit
 ) {
-    var selectedAvatarIndex by remember { mutableStateOf(-1) }
+    var selectedAvatarIndex by remember { mutableStateOf(1) }
 
     val gradientColors = listOf(
         Color(0xFFEC8445),
@@ -66,6 +68,8 @@ fun SignUpStep2Screen(
     val verticalGradientBrush = Brush.verticalGradient(
         colors = gradientColors
     )
+
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -175,7 +179,10 @@ fun SignUpStep2Screen(
             Spacer(modifier = Modifier.height(50.dp))
 
             Button(
-                onClick = { onFinish() },
+                onClick = {
+                    saveProfileAvatar(context, selectedAvatarIndex)
+                    onFinish()
+                },
                 modifier = Modifier
                     .width(124.dp)
                     .testTag("FinishSignUp"),

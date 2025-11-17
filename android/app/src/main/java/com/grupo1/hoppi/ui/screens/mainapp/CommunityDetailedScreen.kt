@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +32,8 @@ import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.ProfileImage
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
 import kotlinx.coroutines.launch
 
 enum class CommunityAccessStatus {
@@ -44,9 +47,11 @@ enum class CommunityAccessStatus {
 fun CommunityDetailScreen(
     navController: NavController,
     communityId: Int,
+    userViewModel: UserViewModel,
     postsViewModel: PostsViewModel
 ) {
     val community = findCommunityById(communityId)
+    val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
 
     val currentCommunity = community?.copy(
         isPrivate = if (communityId == 10) true else community.isPrivate
@@ -206,7 +211,8 @@ fun CommunityDetailScreen(
                 accessStatus = accessStatus,
                 posts = posts,
                 navController = navController,
-                postsViewModel = postsViewModel
+                postsViewModel = postsViewModel,
+                avatarIndex
             )
         }
 
@@ -274,7 +280,8 @@ fun LazyListScope.CommunityDetailBodyItems(
     accessStatus: CommunityAccessStatus,
     posts: List<Post>,
     navController: NavController,
-    postsViewModel: PostsViewModel
+    postsViewModel: PostsViewModel,
+    avatarIndex: Int,
 ) {
     val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
             accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
@@ -283,6 +290,7 @@ fun LazyListScope.CommunityDetailBodyItems(
         items(posts) { post ->
 
             PostCardDetail(
+                avatarIndex,
                 post = post,
                 onPostClick = { postId ->
                     navController.navigate("main/post_open/$postId")
@@ -606,6 +614,7 @@ fun CommunityStat(count: String, label: String) {
 
 @Composable
 fun PostCardDetail(
+    avatarIndex: Int,
     post: Post,
     onPostClick: (Int) -> Unit,
     onLikeClick: () -> Unit
@@ -618,12 +627,15 @@ fun PostCardDetail(
         verticalAlignment = Alignment.Top
     ) {
 
-        Box(
-            modifier = Modifier
-                .size(35.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF3F51B5))
-        )
+        Box (
+            modifier = Modifier.border(0.5.dp, Black, CircleShape)
+        ) {
+            ProfileImage(
+                option = avatarIndex,
+                profileSize = 35.dp,
+                backgroundSize = 40.dp - 1.dp,
+            )
+        }
 
         Spacer(Modifier.width(20.dp))
 

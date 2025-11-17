@@ -18,13 +18,13 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Path
@@ -38,6 +38,8 @@ import androidx.navigation.NavController
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.ProfileImage
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
 
 val ProfileGray = Color(0xFFDBD8D6)
 val Pink = Color(0xFFA4485F)
@@ -49,10 +51,12 @@ val LightGreyText = Color(0xFFA6A6A6)
 fun ProfileScreen(
     navController: NavController,
     postsViewModel: PostsViewModel,
+    userViewModel: UserViewModel,
     onPostClick: (postId: Int) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val posts = postsViewModel.getUserPosts("Fulano de Tal")
+    val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
 
     LazyColumn(
         modifier = Modifier
@@ -61,12 +65,13 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         item {
-            ProfileHeaderContent(navController, onSettingsClick)
+            ProfileHeaderContent(avatarIndex, navController, onSettingsClick)
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
 
         items(posts) { post ->
             ProfilePostCard(
+                avatarIndex,
                 post = post,
                 onPostClick = onPostClick,
                 onLikeClick = { postsViewModel.toggleLike(post.id) }
@@ -77,7 +82,7 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileHeaderContent(navController: NavController, onSettingsClick: () -> Unit) {
+fun ProfileHeaderContent(avatarIndex: Int, navController: NavController, onSettingsClick: () -> Unit) {
     val headerHeight = 230.dp
     val profileSize = 140.dp
 
@@ -152,24 +157,21 @@ fun ProfileHeaderContent(navController: NavController, onSettingsClick: () -> Un
             }
         }
 
-        Box(
+          Box(
             modifier = Modifier
                 .size(230.dp)
                 .align(Alignment.BottomCenter)
                 .offset(y = profileSize / 2f)
                 .background(Color.White, CircleShape)
                 .padding(25.dp)
-                .border(3.dp, Black, CircleShape)
-                .background(ProfileGray, CircleShape),
+                .border(3.dp, Black, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile5),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(profileSize - 12.dp)
-                    .clip(CircleShape)
-            )
+              ProfileImage(
+                  option = avatarIndex,
+                  profileSize = profileSize - 12.dp,
+                  backgroundSize = 230.dp - 6.dp,
+              )
         }
     }
 
@@ -222,10 +224,12 @@ fun ProfileStat(count: String, label: String) {
 
 @Composable
 fun ProfilePostCard(
+    avatarIndex: Int,
     post: Post,
     onPostClick: (postId: Int) -> Unit,
     onLikeClick: () -> Unit
 ) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,12 +238,15 @@ fun ProfilePostCard(
             .padding(20.dp),
         verticalAlignment = Alignment.Top
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Pink)
-        )
+        Box (
+            modifier = Modifier.border(0.5.dp, Black, CircleShape)
+        ) {
+            ProfileImage(
+                option = avatarIndex,
+                profileSize = 35.dp,
+                backgroundSize = 40.dp - 1.dp,
+            )
+        }
 
         Spacer(Modifier.width(20.dp))
 

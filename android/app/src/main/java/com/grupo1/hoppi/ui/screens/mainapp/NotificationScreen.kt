@@ -164,13 +164,6 @@ fun NotificationRow(
             .background(Color.White),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(35.dp)
-                .clip(CircleShape)
-                .background(avatarColor)
-        )
-
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {

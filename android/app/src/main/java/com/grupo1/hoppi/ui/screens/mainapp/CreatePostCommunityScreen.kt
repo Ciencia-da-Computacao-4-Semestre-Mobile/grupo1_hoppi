@@ -5,8 +5,10 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -20,6 +22,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -29,13 +32,17 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.ProfileImage
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
 
 @Composable
 fun CreatePostCommunityScreen(
     navController: NavController,
+    userViewModel: UserViewModel,
     postsViewModel: PostsViewModel,
     communityId: Int
 ) {
+    val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
     var postText by remember { mutableStateOf("") }
     var selectedTag by remember { mutableStateOf<TagItem?>(null) }
     var showMenuTags by remember { mutableStateOf(false) }
@@ -93,11 +100,15 @@ fun CreatePostCommunityScreen(
                         .weight(1f),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .background(Rosa, RoundedCornerShape(25.dp))
-                    )
+                    Box (
+                        modifier = Modifier.border(1.dp, Black, CircleShape)
+                    ) {
+                        ProfileImage(
+                            option = avatarIndex,
+                            profileSize = 30.dp,
+                            backgroundSize = 50.dp - 2.dp,
+                        )
+                    }
                     Spacer(modifier = Modifier.width(10.dp))
 
                     BasicTextField(
