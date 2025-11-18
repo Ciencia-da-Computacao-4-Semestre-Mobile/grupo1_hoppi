@@ -22,6 +22,7 @@ export class AuthGuard implements CanActivate {
         }
 
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             const decoded = this.jwtService.verify(token) as JwtPayloadUser;
             request.user = decoded;
         } catch {

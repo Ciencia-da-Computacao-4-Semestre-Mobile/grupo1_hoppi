@@ -3,8 +3,22 @@ import { z } from 'zod'
 // regex de validação para a o birth_date
 const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de data inválido. Formato esperado: YYYY-MM-DD.')
 
+const isMinimumAge = (birthDateString: string, minAge: number = 16): boolean => {
+    const today = new Date()
+    const birthDate = new Date(birthDateString)
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDifference = today.getMonth() - birthDate.getMonth()
+
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        age--
+    }
+    return age >= minAge
+}
+
+
 export const UserBaseSchema = z.object({
   username: z.string()
+    .trim()
     .min(3, { message: "O nome de usuário deve ter pelo menos 3 caracteres." })
     .max(30, { message: "O nome de usuário não deve ter mais que 30 caracteres." }),
     
@@ -15,8 +29,11 @@ export const UserBaseSchema = z.object({
   avatar_key: z.string()
     .default('avatar_1'),
 
-  email: z.email({ message: "Formato de e-mail inválido." }),
-  birth_date: DateStringSchema,
+  email: z.email({ message: "Formato de e-mail inválido." }).trim(),
+  birth_date: DateStringSchema.refine((val) => isMinimumAge(val), {
+    message: "O usuário deve ter no mínimo 16 anos.",
+    path: ["birth_date"]
+  }),
 
   institution: z.string()
     .min(3, { message: "O nome da instituição deve ter ao menos 3 caracteres." })
@@ -44,11 +61,23 @@ export type UpdateUserDTO = z.infer<typeof UpdateUserSchema>
 
 
 export const LoginSchema = z.object({
-  email: z.email().min(1, "E-mail é um campo obrigatório."),
+  email: z.email().trim().min(1, "E-mail é um campo obrigatório."),
   password: z.string().min(1, "Senha é um campo obrigatório."),
 })
 
 export type LoginDTO = z.infer<typeof LoginSchema>
+
+
+//buscar usuarios
+// export const UserLookupSchema = z.object({
+//     email: z.email().trim().optional(), 
+//     username: z.string().trim().min(3).max(30).optional(),
+// }).refine(data => data.email || data.username, {
+//     message: "É necessário fornecer um e-mail ou um nome de usuário.",
+//     path: ['email', 'username']
+// })
+
+// export type UserLookupDTO = z.infer<typeof UserLookupSchema>
 
 
 export const UpdatePasswordSchema = z.object({

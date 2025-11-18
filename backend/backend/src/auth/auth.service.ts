@@ -94,7 +94,6 @@ export class AuthService {
         const user = await this.userRepository.findOne({ where: { email } });
         
         if (!user) {
-            // Por segurança, não revela se o email existe ou não
             return { 
                 message: 'Se o e-mail existir, um código foi enviado.',
                 canProceed: false 
@@ -122,7 +121,6 @@ export class AuthService {
         });
         await this.passwordResetRepository.save(passwordReset);
 
-        // Envia o e-mail
         await this.emailService.sendPasswordResetCode(email, code);
 
         return { 
