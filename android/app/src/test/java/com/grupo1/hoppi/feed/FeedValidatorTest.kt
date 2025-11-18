@@ -1,48 +1,60 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
 import com.grupo1.hoppi.ui.screens.home.Post
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class FeedValidatorTest {
 
-    private val samplePosts = listOf(
-        Post(id = 1, username = "Caio", content = "Post de teste", isLiked = false),
-        Post(id = 2, username = "Benson", content = "Outro post", isLiked = true)
-    )
-
     @Test
-    fun `validatePosts retorna true para posts válidos`() {
-        val result = FeedValidator.validatePosts(samplePosts)
-        assertTrue(result)
+    fun testHasPosts() {
+        val posts = listOf(
+            Post(
+                id = 1,
+                username = "UserA",
+                handle = "@usera",
+                content = "Post A"
+            ),
+            Post(
+                id = 2,
+                username = "UserB",
+                handle = "@userb",
+                content = "Post B"
+            )
+        )
+        assertTrue(FeedValidator.hasPosts(posts))
+        assertFalse(FeedValidator.hasPosts(emptyList()))
     }
 
     @Test
-    fun `validatePosts retorna false para lista vazia`() {
-        val result = FeedValidator.validatePosts(emptyList())
-        assertFalse(result)
+    fun testIsPostLiked() {
+        val post = Post(
+            id = 1,
+            username = "UserA",
+            handle = "@usera",
+            content = "Post A",
+            isLiked = true
+        )
+        assertTrue(FeedValidator.isPostLiked(post))
     }
 
     @Test
-    fun `validatePosts retorna false se houver campos vazios`() {
-        val invalidPosts = listOf(Post(id = 1, username = "", content = "", isLiked = false))
-        val result = FeedValidator.validatePosts(invalidPosts)
-        assertFalse(result)
-    }
+    fun testToggleLike() {
+        val post = Post(
+            id = 1,
+            username = "UserA",
+            handle = "@usera",
+            content = "Post A",
+            likes = 3,
+            isLiked = false
+        )
 
-    @Test
-    fun `toggleLike inverte o estado de curtida corretamente`() {
-        val updatedPosts = FeedValidator.toggleLike(samplePosts, 1)
-        val toggledPost = updatedPosts.first { it.id == 1 }
-        assertTrue(toggledPost.isLiked)
-    }
+        val liked = FeedValidator.toggleLike(post)
+        assertTrue(liked.isLiked)
+        assertEquals(4, liked.likes)
 
-    @Test
-    fun `toggleLike não altera outros posts`() {
-        val updatedPosts = FeedValidator.toggleLike(samplePosts, 1)
-        val untouchedPost = updatedPosts.first { it.id == 2 }
-        assertEquals(true, untouchedPost.isLiked)
+        val unliked = FeedValidator.toggleLike(liked)
+        assertFalse(unliked.isLiked)
+        assertEquals(3, unliked.likes)
     }
 }

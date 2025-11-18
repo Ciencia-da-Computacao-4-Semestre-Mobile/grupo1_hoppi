@@ -93,7 +93,7 @@ fun HoppiApp() {
             )
         }
 
-        composable("${Destinations.SETTINGS_FLOW}/{pass}") {
+        composable(Destinations.SETTINGS_FLOW) {
             SettingsNavGraph(
                 rootNavController = rootNavController,
                 onLogout = {
@@ -170,7 +170,7 @@ fun MainApp(
                     userViewModel = userViewModel,
                     onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
                     onSettingsClick = {
-                        rootNavController.navigate(Destinations.SETTINGS_FLOW + "/pass")
+                        rootNavController.navigate(Destinations.SETTINGS_FLOW)
                     }
                 )
             }

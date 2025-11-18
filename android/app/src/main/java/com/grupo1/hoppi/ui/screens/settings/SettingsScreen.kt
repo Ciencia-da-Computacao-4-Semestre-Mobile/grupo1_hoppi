@@ -4,20 +4,29 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.grupo1.hoppi.R
 
 val HoppiOrange = Color(0xFFEC8445)
@@ -34,6 +43,8 @@ fun SettingsScreen(
     onLogoutClick: () -> Unit,
     onBack: () -> Unit
 ) {
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -47,7 +58,17 @@ fun SettingsScreen(
             onChangePasswordClick = onChangePasswordClick,
             onPrivacyPolicyClick = onPrivacyPolicyClick,
             onAboutUsClick = onAboutUsClick,
-            onLogoutClick = onLogoutClick
+            onLogoutClick = { showLogoutDialog = true }
+        )
+    }
+
+    if (showLogoutDialog) {
+        LogoutConfirmationDialog(
+            onConfirmLogout = {
+                showLogoutDialog = false
+                onLogoutClick()
+            },
+            onCancel = { showLogoutDialog = false }
         )
     }
 }
@@ -195,5 +216,80 @@ fun SettingItem(
             contentDescription = "Ir para ${title}",
             tint = Color.LightGray
         )
+    }
+}
+
+@Composable
+fun LogoutConfirmationDialog(
+    onConfirmLogout: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onCancel,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.White,
+            shadowElevation = 8.dp,
+            modifier = Modifier.width(350.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(vertical = 20.dp, horizontal = 30.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Tem certeza que deseja sair?",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontSize = 16.sp
+                    ),
+                    color = Color(0xFF000000),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onConfirmLogout,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = HoppiOrange
+                        ),
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(horizontal = 30.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                            .testTag("ConfirmLogoutButton")
+                    ) {
+                        Text(
+                            "Sair", color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                            )
+                    }
+
+                    Button(
+                        onClick = onCancel,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFDBDBDB),
+                            contentColor = Color(0xFF000000)
+                        ),
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(horizontal = 30.dp, vertical = 8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            "Cancelar", color = Color(0xFF000000),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+        }
     }
 }

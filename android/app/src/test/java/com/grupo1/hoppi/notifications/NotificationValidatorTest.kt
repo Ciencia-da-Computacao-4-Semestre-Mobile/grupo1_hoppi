@@ -8,34 +8,61 @@ import org.junit.Test
 class NotificationValidatorTest {
 
     @Test
-    fun `valida notificacao com dados corretos`() {
-        val item = NotificationItem(1, "Teste", "1 dia", NotificationType.LIKE)
+    fun validNotification_returnsTrue() {
+        val item = NotificationItem(
+            id = 1,
+            text = "Mensagem",
+            timeAgo = "2h",
+            type = NotificationType.LIKE
+        )
         assertTrue(NotificationValidator.isValidNotification(item))
     }
 
     @Test
-    fun `recusa notificacao com id invalido`() {
-        val item = NotificationItem(0, "Teste", "1 dia", NotificationType.LIKE)
+    fun nullNotification_returnsFalse() {
+        assertFalse(NotificationValidator.isValidNotification(null))
+    }
+
+    @Test
+    fun blankText_returnsFalse() {
+        val item = NotificationItem(
+            id = 10,
+            text = "",
+            timeAgo = "1d",
+            type = NotificationType.COMMENT
+        )
         assertFalse(NotificationValidator.isValidNotification(item))
     }
 
     @Test
-    fun `recusa notificacao com texto vazio`() {
-        val item = NotificationItem(1, "", "1 dia", NotificationType.LIKE)
+    fun blankTime_returnsFalse() {
+        val item = NotificationItem(
+            id = 10,
+            text = "Comentou algo",
+            timeAgo = "",
+            type = NotificationType.COMMENT
+        )
         assertFalse(NotificationValidator.isValidNotification(item))
     }
 
     @Test
-    fun `recusa notificacao com tempo vazio`() {
-        val item = NotificationItem(1, "Teste", "", NotificationType.LIKE)
+    fun negativeId_returnsFalse() {
+        val item = NotificationItem(
+            id = -1,
+            text = "Ok",
+            timeAgo = "1d",
+            type = NotificationType.NEW_FOLLOWER
+        )
         assertFalse(NotificationValidator.isValidNotification(item))
     }
 
     @Test
-    fun `mostra acoes somente para follow request`() {
-        val follow = NotificationItem(1, "pediu", "agora", NotificationType.FOLLOW_REQUEST, true)
-        val like = NotificationItem(2, "curtiu", "agora", NotificationType.LIKE)
-        assertTrue(NotificationValidator.shouldShowActions(follow))
-        assertFalse(NotificationValidator.shouldShowActions(like))
+    fun followRequest_canShowActions() {
+        assertTrue(NotificationValidator.canShowActions(NotificationType.FOLLOW_REQUEST))
+    }
+
+    @Test
+    fun like_cannotShowActions() {
+        assertFalse(NotificationValidator.canShowActions(NotificationType.LIKE))
     }
 }

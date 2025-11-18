@@ -1,57 +1,68 @@
 package com.grupo1.hoppi.profile
 
 import com.grupo1.hoppi.ui.screens.home.Post
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class ProfileValidatorTest {
 
-    private val validUsername = "@fulan.tal"
-    private val validName = "Fulano de Tal"
-    private val validBio = "Texto de bio de teste"
-
-    private val samplePosts = listOf(
-        Post(id = 1, username = "Caio", content = "Primeiro post", isLiked = false),
-        Post(id = 2, username = "Benson", content = "Segundo post", isLiked = true)
-    )
-
     @Test
-    fun `validateProfile retorna true para perfil válido`() {
-        val result = ProfileValidator.validateProfile(validUsername, validName, validBio)
-        assertTrue(result)
+    fun testHasUserPosts() {
+        val posts = listOf(
+            Post(
+                id = 1,
+                username = "UserOne",
+                handle = "@userone",
+                content = "Hello World"
+            )
+        )
+        assertTrue(ProfileValidator.hasUserPosts(posts))
+        assertFalse(ProfileValidator.hasUserPosts(emptyList()))
     }
 
     @Test
-    fun `validateProfile retorna false se houver campos vazios`() {
-        val result = ProfileValidator.validateProfile("", validName, validBio)
-        assertFalse(result)
+    fun testIsPostLiked() {
+        val post = Post(
+            id = 2,
+            username = "UserOne",
+            handle = "@userone",
+            content = "Test Content",
+            isLiked = true
+        )
+        assertTrue(ProfileValidator.isPostLiked(post))
     }
 
     @Test
-    fun `validatePosts retorna true para posts válidos`() {
-        val result = ProfileValidator.validatePosts(samplePosts)
-        assertTrue(result)
+    fun testToggleLike() {
+        val post = Post(
+            id = 3,
+            username = "UserTwo",
+            handle = "@usertwo",
+            content = "Sample",
+            likes = 2,
+            isLiked = false
+        )
+
+        val liked = ProfileValidator.toggleLike(post)
+        assertTrue(liked.isLiked)
+        assertEquals(3, liked.likes)
+
+        val unliked = ProfileValidator.toggleLike(liked)
+        assertFalse(unliked.isLiked)
+        assertEquals(2, unliked.likes)
     }
 
     @Test
-    fun `validatePosts retorna false para lista vazia`() {
-        val result = ProfileValidator.validatePosts(emptyList())
-        assertFalse(result)
-    }
+    fun testFilterByUser() {
+        val posts = listOf(
+            Post(1, "UserOne", "@userone", "Post 1"),
+            Post(2, "UserTwo", "@usertwo", "Post 2"),
+            Post(3, "UserOne", "@userone", "Post 3")
+        )
 
-    @Test
-    fun `toggleLike inverte corretamente o estado de curtida`() {
-        val updated = ProfileValidator.toggleLike(samplePosts, 1)
-        val toggledPost = updated.first { it.id == 1 }
-        assertTrue(toggledPost.isLiked)
-    }
+        val filtered = ProfileValidator.filterByUser(posts, "UserOne")
 
-    @Test
-    fun `toggleLike não altera outros posts`() {
-        val updated = ProfileValidator.toggleLike(samplePosts, 1)
-        val untouchedPost = updated.first { it.id == 2 }
-        assertEquals(true, untouchedPost.isLiked)
+        assertEquals(2, filtered.size)
+        assertTrue(filtered.all { it.username == "UserOne" })
     }
 }

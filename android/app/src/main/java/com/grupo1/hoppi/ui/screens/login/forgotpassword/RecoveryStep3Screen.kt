@@ -40,6 +40,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.components.login.LoginTextField
+import com.grupo1.hoppi.ui.components.login.PasswordTextField
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 
 @Composable
@@ -48,6 +49,7 @@ fun RecoveryStep3Screen(
 ) {
     var password by remember { mutableStateOf("") }
     var checkPassword by remember { mutableStateOf("") }
+    var visiblePassword by remember { mutableStateOf(false) }
 
     var showSuccessDialog by remember { mutableStateOf(false) }
 
@@ -156,12 +158,14 @@ fun RecoveryStep3Screen(
                     .padding(top = 30.dp, bottom = 10.dp)
             )
 
-            LoginTextField(
+            PasswordTextField(
                 label = "Digite sua senha",
                 placeholder = "Digite sua senha",
                 value = password,
                 onValueChange = { password = it },
                 leadingIcon = Icons.Filled.Lock,
+                visiblePassword = visiblePassword,
+                onToggleVisibility = { visiblePassword = !visiblePassword },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
@@ -215,12 +219,14 @@ fun RecoveryStep3Screen(
                     .padding(top = 20.dp, bottom = 10.dp)
             )
 
-            LoginTextField(
+            PasswordTextField(
                 label = "Digite sua senha",
                 placeholder = "Digite sua senha",
                 value = checkPassword,
                 onValueChange = { checkPassword = it },
                 leadingIcon = Icons.Filled.Lock,
+                visiblePassword = visiblePassword,
+                onToggleVisibility = { visiblePassword = !visiblePassword },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
 
@@ -239,10 +245,12 @@ fun RecoveryStep3Screen(
                 )
             ) {
                 Text(
-                    "Alterar Senha",
+                    "Alterar",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color(0xFF000000),
-                    modifier = Modifier.padding(vertical = 3.dp))
+                    modifier = Modifier.padding(vertical = 3.dp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

@@ -1,6 +1,5 @@
-package com.grupo1.hoppi.settings
-
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -54,6 +53,8 @@ class SettingsUITest {
         assert(aboutClicked)
 
         composeRule.onNodeWithText("Sair").performClick()
+
+        composeRule.onNodeWithTag("ConfirmLogoutButton").performClick()
         assert(logoutClicked)
     }
 }

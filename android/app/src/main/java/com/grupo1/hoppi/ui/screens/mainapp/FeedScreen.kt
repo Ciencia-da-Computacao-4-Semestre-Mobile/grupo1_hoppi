@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -176,6 +177,7 @@ fun PostCard(
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onLikeClick() }
+                        .testTag("like_icon")
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(post.likes.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))

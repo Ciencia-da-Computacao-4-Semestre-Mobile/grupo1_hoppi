@@ -3,23 +3,24 @@ package com.grupo1.hoppi.profile
 import com.grupo1.hoppi.ui.screens.home.Post
 
 object ProfileValidator {
-    fun validateProfile(username: String, name: String, bio: String): Boolean {
-        return username.isNotBlank() && name.isNotBlank() && bio.isNotBlank()
+
+    fun hasUserPosts(posts: List<Post>): Boolean {
+        return posts.isNotEmpty()
     }
 
-    fun validatePosts(posts: List<Post>): Boolean {
-        if (posts.isEmpty()) return false
-        return posts.all { post ->
-            post.id >= 0 &&
-                    post.username.isNotBlank() &&
-                    post.content.isNotBlank()
+    fun isPostLiked(post: Post): Boolean {
+        return post.isLiked
+    }
+
+    fun toggleLike(post: Post): Post {
+        return if (post.isLiked) {
+            post.copy(isLiked = false, likes = post.likes - 1)
+        } else {
+            post.copy(isLiked = true, likes = post.likes + 1)
         }
     }
 
-    fun toggleLike(posts: List<Post>, postId: Int): List<Post> {
-        return posts.map { post ->
-            if (post.id == postId) post.copy(isLiked = !post.isLiked)
-            else post
-        }
+    fun filterByUser(posts: List<Post>, username: String): List<Post> {
+        return posts.filter { it.username == username }
     }
 }

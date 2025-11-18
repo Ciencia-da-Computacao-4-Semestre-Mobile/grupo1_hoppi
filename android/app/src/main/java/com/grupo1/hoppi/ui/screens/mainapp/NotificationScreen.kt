@@ -67,9 +67,10 @@ val mockNotifications = listOf(
     ),
     NotificationItem(
         2,
-        "Comunidade de Estudantes aceitou sua solicitação",
+        "pediu para seguir sua comunidade",
         "1 sem",
-        NotificationType.ACCEPTED
+        NotificationType.FOLLOW_REQUEST,
+        true
     ),
     NotificationItem(3, "Curtiu seu post.", "1 sem", NotificationType.LIKE),
     NotificationItem(4, "Curtiu seu post.", "2 sem", NotificationType.LIKE),

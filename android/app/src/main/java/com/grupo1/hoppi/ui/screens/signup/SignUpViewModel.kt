@@ -11,12 +11,14 @@ open class SignUpViewModel : ViewModel() {
     val state: StateFlow<SignUpState> = _state
 
     private fun updateButtonState(currentState: SignUpState) {
-        val isEnabled = currentState.name.isNotEmpty() &&
-                currentState.birthDate.isNotEmpty() &&
-                currentState.institution.isNotEmpty() &&
-                currentState.email.isNotEmpty() &&
-                currentState.password.isNotEmpty() &&
-                currentState.acceptedTerms
+        val isEnabled = SignUpValidator.allFieldsValid(
+            name = currentState.name,
+            birthDate = currentState.birthDate,
+            institution = currentState.institution,
+            email = currentState.email,
+            password = currentState.password,
+            acceptedTerms = currentState.acceptedTerms
+        )
 
         _state.update { it.copy(isButtonEnabled = isEnabled) }
     }

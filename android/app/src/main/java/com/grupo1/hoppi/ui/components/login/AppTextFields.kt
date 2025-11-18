@@ -119,6 +119,7 @@ fun PasswordTextField(
     leadingIcon: ImageVector,
     visiblePassword: Boolean,
     onToggleVisibility: () -> Unit,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     OutlinedTextField(
         value = value,

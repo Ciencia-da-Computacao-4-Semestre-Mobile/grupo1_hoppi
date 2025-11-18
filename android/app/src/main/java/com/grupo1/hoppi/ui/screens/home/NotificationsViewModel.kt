@@ -27,4 +27,10 @@ class NotificationsViewModel : ViewModel() {
     fun denyRequest(id: Int) {
         _notifications.removeAll { it.id == id }
     }
+
+    fun setNotificationsForTest(items: List<NotificationItem>) {
+        _notifications.clear()
+        _notifications.addAll(items)
+    }
+
 }

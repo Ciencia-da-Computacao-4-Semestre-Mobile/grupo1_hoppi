@@ -1,15 +1,17 @@
 package com.grupo1.hoppi.mainapp
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.*
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.grupo1.hoppi.ui.screens.mainapp.CreatePostScreen
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.mainapp.CreatePostScreen
+import androidx.navigation.compose.rememberNavController
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.navigation.compose.rememberNavController
-import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+
 
 @RunWith(AndroidJUnit4::class)
 class CreatePostUITest {
@@ -17,13 +19,18 @@ class CreatePostUITest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
+    private val fakeDataStore = FakeDataStore()
+    private val userViewModel = UserViewModel(fakeDataStore)
+
     @Test
     fun createPostScreen_displaysAndPublishesPost() {
-        val viewModel = PostsViewModel()
+        val postsViewModel = PostsViewModel()
+
         composeTestRule.setContent {
             CreatePostScreen(
                 navController = rememberNavController(),
-                postsViewModel = viewModel
+                postsViewModel = postsViewModel,
+                userViewModel = userViewModel
             )
         }
 
@@ -43,24 +50,23 @@ class CreatePostUITest {
         composeTestRule.onNodeWithText("Publicar", useUnmergedTree = true)
             .performClick()
 
-        assert(viewModel.posts.any { it.content == "Novo post de teste" })
+        assert(postsViewModel.posts.any { it.content == "Novo post de teste" && it.tag == "Estudo" })
     }
 
     @Test
     fun createPostScreen_canDismissTag() {
-        val viewModel = PostsViewModel()
+        val postsViewModel = PostsViewModel()
+
         composeTestRule.setContent {
             CreatePostScreen(
                 navController = rememberNavController(),
-                postsViewModel = viewModel
+                postsViewModel = postsViewModel,
+                userViewModel = userViewModel
             )
         }
 
-        composeTestRule.onNodeWithText("Adicionar tag", useUnmergedTree = true)
-            .performClick()
-
-        composeTestRule.onNodeWithText("Venda", useUnmergedTree = true)
-            .performClick()
+        composeTestRule.onNodeWithText("Adicionar tag", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithText("Venda", useUnmergedTree = true).performClick()
 
         composeTestRule.onNodeWithContentDescription("Remover Tag", useUnmergedTree = true)
             .performClick()
@@ -74,7 +80,8 @@ class CreatePostUITest {
         composeTestRule.setContent {
             CreatePostScreen(
                 navController = rememberNavController(),
-                postsViewModel = PostsViewModel()
+                postsViewModel = PostsViewModel(),
+                userViewModel = userViewModel
             )
         }
 

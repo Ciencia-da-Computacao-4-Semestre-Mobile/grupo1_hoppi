@@ -40,7 +40,7 @@ class ForgotPasswordFlowTest {
         passwordFields[0].performTextInput("Senha123")
         passwordFields[1].performTextInput("Senha123")
 
-        composeTestRule.onNodeWithText("Alterar Senha").performClick()
+        composeTestRule.onNodeWithText("Alterar").performClick()
         composeTestRule.onNodeWithText("Voltar").performClick()
 
         assert(backToLoginCalled)
