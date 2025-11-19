@@ -2,10 +2,11 @@ import { z } from 'zod'
 import * as bcrypt from 'bcryptjs'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { IsNull, Repository } from 'typeorm'
 import { User } from './users.entity'
-import { CreateUserDTO, CreateUserSchema, UpdatePasswordDTO, UpdatePasswordSchema, UpdateUserDTO, UpdateUserSchema } from './schemas/user.schema'
-import { Post } from 'src/posts/posts.entity'
+import { CreateUserDTO, CreateUserSchema, mapToPublicUserDTO, UpdatePasswordDTO, UpdatePasswordSchema, UpdateUserDTO, UpdateUserSchema } from './schemas/user.schema'
+import { Post } from '../posts/posts.entity'
+import { SanitizedPost, sanitizePostsArray } from 'src/common/utils/post-sanitizer.util'
 
 @Injectable()
 export class UsersService {
@@ -15,11 +16,11 @@ export class UsersService {
 
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>
-  ) {}
+  ) { }
 
-  async create(rawData: any){
+  async create(rawData: any) {
     const parsed = CreateUserSchema.safeParse(rawData)
-    if(!parsed.success){
+    if (!parsed.success) {
       throw new BadRequestException(z.treeifyError(parsed.error))
     }
 
@@ -28,12 +29,12 @@ export class UsersService {
     const exists = await this.usersRepository.findOne({
       where: [{ email: data.email }, { username: data.username }]
     })
-    if(exists){
+    if (exists) {
       throw new BadRequestException('E-mail or username already in use.')
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10)
-    
+
     const user = this.usersRepository.create({
       ...data,
       password_hash: passwordHash,
@@ -44,30 +45,30 @@ export class UsersService {
     return { id: user.id, username: user.username }
   }
 
-  async getByID(id: string){
+  async getByID(id: string) {
     const user = await this.usersRepository.findOne({
       where: { id }
     })
-    if(!user){
+    if (!user) {
       throw new NotFoundException('User not found.')
     }
 
     return user
   }
 
-  async getByUsername(username: string){
+  async getByUsername(username: string) {
     const user = await this.usersRepository.findOne({
       where: { username },
-      select: [ 'id', 'username', 'display_name', 'avatar_key', 'institution' ]
+      select: ['id', 'username', 'display_name', 'avatar_key', 'institution']
     })
-    if(!user){
+    if (!user) {
       throw new NotFoundException('User not found.')
     }
   }
 
-  async update(id: string, rawData: any){
+  async update(id: string, rawData: any) {
     const parsed = UpdateUserSchema.safeParse(rawData)
-    if(!parsed.success){
+    if (!parsed.success) {
       throw new BadRequestException(z.treeifyError(parsed.error))
     }
 
@@ -77,9 +78,9 @@ export class UsersService {
     return this.getByID(id)
   }
 
-  async updatePassword(id: string, rawData: any){
+  async updatePassword(id: string, rawData: any) {
     const parsed = UpdatePasswordSchema.safeParse(rawData)
-    if(!parsed.success){
+    if (!parsed.success) {
       throw new BadRequestException(z.treeifyError(parsed.error))
     }
 
@@ -88,7 +89,7 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { id }
     })
-    if(!user) {
+    if (!user) {
       throw new NotFoundException('User not found')
     }
 
@@ -96,7 +97,7 @@ export class UsersService {
       data.current_password,
       user.password_hash
     )
-    if(!valid){
+    if (!valid) {
       throw new BadRequestException('Current password incorrect.')
     }
 
@@ -106,17 +107,30 @@ export class UsersService {
     return { message: 'Password updated sucessfully.' }
   }
 
-  async suspend(id: string){
+  async suspend(id: string) {
     await this.usersRepository.update(id, { is_suspended: true })
     return { message: 'User suspended.' }
   }
 
-  async getUserPosts(userID: string) {
-    return this.postsRepository.find({
-      where: { author: { id: userID } },
-      relations: [ 'user' ],
-      order: { created_at: 'DESC' }
+  async getPostsByUser(userID: string): Promise<SanitizedPost[]> {
+    const posts = await this.postsRepository.find({
+        where: { 
+            author: { id: userID },
+            is_reply_to: IsNull()
+        },
+        relations: [
+            'author', 
+            'likes', 
+            'replies', 
+            'replies.author',
+            'postCount'
+        ], 
+        order: { 
+            created_at: 'DESC'
+        }
     })
+
+    return sanitizePostsArray(posts);
   }
 
   //Posts de comunidades dele

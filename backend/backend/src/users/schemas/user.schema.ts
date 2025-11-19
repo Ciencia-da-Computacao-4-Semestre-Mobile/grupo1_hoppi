@@ -1,18 +1,19 @@
 import { z } from 'zod'
+import { User } from '../users.entity'
 
 // regex de validação para a o birth_date
 const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de data inválido. Formato esperado: YYYY-MM-DD.')
 
 const isMinimumAge = (birthDateString: string, minAge: number = 16): boolean => {
-    const today = new Date()
-    const birthDate = new Date(birthDateString)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDifference = today.getMonth() - birthDate.getMonth()
+  const today = new Date()
+  const birthDate = new Date(birthDateString)
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const monthDifference = today.getMonth() - birthDate.getMonth()
 
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-        age--
-    }
-    return age >= minAge
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    age--
+  }
+  return age >= minAge
 }
 
 
@@ -21,11 +22,11 @@ export const UserBaseSchema = z.object({
     .trim()
     .min(3, { message: "O nome de usuário deve ter pelo menos 3 caracteres." })
     .max(30, { message: "O nome de usuário não deve ter mais que 30 caracteres." }),
-    
+
   display_name: z.string()
     .min(1, { message: "O nome de exibição não pode estar vazio." })
     .max(30, { message: "O nome de exibição não deve ter mais que 30 caracteres." }),
-    
+
   avatar_key: z.string()
     .default('avatar_1'),
 
@@ -51,11 +52,11 @@ export type CreateUserDTO = z.infer<typeof CreateUserSchema>
 
 export const UpdateUserSchema = UserBaseSchema
   .partial()
-  .omit({ 
+  .omit({
     // campos que terão endpoints de atualização separados ou não serão atualizados
     email: true,
     birth_date: true,
-})
+  })
 
 export type UpdateUserDTO = z.infer<typeof UpdateUserSchema>
 
@@ -83,13 +84,29 @@ export type LoginDTO = z.infer<typeof LoginSchema>
 export const UpdatePasswordSchema = z.object({
   current_password: z.string().min(8).max(100),
   new_password: z.string()
-  .min(8, "A senha deve ter pelo menos 8 caracteres.")
-  .max(100, "A senha não deve ter mais que 100 caracteres.")
+    .min(8, "A senha deve ter pelo menos 8 caracteres.")
+    .max(100, "A senha não deve ter mais que 100 caracteres.")
 })
 
-.refine((data) => data.new_password !== data.current_password, {
+  .refine((data) => data.new_password !== data.current_password, {
     message: "A nova senha deve ser diferente da senha atual.",
     path: ["new_password"],
-})
+  })
 
 export type UpdatePasswordDTO = z.infer<typeof UpdatePasswordSchema>
+
+export const PublicUserSchema = z.object({
+  id: z.string().uuid(),
+  username: z.string(),
+  display_name: z.string(),
+});
+
+export type PublicUserDTO = z.infer<typeof PublicUserSchema>;
+
+export function mapToPublicUserDTO(user: User): PublicUserDTO {
+    return {
+      id: user.id,
+      username: user.username,
+      display_name: user.display_name,
+    } as PublicUserDTO;
+}

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CommunityPost } from './entities/community-post.entity';
 import { User } from '../users/users.entity';
 import { CommunityMember } from './entities/community-member.entity';
+import { CreatePostDTO } from 'src/posts/schemas/post.schema';
 
 // REVISAR
 
@@ -18,7 +19,7 @@ export class CommunityPostsService {
 
     async createPost(
     communityId: number,
-        createPostDto: CreatePostDto,
+        createPostDto: CreatePostDTO,
         author: User
     ): Promise<CommunityPost> {
         // Verify membership and permissions

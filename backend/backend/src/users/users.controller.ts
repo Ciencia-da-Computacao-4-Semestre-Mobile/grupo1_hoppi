@@ -69,7 +69,7 @@ export class UsersController {
 
   @Get(':id/posts')
   async getUserPosts(@Param('id') id: string) {
-    return this.usersService.getUserPosts(id)
+    return this.usersService.getPostsByUser(id)
   }
 
   @Get(':id/likes')
