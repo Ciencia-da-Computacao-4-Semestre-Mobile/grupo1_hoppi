@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -179,7 +180,12 @@ fun CommunityDetailScreen(
                     shape = CircleShape,
                     containerColor = HoppiOrange
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Criar Post", tint = Color.White)
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Criar Post",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
                 }
             }
         },
@@ -339,6 +345,7 @@ fun CommunityDetailTopBar(
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     TopAppBar(
+        modifier = Modifier.testTag("community_topbar"),
         title = { },
         navigationIcon = {
             Box(modifier = Modifier.padding(top = 0.dp, start = 20.dp, end = 0.dp)) {
@@ -500,10 +507,14 @@ fun CommunityDetailHeader(
         ) {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
                     .clip(CircleShape)
-                    .background(LightBlue)
-            )
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_community),
+                    contentDescription = "Ícone comunidade",
+                    modifier = Modifier.size(80.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(

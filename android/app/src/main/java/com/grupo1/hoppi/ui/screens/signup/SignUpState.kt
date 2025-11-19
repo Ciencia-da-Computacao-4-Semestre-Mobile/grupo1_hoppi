@@ -2,6 +2,7 @@ package com.grupo1.hoppi.ui.screens.signup
 
 data class SignUpState(
     val name: String = "",
+    val username: String = "",
     val birthDate: String = "",
     val institution: String = "",
     val email: String = "",

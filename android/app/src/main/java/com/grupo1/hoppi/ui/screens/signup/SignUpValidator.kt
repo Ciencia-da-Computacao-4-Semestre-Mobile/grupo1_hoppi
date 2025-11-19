@@ -6,6 +6,18 @@ object SignUpValidator {
         return name.isNotBlank() && name.length >= 3
     }
 
+    fun isUsernameValid(username: String): Boolean {
+        if (username.isBlank() || username.length < 3) {
+            return false
+        }
+        if (username.length > 30) {
+            return false
+        }
+        val lowerCaseRegex = Regex("^[a-z0-9]+$")
+
+        return username.matches(lowerCaseRegex)
+    }
+
     fun isBirthDateValid(date: String): Boolean {
         return date.matches(Regex("\\d{1,2}/\\d{1,2}/\\d{4}"))
     }
@@ -27,6 +39,7 @@ object SignUpValidator {
 
     fun allFieldsValid(
         name: String,
+        username: String,
         birthDate: String,
         institution: String,
         email: String,
@@ -34,6 +47,7 @@ object SignUpValidator {
         acceptedTerms: Boolean
     ): Boolean {
         return isNameValid(name)
+                && isUsernameValid(username)
                 && isBirthDateValid(birthDate)
                 && isInstitutionValid(institution)
                 && isEmailValid(email)

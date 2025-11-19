@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -44,6 +45,7 @@ fun BottomNavBar(
     NavigationBar(
         containerColor = Color.White
     ) {
+        // Divider(color = Color(0xFF000000).copy(alpha = 0.5f), thickness = 1.dp)
         items.forEach { item ->
             val isSelected = currentRoute == item.route
 

@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,14 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
+import com.grupo1.hoppi.R
 
 @Composable
 fun CreateCommunityScreen(navController: NavController) {
@@ -34,7 +36,7 @@ fun CreateCommunityScreen(navController: NavController) {
     var selectedPrivacyOption by remember { mutableStateOf("Público") }
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = false
-    val isCreateEnabled = communityName.isNotBlank()
+    val isCreateEnabled = communityName.isNotBlank() && communityDescription.isNotBlank() && selectedPrivacyOption.isNotBlank()
     val postsViewModel: PostsViewModel = viewModel()
 
     DisposableEffect(systemUiController) {
@@ -55,22 +57,20 @@ fun CreateCommunityScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(horizontal = 20.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .clip(CircleShape)
-                    .background(LightBlue)
-                    .clickable { /* Handle add photo click */ },
+                    .clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Add Foto",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
+                Image(
+                    painter = painterResource(id = R.drawable.icon_community),
+                    contentDescription = "Ícone comunidades",
+                    modifier = Modifier
+                        .size(100.dp)
                 )
             }
 
@@ -88,23 +88,29 @@ fun CreateCommunityScreen(navController: NavController) {
             OutlinedTextField(
                 value = communityName,
                 onValueChange = { communityName = it },
-                label = { Text("Nome", color = GrayColor) },
+                label = { Text("Nome", color = Color(0xFF4C4B4B)) },
                 singleLine = true,
                 shape = RoundedCornerShape(30.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = HoppiOrange,
-                    unfocusedBorderColor = Color.Black.copy(alpha = 0.5f),
+                    unfocusedBorderColor = Color(0xFF000000).copy(alpha = 0.5f),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    cursorColor = HoppiOrange
+                    cursorColor = HoppiOrange,
+                    focusedPlaceholderColor = Color(0xFF4C4B4B),
+                    unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                    focusedLabelColor = Color(0xFF4C4B4B),
+                    unfocusedLabelColor = Color(0xFF4C4B4B),
+                    focusedTextColor = Color(0xFF000000),
+                    unfocusedTextColor = Color(0xFF000000)
                 )
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Descrição",
+                text = "Descrição *",
                 color = HoppiOrange,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
@@ -115,7 +121,7 @@ fun CreateCommunityScreen(navController: NavController) {
             OutlinedTextField(
                 value = communityDescription,
                 onValueChange = { communityDescription = it },
-                label = { Text("Descrição", color = GrayColor) },
+                label = { Text("Descrição", color = Color(0xFF4C4B4B)) },
                 minLines = 3,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
@@ -123,10 +129,16 @@ fun CreateCommunityScreen(navController: NavController) {
                     .height(100.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = HoppiOrange,
-                    unfocusedBorderColor = Color.Black.copy(alpha = 0.5f),
+                    unfocusedBorderColor = Color(0xFF000000).copy(alpha = 0.5f),
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    cursorColor = HoppiOrange
+                    cursorColor = HoppiOrange,
+                    focusedPlaceholderColor = Color(0xFF4C4B4B),
+                    unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                    focusedLabelColor = Color(0xFF4C4B4B),
+                    unfocusedLabelColor = Color(0xFF4C4B4B),
+                    focusedTextColor = Color(0xFF000000),
+                    unfocusedTextColor = Color(0xFF000000)
                 )
             )
 
@@ -159,15 +171,15 @@ fun CreateCommunityScreen(navController: NavController) {
                             Spacer(modifier = Modifier.width(0.dp))
 
                             when (selectedPrivacyOption) {
-                                "Público" -> Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color.Black)
-                                "Privado" -> Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color.Black)
+                                "Público" -> Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color(0xFF000000))
+                                "Privado" -> Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color(0xFF000000))
                             }
 
                             Spacer(modifier = Modifier.width(10.dp))
 
                             Text(
                                 text = selectedPrivacyOption,
-                                color = Color.Black,
+                                color = Color(0xFF000000),
                                 fontSize = 16.sp
                             )
                         }
@@ -179,14 +191,14 @@ fun CreateCommunityScreen(navController: NavController) {
                             Icon(
                                 Icons.Default.ArrowDropDown,
                                 contentDescription = "Dropdown Arrow",
-                                tint = Color.Black
+                                tint = Color(0xFF000000)
                             )
                             Spacer(modifier = Modifier.width(0.dp))
                         }
                     }
 
                     Divider(
-                        color = Color.Black.copy(alpha = 0.5f),
+                        color = Color(0xFF000000).copy(alpha = 0.5f),
                         thickness = 1.dp
                     )
                 }
@@ -202,9 +214,9 @@ fun CreateCommunityScreen(navController: NavController) {
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Public, contentDescription = "Public Icon")
+                                Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color(0xFF000000))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Público")
+                                Text("Público", color = Color(0xFF000000))
                             }
                         },
                         onClick = {
@@ -215,9 +227,9 @@ fun CreateCommunityScreen(navController: NavController) {
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.Lock, contentDescription = "Private Icon")
+                                Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color(0xFF000000))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Privado")
+                                Text("Privado", color = Color(0xFF000000))
                             }
                         },
                         onClick = {

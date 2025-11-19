@@ -20,12 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.R
 import kotlinx.coroutines.launch
@@ -42,7 +42,6 @@ fun CommunitiesScreen(navController: NavController) {
 
     val homeCommunities = AppCommunityManager.allCommunities.filter { AppCommunityManager.isFollowing(it.name) }
     val exploreCommunities = AppCommunityManager.allCommunities.filter { !AppCommunityManager.isFollowing(it.name) }
-
     val currentList = if (selectedTabIndex == 0) homeCommunities else exploreCommunities
 
     val filteredCommunities = if (!isSearchActive || searchText.isBlank()) {
@@ -89,12 +88,13 @@ fun CommunitiesScreen(navController: NavController) {
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
+                            modifier = Modifier.testTag("tab_$title"),
                             text = {
                                 Text(
                                     text = title,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontSize = 16.sp,
-                                    color = if (selectedTabIndex == index) HoppiOrange else Color.Gray
+                                    color = if (selectedTabIndex == index) HoppiOrange else Color(0xFF000000)
                                 )
                             }
                         )
@@ -208,12 +208,12 @@ fun CommunitiesTopBar(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = HoppiOrange,
                     unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                    focusedPlaceholderColor = Color(0xFF000000),
-                    unfocusedPlaceholderColor = Color(0xFF000000),
-                    focusedLabelColor = Color(0xFF000000),
-                    unfocusedLabelColor = Color(0xFF000000),
-                    focusedLeadingIconColor = Color(0xFF000000),
-                    unfocusedLeadingIconColor = Color(0xFF000000),
+                    focusedPlaceholderColor = Color(0xFF4C4B4B),
+                    unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                    focusedLabelColor = Color(0xFF4C4B4B),
+                    unfocusedLabelColor = Color(0xFF4C4B4B),
+                    focusedLeadingIconColor = Color(0xFF4C4B4B),
+                    unfocusedLeadingIconColor = Color(0xFF4C4B4B),
                     focusedTextColor = Color(0xFF000000),
                     unfocusedTextColor = Color(0xFF000000)
                 )
@@ -231,7 +231,9 @@ fun CommunityTabContent(
 ) {
     Spacer(modifier = Modifier.width(20.dp))
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("CommunityList"),
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(communities) { community ->
@@ -256,7 +258,8 @@ fun CommunityItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 5.dp)
-            .clickable(onClick = onCommunityClick),
+            .clickable(onClick = onCommunityClick)
+            .testTag("community_${community.name}"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = ItemCardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -269,10 +272,14 @@ fun CommunityItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(35.dp)
                     .clip(CircleShape)
-                    .background(community.iconColor)
-            )
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_community),
+                    contentDescription = "Ícone comunidade",
+                    modifier = Modifier.size(35.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.width(10.dp))
 
@@ -317,7 +324,9 @@ fun CommunityItem(
             val isFollowing = AppCommunityManager.isFollowing(community.name)
             IconButton(onClick = {
                 onFollowToggle(community.name)
-            }) {
+            },
+                modifier = Modifier.testTag("follow_${community.name}")
+            ) {
                 if (isFollowing) {
                     Icon(
                         imageVector = Icons.Default.Check,

@@ -70,14 +70,14 @@ class CreateCommunityValidatorTest {
     }
 
     @Test
-    fun `descricao nula é aceita`() {
+    fun `descricao vazia retorna false`() {
         val result = CommunityValidator.canCreate(
             name = "Comunidade Legal",
-            description = null,
+            description = "",
             privacy = "Público",
             creator = "UserX"
         )
-        assertTrue(result)
+        assertFalse(result)
     }
 
     @Test

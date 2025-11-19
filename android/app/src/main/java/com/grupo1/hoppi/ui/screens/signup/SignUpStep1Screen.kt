@@ -146,6 +146,26 @@ fun SignUpStep1Screen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
+                text = "Nome de Usuário *",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+                    .align(Alignment.Start)
+            )
+
+            LoginTextField(
+                label = "Digite seu nome de usuário",
+                placeholder = "Digite seu nome de usuário",
+                value = state.username,
+                onValueChange = viewModel::onUsernameChange,
+                leadingIcon = Icons.Filled.Person,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
                 text = "Data de Nascimento *",
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge,
@@ -197,8 +217,8 @@ fun SignUpStep1Screen(
             )
 
             LoginTextField(
-                label = "Digite seu email",
-                placeholder = "Digite seu email",
+                label = "Digite seu -",
+                placeholder = "Digite seu e-mail",
                 value = state.email,
                 onValueChange = viewModel::onEmailChange,
                 leadingIcon = Icons.Filled.Email,

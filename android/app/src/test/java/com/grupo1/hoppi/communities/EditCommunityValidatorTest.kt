@@ -78,36 +78,36 @@ class EditCommunityValidatorTest {
     }
 
     @Test
-    fun testDescriptionNullAllowed() {
+    fun testDescriptionNullFails() {
         val result = CommunityValidator.canEdit(
             original,
             "Nome Válido",
             null,
             "Público"
         )
-        assertTrue(result)
+        assertFalse(result)
     }
 
     @Test
-    fun testDescriptionEmptyAllowed() {
+    fun testDescriptionEmptyFails() {
         val result = CommunityValidator.canEdit(
             original,
             "Nome Válido",
             "",
             "Público"
         )
-        assertTrue(result)
+        assertFalse(result)
     }
 
     @Test
-    fun testDescriptionWhitespaceAllowed() {
+    fun testDescriptionWhitespaceFails() {
         val result = CommunityValidator.canEdit(
             original,
             "Nome Válido",
             "   ",
             "Público"
         )
-        assertTrue(result)
+        assertFalse(result)
     }
 
     @Test

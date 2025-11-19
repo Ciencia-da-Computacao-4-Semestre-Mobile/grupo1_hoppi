@@ -10,8 +10,7 @@ object CommunityValidator {
     }
 
     fun isValidDescription(description: String?): Boolean {
-        if (description == null) return true
-        return description.trim().length >= 0
+        return !description.isNullOrBlank()
     }
 
     fun isValidPrivacy(privacy: String?): Boolean {

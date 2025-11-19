@@ -13,6 +13,7 @@ open class SignUpViewModel : ViewModel() {
     private fun updateButtonState(currentState: SignUpState) {
         val isEnabled = SignUpValidator.allFieldsValid(
             name = currentState.name,
+            username = currentState.username,
             birthDate = currentState.birthDate,
             institution = currentState.institution,
             email = currentState.email,
@@ -26,6 +27,14 @@ open class SignUpViewModel : ViewModel() {
     fun onNameChange(name: String) {
         _state.update { currentState ->
             val newState = currentState.copy(name = name)
+            updateButtonState(newState)
+            newState
+        }
+    }
+
+    fun onUsernameChange(username: String) {
+        _state.update { currentState ->
+            val newState = currentState.copy(username = username)
             updateButtonState(newState)
             newState
         }

@@ -7,6 +7,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -124,7 +126,9 @@ fun MainApp(
 
     val hideBottomBar = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
             currentDestination == MainAppDestinations.CREATE_POST_ROUTE  ||
-            currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true
+            currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true ||
+            currentDestination == "${MainAppDestinations.EDIT_COMMUNITY_ROUTE}/{communityId}" ||
+            currentDestination == MainAppDestinations.CREATE_COMMUNITY_ROUTE
     val hideFab = currentDestination == MainAppDestinations.SEARCH_ROUTE ||
             currentDestination == MainAppDestinations.NOTIFICATIONS_ROUTE ||
             currentDestination == MainAppDestinations.COMMUNITY_ROUTE ||
@@ -132,7 +136,7 @@ fun MainApp(
             currentDestination == MainAppDestinations.POST_OPEN_ROUTE ||
             currentDestination == MainAppDestinations.COMMUNITY_DETAIL_ROUTE  ||
             currentDestination == MainAppDestinations.CREATE_COMMUNITY_ROUTE  ||
-            currentDestination == MainAppDestinations.EDIT_COMMUNITY_ROUTE  ||
+            currentDestination == "${MainAppDestinations.EDIT_COMMUNITY_ROUTE}/{communityId}"  ||
             currentDestination?.startsWith(MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE) == true
 
     Scaffold(
@@ -151,7 +155,12 @@ fun MainApp(
                     shape = CircleShape,
                     containerColor = Color(0xFFEC8445)
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Criar Post", tint = Color.White)
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Criar Post",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                        )
                 }
             }
         },

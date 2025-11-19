@@ -47,12 +47,12 @@ fun LoginTextField(
             cursorColor = Color.DarkGray,
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
-            focusedPlaceholderColor = Color(0xFF000000),
-            unfocusedPlaceholderColor = Color(0xFF000000),
-            focusedLabelColor = Color(0xFF000000),
-            unfocusedLabelColor = Color(0xFF000000),
-            focusedLeadingIconColor = Color(0xFF000000),
-            unfocusedLeadingIconColor = Color(0xFF000000),
+            focusedPlaceholderColor = Color(0xFF4C4B4B),
+            unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+            focusedLabelColor = Color(0xFF4C4B4B),
+            unfocusedLabelColor = Color(0xFF4C4B4B),
+            focusedLeadingIconColor = Color(0xFF4C4B4B),
+            unfocusedLeadingIconColor = Color(0xFF4C4B4B),
             focusedTextColor = Color(0xFF000000),
             unfocusedTextColor = Color(0xFF000000)
         ),
@@ -92,12 +92,12 @@ fun DateTextField(
                 cursorColor = Color.DarkGray,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
-                focusedPlaceholderColor = Color(0xFF000000),
-                unfocusedPlaceholderColor = Color(0xFF000000),
-                focusedLabelColor = Color(0xFF000000),
-                unfocusedLabelColor = Color(0xFF000000),
-                focusedLeadingIconColor = Color(0xFF000000),
-                unfocusedLeadingIconColor = Color(0xFF000000),
+                focusedPlaceholderColor = Color(0xFF4C4B4B),
+                unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                focusedLabelColor = Color(0xFF4C4B4B),
+                unfocusedLabelColor = Color(0xFF4C4B4B),
+                focusedLeadingIconColor = Color(0xFF4C4B4B),
+                unfocusedLeadingIconColor = Color(0xFF4C4B4B),
                 focusedTextColor = Color(0xFF000000),
                 unfocusedTextColor = Color(0xFF000000)
             )
@@ -132,7 +132,7 @@ fun PasswordTextField(
                 Icon(
                     imageVector = if (visiblePassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                     contentDescription = if (visiblePassword) "Esconder Senha" else "Mostrar Senha",
-                    tint = Color(0xFF000000)
+                    tint = Color(0xFF4C4B4B)
                 )
             }
         },
@@ -149,12 +149,12 @@ fun PasswordTextField(
             cursorColor = Color.DarkGray,
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
-            focusedPlaceholderColor = Color(0xFF000000),
-            unfocusedPlaceholderColor = Color(0xFF000000),
-            focusedLabelColor = Color(0xFF000000),
-            unfocusedLabelColor = Color(0xFF000000),
-            focusedLeadingIconColor = Color(0xFF000000),
-            unfocusedLeadingIconColor = Color(0xFF000000),
+            focusedPlaceholderColor = Color(0xFF4C4B4B),
+            unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+            focusedLabelColor = Color(0xFF4C4B4B),
+            unfocusedLabelColor = Color(0xFF4C4B4B),
+            focusedLeadingIconColor = Color(0xFF4C4B4B),
+            unfocusedLeadingIconColor = Color(0xFF4C4B4B),
             focusedTextColor = Color(0xFF000000),
             unfocusedTextColor = Color(0xFF000000)
         )

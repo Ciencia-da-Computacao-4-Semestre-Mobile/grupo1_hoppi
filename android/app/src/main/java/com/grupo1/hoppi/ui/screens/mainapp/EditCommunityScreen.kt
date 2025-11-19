@@ -1,8 +1,11 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -45,7 +49,7 @@ fun EditCommunityScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .padding(horizontal = 20.dp, vertical = 20.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -67,14 +71,20 @@ fun EditCommunityScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = HoppiOrange,
                     unfocusedBorderColor = Color.Black.copy(alpha = 0.5f),
-                    cursorColor = HoppiOrange
+                    cursorColor = HoppiOrange,
+                    focusedPlaceholderColor = Color(0xFF4C4B4B),
+                    unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                    focusedLabelColor = Color(0xFF4C4B4B),
+                    unfocusedLabelColor = Color(0xFF4C4B4B),
+                    focusedTextColor = Color(0xFF000000),
+                    unfocusedTextColor = Color(0xFF000000)
                 )
             )
 
             Spacer(Modifier.height(20.dp))
 
             Text(
-                text = "Descrição",
+                text = "Descrição *",
                 color = HoppiOrange,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.align(Alignment.Start)
@@ -91,7 +101,13 @@ fun EditCommunityScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = HoppiOrange,
                     unfocusedBorderColor = Color.Black.copy(alpha = 0.5f),
-                    cursorColor = HoppiOrange
+                    cursorColor = HoppiOrange,
+                    focusedPlaceholderColor = Color(0xFF4C4B4B),
+                    unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                    focusedLabelColor = Color(0xFF4C4B4B),
+                    unfocusedLabelColor = Color(0xFF4C4B4B),
+                    focusedTextColor = Color(0xFF000000),
+                    unfocusedTextColor = Color(0xFF000000)
                 )
             )
 
@@ -101,11 +117,17 @@ fun EditCommunityScreen(
                 text = "Privacidade",
                 color = HoppiOrange,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.align(Alignment.Start)
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+                    .align(Alignment.Start)
             )
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.TopStart)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -115,40 +137,70 @@ fun EditCommunityScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            Spacer(modifier = Modifier.width(0.dp))
+
                             when (selectedPrivacyOption) {
-                                "Público" -> Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color.Black)
-                                "Privado" -> Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color.Black)
+                                "Público" -> Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color(0xFF000000))
+                                "Privado" -> Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color(0xFF000000))
                             }
 
                             Spacer(modifier = Modifier.width(10.dp))
 
                             Text(
                                 text = selectedPrivacyOption,
-                                color = Color.Black,
+                                color = Color(0xFF000000),
                                 fontSize = 16.sp
                             )
                         }
 
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Arrow", tint = Color.Black)
+                        Box(
+                            modifier = Modifier.fillMaxHeight(),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown Arrow",
+                                tint = Color(0xFF000000)
+                            )
+                            Spacer(modifier = Modifier.width(0.dp))
+                        }
                     }
 
-                    Divider(color = Color.Black.copy(alpha = 0.5f), thickness = 1.dp)
+                    Divider(
+                        color = Color(0xFF000000).copy(alpha = 0.5f),
+                        thickness = 1.dp
+                    )
                 }
 
                 DropdownMenu(
                     expanded = isPrivacyExpanded,
                     onDismissRequest = { isPrivacyExpanded = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .background(Color.White)
+                        .border(1.dp, Color.Gray.copy(alpha = 0.5f))
                 ) {
                     DropdownMenuItem(
-                        text = { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Public, null); Spacer(Modifier.width(8.dp)); Text("Público") } },
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color(0xFF000000))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Público", color = Color(0xFF000000))
+                            }
+                        },
                         onClick = {
                             selectedPrivacyOption = "Público"
                             isPrivacyExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Lock, null); Spacer(Modifier.width(8.dp)); Text("Privado") } },
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color(0xFF000000))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Privado", color = Color(0xFF000000))
+                            }
+                        },
                         onClick = {
                             selectedPrivacyOption = "Privado"
                             isPrivacyExpanded = false
@@ -176,12 +228,11 @@ fun EditCommunityScreen(
                 enabled = newName.isNotBlank(),
                 modifier = Modifier
                     .width(140.dp)
-                    .height(48.dp)
                     .padding(bottom = 20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
-                shape = RoundedCornerShape(25.dp)
+                shape = CircleShape
             ) {
-                Text("Salvar Alterações", color = Color.White, fontSize = 18.sp)
+                Text("Salvar", color = Color.White, fontSize = 18.sp, textAlign = TextAlign.Center)
             }
         }
     }

@@ -184,13 +184,13 @@ fun EditFieldGroup(
     onValueChange: (TextFieldValue) -> Unit,
     placeholder: String
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = DarkText,
-            fontSize = 20.sp
+            fontSize = 18.sp
         )
 
         Text(
@@ -222,7 +222,7 @@ fun CustomTextField(
         onValueChange = onValueChange,
         placeholder = { Text(placeholder, color = DarkText.copy(alpha = 0.6f)) },
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(15.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,

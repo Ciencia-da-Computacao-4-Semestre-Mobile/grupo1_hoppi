@@ -53,7 +53,7 @@ fun SearchScreen(
                 value = searchText,
                 onValueChange = { searchText = it },
                 placeholder = { Text("O que você está buscando?") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Busca", tint = Color(0xFF000000)) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Busca", tint = Color(0xFFA5A5A5)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 20.dp)
@@ -62,17 +62,17 @@ fun SearchScreen(
                 shape = RoundedCornerShape(50.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color(0xFFF0F0F0),
-                    focusedContainerColor = Color(0xFFF0F0F0),
+                    unfocusedContainerColor = Color(0xFFDBDBDB),
+                    focusedContainerColor = Color(0xFFDBDBDB),
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedPlaceholderColor = Color(0xFF000000),
-                    unfocusedPlaceholderColor = Color(0xFF000000),
-                    focusedLabelColor = Color(0xFF000000),
-                    unfocusedLabelColor = Color(0xFF000000),
-                    focusedLeadingIconColor = Color(0xFF000000),
-                    unfocusedLeadingIconColor = Color(0xFF000000),
+                    focusedPlaceholderColor = Color(0xFFA5A5A5),
+                    unfocusedPlaceholderColor = Color(0xFFA5A5A5),
+                    focusedLabelColor = Color(0xFFA5A5A5),
+                    unfocusedLabelColor = Color(0xFFA5A5A5),
+                    focusedLeadingIconColor = Color(0xFFA5A5A5),
+                    unfocusedLeadingIconColor = Color(0xFFA5A5A5),
                     focusedTextColor = Color(0xFF000000),
                     unfocusedTextColor = Color(0xFF000000)
                 )
@@ -141,7 +141,7 @@ fun SearchItemRow(
                 onClick = { onRemoveItem(item) },
                 modifier = Modifier.testTag("RemoveButton_$item")
             ) {
-                Icon(Icons.Filled.Close, contentDescription = "Remover item")
+                Icon(Icons.Filled.Close, contentDescription = "Remover item", tint = Color(0xFF000000))
             }
         }
         Divider(
