@@ -1,82 +1,76 @@
 package com.grupo1.hoppi.signup
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
-import com.grupo1.hoppi.ui.screens.signup.SignUpState
 import com.grupo1.hoppi.ui.screens.signup.SignUpViewModel
 import org.junit.Rule
 import org.junit.Test
 
-class TestSignUpViewModel(
-    initialState: SignUpState = SignUpState()
-) : SignUpViewModel() {
-    init {
-        _state.value = initialState
-    }
-}
-
-class SignUpFlowUiTest {
+class SignUpUITest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val rule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun signUpFlow_successfulSignUp_callsFinish() {
-        var finishCalled = false
+    fun testFullSignUpFlow() {
+        var finished = false
+        val viewModel = SignUpViewModel()
 
-        val mockState = SignUpState(
-            name = "Nome Usuário",
-            birthDate = "01/01/2000",
-            institution = "UCLA",
-            email = "email@example.com",
-            password = "Senha123",
-            acceptedTerms = true,
-            isButtonEnabled = true
-        )
-        val testViewModel = TestSignUpViewModel(initialState = mockState)
-
-        composeTestRule.setContent {
+        rule.setContent {
             SignUpFlow(
-                onLoginClick = { },
-                onFinish = { finishCalled = true },
-                mockViewModel = testViewModel
+                onLoginClick = {},
+                onFinish = { finished = true },
+                mockViewModel = viewModel
             )
         }
 
-        composeTestRule.onNodeWithTag("SignUpButton")
-            .performScrollTo()
-            .performClick()
+        rule.onNodeWithText("Digite seu nome completo").performTextInput("João Silva")
+        rule.onNodeWithText("Digite seu nome de usuário").performTextInput("joaosilva123")
 
-        composeTestRule.onNodeWithTag("FinishSignUp").assertExists()
+        rule.runOnIdle {
+            viewModel.onBirthDateChange("10/05/2003")
+            viewModel.onToggleTerms(true)
+        }
+        rule.waitForIdle()
 
-        composeTestRule.onNodeWithTag("Avatar0")
-            .performScrollTo()
-            .performClick()
-        composeTestRule.onNodeWithTag("FinishSignUp")
-            .performScrollTo()
-            .performClick()
+        rule.onNodeWithText("Digite sua instituição de ensino").performTextInput("Universidade XPTO")
+        rule.onNodeWithText("Digite seu e-mail").performTextInput("teste@example.com")
+        rule.onNodeWithText("Digite sua senha").performTextInput("Abc12345")
 
-        assert(finishCalled)
-    }
-
-    @Test
-    fun signUpFlow_loginClick_worksCorrectly() {
-        var loginClicked = false
-
-        composeTestRule.setContent {
-            SignUpFlow(
-                onLoginClick = { loginClicked = true },
-                onFinish = { }
-            )
+        rule.runOnIdle {
+            check(viewModel.state.value.isButtonEnabled) {
+                "Botão não ativou! Estado: ${viewModel.state.value}"
+            }
         }
 
-        composeTestRule.onNodeWithTag("AlreadyRegistered")
+        rule.onNodeWithTag("SignUpButton")
             .performScrollTo()
+            .assertIsEnabled()
             .performClick()
 
-        assert(loginClicked)
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodesWithTag("SignUpStep2").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        rule.onNodeWithTag("Avatar1")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+
+        rule.onNodeWithTag("FinishSignUp")
+            .performScrollTo()
+            .assertIsEnabled()
+            .performClick()
+
+        assert(finished)
     }
 }

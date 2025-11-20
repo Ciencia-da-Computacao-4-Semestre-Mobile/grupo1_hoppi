@@ -97,7 +97,6 @@ fun EditInformationContent(
             .background(Color.White)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
             text = "Alterar dados",
@@ -107,7 +106,7 @@ fun EditInformationContent(
             fontSize = 18.sp
         )
 
-        // Spacer(Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         EditFieldGroup(
             label = "Nome *",
@@ -117,6 +116,8 @@ fun EditInformationContent(
             placeholder = "Nome Completo"
         )
 
+        Spacer(modifier = Modifier.height(20.dp))
+
         EditFieldGroup(
             label = "Nome de usuário *",
             currentValue = currentUsername,
@@ -125,7 +126,8 @@ fun EditInformationContent(
             placeholder = "@novo_nome_de_usuario"
         )
 
-        // --- Campo 2: Data de nascimento ---
+        Spacer(modifier = Modifier.height(20.dp))
+
         EditFieldGroup(
             label = "Data de nascimento *",
             currentValue = currentBirthdate,
@@ -134,7 +136,8 @@ fun EditInformationContent(
             placeholder = "dd/mm/aaaa"
         )
 
-        // --- Campo 3: Instituição de ensino ---
+        Spacer(modifier = Modifier.height(20.dp))
+
         EditFieldGroup(
             label = "Instituição de ensino *",
             currentValue = currentInstitution,
@@ -143,13 +146,13 @@ fun EditInformationContent(
             placeholder = "Mudar instituição"
         )
 
-        Spacer(Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         Button(
             onClick = onSave,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .size(210.dp, 40.dp),
+                .size(210.dp, 42.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
             colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
             shape = RoundedCornerShape(20.dp)
@@ -157,7 +160,7 @@ fun EditInformationContent(
             Text("Salvar alterações", color = Color.White, style = MaterialTheme.typography.bodyMedium, fontSize = 18.sp)
         }
 
-        Spacer(Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         Button(
             onClick = onCancel,
@@ -165,7 +168,7 @@ fun EditInformationContent(
                 .align(Alignment.CenterHorizontally)
                 .size(210.dp, 40.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFF0F0F0),
                 contentColor = DarkText
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),

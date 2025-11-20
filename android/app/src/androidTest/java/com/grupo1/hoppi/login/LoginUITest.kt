@@ -10,7 +10,7 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-class LoginScreenInstrumentedTest {
+class LoginUITest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()

@@ -217,7 +217,7 @@ fun SignUpStep1Screen(
             )
 
             LoginTextField(
-                label = "Digite seu -",
+                label = "Digite seu e-mail",
                 placeholder = "Digite seu e-mail",
                 value = state.email,
                 onValueChange = viewModel::onEmailChange,

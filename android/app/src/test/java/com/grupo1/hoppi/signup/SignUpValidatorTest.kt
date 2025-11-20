@@ -5,7 +5,7 @@ import com.grupo1.hoppi.ui.screens.signup.SignUpViewModel
 import org.junit.Assert.*
 import org.junit.Test
 
-class SignUpFlowTest {
+class SignUpValidatorTest {
 
     @Test
     fun testNameValidation() {
@@ -46,6 +46,7 @@ class SignUpFlowTest {
     fun testAllFieldsValid() {
         val result = SignUpValidator.allFieldsValid(
             name = "John Doe",
+            username = "johndoe",
             birthDate = "10/10/2000",
             institution = "Institute",
             email = "test@mail.com",
@@ -59,6 +60,7 @@ class SignUpFlowTest {
     fun testAllFieldsInvalid() {
         val result = SignUpValidator.allFieldsValid(
             name = "",
+            username = "",
             birthDate = "10-10-2000",
             institution = "",
             email = "invalid",
@@ -72,6 +74,7 @@ class SignUpFlowTest {
     fun testFlowGoesToStep2WhenValid() {
         val vm = SignUpViewModel()
         vm.onNameChange("User Example")
+        vm.onUsernameChange("userexample")
         vm.onBirthDateChange("10/10/2000")
         vm.onInstitutionChange("Institute")
         vm.onEmailChange("example@mail.com")
@@ -81,6 +84,7 @@ class SignUpFlowTest {
         assertTrue(
             SignUpValidator.allFieldsValid(
                 vm.state.value.name,
+                vm.state.value.username,
                 vm.state.value.birthDate,
                 vm.state.value.institution,
                 vm.state.value.email,
@@ -152,6 +156,7 @@ class SignUpFlowTest {
     fun testAllFieldsInvalidTermsOnly() {
         val result = SignUpValidator.allFieldsValid(
             name = "John Doe",
+            username = "johndoe",
             birthDate = "10/10/2000",
             institution = "Uni",
             email = "test@mail.com",

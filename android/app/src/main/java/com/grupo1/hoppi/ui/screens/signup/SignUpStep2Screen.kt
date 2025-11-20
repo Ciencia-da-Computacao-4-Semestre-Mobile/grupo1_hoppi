@@ -75,6 +75,7 @@ fun SignUpStep2Screen(
         modifier = Modifier
             .fillMaxSize()
             .background(verticalGradientBrush)
+            .testTag("SignUpStep2")
     ) {
         Column(
             modifier = Modifier

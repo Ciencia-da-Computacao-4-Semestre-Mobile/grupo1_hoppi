@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 const val MOCK_CODE = "1234"
 
@@ -111,9 +112,18 @@ fun EditEmailContent(
             .fillMaxSize()
             .background(Color.White)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
+        Text(
+            text = "Alterar e-mail",
+            style = MaterialTheme.typography.bodyMedium,
+            color = DarkText,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         EditFieldGroup(
             label = "E-mail *",
             currentValue = currentEmail,
@@ -122,51 +132,54 @@ fun EditEmailContent(
             placeholder = "seuemail@email.com",
         )
 
+        Spacer(modifier = Modifier.height(30.dp))
+
         Button(
             onClick = onSendEmailAttempt,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+                .align(Alignment.CenterHorizontally)
+                .size(210.dp, 42.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
             colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Text(
-                "Mudar e-mail",
-                color = Color.White,
-                fontSize = 18.sp
-            )
+            Text("Mudar e-mail", color = Color.White, style = MaterialTheme.typography.bodyMedium, fontSize = 18.sp)
         }
+
+        Spacer(modifier = Modifier.height(15.dp))
 
         Button(
             onClick = onCancel,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+                .align(Alignment.CenterHorizontally)
+                .size(210.dp, 40.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
+                containerColor = Color(0xFFF0F0F0),
                 contentColor = DarkText
             ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Text("Cancelar", fontSize = 18.sp, fontWeight = FontWeight.Normal)
+            Text("Cancelar", fontSize = 18.sp, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Normal)
         }
 
         if (showVerificationCode) {
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(50.dp))
             VerificationCodeInput(
                 code = verificationCode,
                 onCodeChange = { verificationCode = it }
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(30.dp))
 
             Button(
                 onClick = onCodeValidation,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                    .align(Alignment.CenterHorizontally)
+                    .size(210.dp, 42.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = HoppiOrange),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(20.dp),
                 enabled = verificationCode.length == 4
             ) {
                 Text(

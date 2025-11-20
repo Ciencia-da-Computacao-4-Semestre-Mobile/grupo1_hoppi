@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -132,7 +133,8 @@ fun EditCommunityScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .clickable { isPrivacyExpanded = true },
+                            .clickable { isPrivacyExpanded = true }
+                            .testTag("privacy_toggle"),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -182,7 +184,10 @@ fun EditCommunityScreen(
                 ) {
                     DropdownMenuItem(
                         text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier.testTag("privacy_public"),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Icon(Icons.Default.Public, contentDescription = "Public Icon", tint = Color(0xFF000000))
                                 Spacer(Modifier.width(8.dp))
                                 Text("Público", color = Color(0xFF000000))
@@ -194,8 +199,12 @@ fun EditCommunityScreen(
                         }
                     )
                     DropdownMenuItem(
+                        modifier = Modifier.testTag("privacy_private"),
                         text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier.testTag("privacy_private"),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color(0xFF000000))
                                 Spacer(Modifier.width(8.dp))
                                 Text("Privado", color = Color(0xFF000000))

@@ -17,6 +17,7 @@ class SignUpViewModelTest {
         val vm = SignUpViewModel()
 
         vm.onNameChange("John Doe")
+        vm.onUsernameChange("johndoe")
         vm.onBirthDateChange("10/10/2000")
         vm.onInstitutionChange("University")
         vm.onEmailChange("john@mail.com")
@@ -31,6 +32,7 @@ class SignUpViewModelTest {
         val vm = SignUpViewModel()
 
         vm.onNameChange("John Doe")
+        vm.onUsernameChange("johndoe")
         vm.onBirthDateChange("10/10/2000")
         vm.onInstitutionChange("University")
         vm.onEmailChange("john@mail.com")

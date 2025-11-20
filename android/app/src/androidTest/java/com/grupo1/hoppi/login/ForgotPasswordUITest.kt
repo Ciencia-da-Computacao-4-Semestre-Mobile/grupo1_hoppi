@@ -9,7 +9,7 @@ import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import org.junit.Rule
 import org.junit.Test
 
-class ForgotPasswordFlowTest {
+class ForgotPasswordUITest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
