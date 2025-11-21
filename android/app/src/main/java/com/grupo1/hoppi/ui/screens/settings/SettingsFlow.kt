@@ -9,6 +9,7 @@ import com.grupo1.hoppi.ui.screens.settings.SettingsScreen
 import com.grupo1.hoppi.ui.screens.settings.account.EditEmailScreen
 import com.grupo1.hoppi.ui.screens.settings.account.EditInformationScreen
 import com.grupo1.hoppi.ui.screens.settings.AboutUsScreen
+import com.grupo1.hoppi.ui.screens.settings.PrivacyPolicyScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 
 object SettingsDestinations {
@@ -56,7 +57,7 @@ fun SettingsNavGraph(
         }
 
         composable(SettingsDestinations.PRIVACY_POLICY_ROUTE) {
-            // PrivacyPolicyScreen(navController = settingsNavController)
+            PrivacyPolicyScreen(navController = settingsNavController)
         }
 
         composable(SettingsDestinations.ABOUT_US_ROUTE) {
