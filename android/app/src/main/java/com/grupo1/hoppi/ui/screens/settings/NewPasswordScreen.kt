@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.ui.screens.settings.alterpassword
+package com.grupo1.hoppi.ui.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
