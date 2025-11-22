@@ -12,8 +12,8 @@ import com.grupo1.hoppi.ui.screens.settings.EditPasswordScreen
 import com.grupo1.hoppi.ui.screens.settings.AboutUsScreen
 import com.grupo1.hoppi.ui.screens.settings.PrivacyPolicyScreen
 import com.grupo1.hoppi.ui.screens.settings.PrivacyPolicyScreen
-import com.grupo1.hoppi.ui.screens.settings.alterpassword.NewPasswordScreen
-import com.grupo1.hoppi.ui.screens.settings.alterpassword.PasswordRecoveryScreen
+import com.grupo1.hoppi.ui.screens.settings.NewPasswordScreen
+import com.grupo1.hoppi.ui.screens.settings.PasswordRecoveryScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 
 object SettingsDestinations {
