@@ -1,4 +1,4 @@
-package com.grupo1.hoppi.ui.screens.settings.alterpassword
+package com.grupo1.hoppi.ui.screens.settings
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
