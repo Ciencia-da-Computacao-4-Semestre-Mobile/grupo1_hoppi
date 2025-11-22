@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -182,11 +184,14 @@ fun EditInformationContent(
 @Composable
 fun EditFieldGroup(
     label: String,
-    currentValue: String,
+    currentValue: String? = null,
     textFieldValue: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
-    placeholder: String
+    placeholder: String,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
+    
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = label,
@@ -196,12 +201,14 @@ fun EditFieldGroup(
             fontSize = 18.sp
         )
 
+        if (currentValue != null) {
         Text(
             text = currentValue,
             color = DarkText.copy(alpha = 0.6f),
             style = MaterialTheme.typography.bodyMedium,
             fontSize = 16.sp
         )
+        }
 
         Spacer(Modifier.height(4.dp))
 
@@ -209,6 +216,8 @@ fun EditFieldGroup(
             value = textFieldValue,
             onValueChange = onValueChange,
             placeholder = placeholder,
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions
         )
     }
 }
@@ -227,6 +236,8 @@ fun CustomTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(15.dp),
         singleLine = true,
+        visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
