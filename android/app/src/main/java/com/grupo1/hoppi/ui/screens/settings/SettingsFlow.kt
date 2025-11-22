@@ -8,8 +8,12 @@ import androidx.navigation.compose.rememberNavController
 import com.grupo1.hoppi.ui.screens.settings.SettingsScreen
 import com.grupo1.hoppi.ui.screens.settings.account.EditEmailScreen
 import com.grupo1.hoppi.ui.screens.settings.account.EditInformationScreen
+import com.grupo1.hoppi.ui.screens.settings.EditPasswordScreen
 import com.grupo1.hoppi.ui.screens.settings.AboutUsScreen
 import com.grupo1.hoppi.ui.screens.settings.PrivacyPolicyScreen
+import com.grupo1.hoppi.ui.screens.settings.PrivacyPolicyScreen
+import com.grupo1.hoppi.ui.screens.settings.alterpassword.NewPasswordScreen
+import com.grupo1.hoppi.ui.screens.settings.alterpassword.PasswordRecoveryScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 
 object SettingsDestinations {
@@ -19,6 +23,8 @@ object SettingsDestinations {
     const val CHANGE_PASSWORD_ROUTE = "settings/change_password"
     const val PRIVACY_POLICY_ROUTE = "settings/privacy_policy"
     const val ABOUT_US_ROUTE = "settings/about_us"
+    const val RECOVER_PASSWORD_ROUTE = "settings/change_password/recover_password"
+    const val NEW_PASSWORD_ROUTE = "settings/change_password/new_password"
 }
 
 @Composable
@@ -53,8 +59,24 @@ fun SettingsNavGraph(
         }
 
         composable(SettingsDestinations.CHANGE_PASSWORD_ROUTE) {
-            // ChangePasswordScreen(navController = settingsNavController)
+            EditPasswordScreen(
+                navController = settingsNavController,
+                onForgottenPasswordClick = {
+                    settingsNavController.navigate(SettingsDestinations.RECOVER_PASSWORD_ROUTE)
+                })
         }
+
+        composable(SettingsDestinations.RECOVER_PASSWORD_ROUTE) {
+            PasswordRecoveryScreen(navController = settingsNavController)
+        }
+
+        composable(SettingsDestinations.NEW_PASSWORD_ROUTE) {
+            NewPasswordScreen(
+                navController = settingsNavController,
+                onFinishFlow = {
+                    settingsNavController.popBackStack(SettingsDestinations.SETTINGS_MAIN_SCREEN, false)
+                }
+            )
 
         composable(SettingsDestinations.PRIVACY_POLICY_ROUTE) {
             PrivacyPolicyScreen(navController = settingsNavController)
