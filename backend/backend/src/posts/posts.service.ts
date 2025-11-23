@@ -2,25 +2,43 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Post } from './posts.entity';
-import type { CreatePostDTO } from './schemas/post.schema';
+import type { CreatePostDTO, GetFeedQueryDTO } from './schemas/post.schema';
+import { FollowsService } from 'src/follows/follows.service';
+import { FeedService } from './feed.service';
+import { SanitizedPost } from 'src/common/utils/post-sanitizer.util';
 
 @Injectable()
 export class PostsService {
   constructor(
+    private followsService: FollowsService,
+    private feedService: FeedService,
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
   ) { }
 
-  async create(data: CreatePostDTO) {
+  async create(data: CreatePostDTO, user: any) {
     const post = this.postsRepository.create({
       content: data.content,
       metadata: data.metadata ?? null,
+      author: { id: user.sub } as any,
       is_reply_to: data.is_reply_to
         ? ({ id: data.is_reply_to } as any)
         : null,
     });
 
-    return this.postsRepository.save(post);
+    const savedPost = await this.postsRepository.save(post);
+
+    const parentPostId = data.is_reply_to;
+
+    if (parentPostId) {
+      await this.postsRepository.increment(
+        { id: parentPostId },
+        'reply_count',
+        1           
+      );
+    }
+
+    return savedPost;
   }
 
   findAll() {
@@ -53,5 +71,33 @@ export class PostsService {
 
   async delete(id: string) {
     await this.postsRepository.delete(id);
+  }
+
+  /* Feed */
+  async getFeed(userId: string, query: GetFeedQueryDTO): Promise<SanitizedPost[]> {
+    const { strategy } = query;
+
+    if (strategy === 'community') {
+      if (!query.communityId) {
+        throw new Error("ID da comunidade é obrigatório para a estratégia 'community'.");
+      }
+      return this.feedService.getCommunityFeed(
+        this.postsRepository,
+        query.communityId,
+        query.limit,
+        query.cursor
+      );
+    }
+
+
+    const followedUserIds = await this.followsService.getFollowingIds(userId);
+    followedUserIds.push(userId);
+
+    return this.feedService.getMergedFeed(
+      userId,
+      query,
+      this.postsRepository,
+      followedUserIds,
+    );
   }
 }
