@@ -119,9 +119,9 @@ fun AboutUsScreen(
             item {
                 Text(
                     text = paragrafo4,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 18.sp),
                     textAlign = TextAlign.Justify,
-                    color = Color.Black,
-                    fontSize = 14.sp,
+                    color = Color(0xFF000000),
                     lineHeight = 20.sp
                 )
             }

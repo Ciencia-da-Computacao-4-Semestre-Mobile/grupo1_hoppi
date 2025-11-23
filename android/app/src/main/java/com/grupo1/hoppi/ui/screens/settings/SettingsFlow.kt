@@ -74,9 +74,13 @@ fun SettingsNavGraph(
             NewPasswordScreen(
                 navController = settingsNavController,
                 onFinishFlow = {
-                    settingsNavController.popBackStack(SettingsDestinations.SETTINGS_MAIN_SCREEN, false)
+                    settingsNavController.popBackStack(
+                        SettingsDestinations.SETTINGS_MAIN_SCREEN,
+                        false
+                    )
                 }
             )
+        }
 
         composable(SettingsDestinations.PRIVACY_POLICY_ROUTE) {
             PrivacyPolicyScreen(navController = settingsNavController)

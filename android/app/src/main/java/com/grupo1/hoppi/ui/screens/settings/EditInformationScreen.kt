@@ -216,8 +216,6 @@ fun EditFieldGroup(
             value = textFieldValue,
             onValueChange = onValueChange,
             placeholder = placeholder,
-            visualTransformation = visualTransformation,
-            keyboardOptions = keyboardOptions
         )
     }
 }
@@ -236,8 +234,6 @@ fun CustomTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(15.dp),
         singleLine = true,
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
