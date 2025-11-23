@@ -10,11 +10,13 @@ const envSchema = z.object({
     DB_USERNAME: z.string(),
     DB_PASSWORD: z.string(),
     SERVER_PORT: z.coerce.number(),
+    JWT_SECRET: z.string(),
+    JWT_EXPIRES_IN: z.string().default('7d'),
     EMAIL_HOST: z.string().default('smtp.gmail.com'),
     EMAIL_PORT: z.coerce.number().default(587),
     EMAIL_USER: z.string(),
     EMAIL_PASSWORD: z.string(),
-    EMAIL_FROM_NAME: z.string().optional()
+    EMAIL_FROM_NAME: z.string().optional().default('Hoppi')
 })
 
 const _env = envSchema.safeParse(process.env)

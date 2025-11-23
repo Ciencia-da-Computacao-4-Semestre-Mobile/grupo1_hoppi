@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { MailModule } from 'src/nodemailer/mailer.module';
 import { PasswordReset } from './entities/password-reset.entity';
 import { EmailService } from './email.service';
+import { env } from 'src/config/env';
 
 @Module({
     imports: [
@@ -15,9 +16,9 @@ import { EmailService } from './email.service';
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
             global: true,
-            secret: "secret",
+            secret: env.JWT_SECRET,
             signOptions: {
-                expiresIn: '60s',
+                expiresIn: env.JWT_EXPIRES_IN,
             }
         }),
         MailModule
