@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,6 +10,7 @@ import { PasswordReset } from './entities/password-reset.entity';
 import { EmailService } from './email.service';
 import { env } from 'src/config/env';
 import { JwtStrategy } from './jwt.strategy';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
     imports: [
@@ -21,7 +22,8 @@ import { JwtStrategy } from './jwt.strategy';
                 expiresIn: '7d',
             }
         }),
-        MailModule
+        MailModule,
+        forwardRef(() => UsersModule)
     ],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy, EmailService],

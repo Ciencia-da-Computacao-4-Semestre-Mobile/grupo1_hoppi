@@ -5,8 +5,7 @@ import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
-import { RegisterDto } from "./dto/auth.register.dto";
-import { AuthLoginDto } from "./dto/auth.login.dto";
+import { RegisterDTO, AuthLoginDTO } from "./schemas/auth.schema";
 // import { MailService } from "src/nodemailer/mailer.service";
 import { PasswordReset } from "./entities/password-reset.entity";
 import { EmailService } from "./email.service";
@@ -24,7 +23,7 @@ export class AuthService {
         private readonly emailService: EmailService
     ) {}
 
-    async login(dto: AuthLoginDto) {
+    async login( dto: AuthLoginDTO ) {
         const user = await this.userRepository.findOneBy({ email: dto.email });
 
         if (!user) {
@@ -45,7 +44,7 @@ export class AuthService {
         };
     }
 
-    async register(dto: RegisterDto) {
+    async register(dto: RegisterDTO) {
         const userExists = await this.userRepository.findOneBy({ 
             email: dto.email 
         });

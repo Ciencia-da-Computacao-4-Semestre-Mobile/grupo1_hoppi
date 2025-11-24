@@ -76,6 +76,7 @@ export class FeedService {
         postsRepository: Repository<Post>,
         limit: number,
         excludedPostIds: string[],
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         cursor?: string
     ): Promise<Post[]> {
 

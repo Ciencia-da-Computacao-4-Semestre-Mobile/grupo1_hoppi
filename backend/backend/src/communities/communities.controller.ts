@@ -1,13 +1,14 @@
+import { z } from 'zod'
+import { User } from 'src/users/users.entity';
 import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common'
 import { CommunitiesService } from './communities.service';
 import { Community } from './communities.entity';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/auth/decorators/current-user.decorator';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CommunityRequestActionSchema, CreateCommunitySchema, DeleteCommunityParamsSchema, ListMembersQuerySchema, ListRequestsQuerySchema, TransferOwnerSchema, UpdateCommunitySchema } from './schemas/community.schema'
 import type { CreateCommunityDTO, UpdateCommunityDTO } from './schemas/community.schema'
-import { z } from 'zod'
 
 @Controller('communities')
 export class CommunitiesController {
@@ -23,36 +24,36 @@ export class CommunitiesController {
     return await this.communitiesService.findOne(params.id)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body(new ZodValidationPipe(CreateCommunitySchema)) 
     data: CreateCommunityDTO,
     @CurrentUser() user: JwtPayloadUser
   ) {
-    return await this.communitiesService.create(data, { id: user.sub } as unknown as any)
+    return await this.communitiesService.create(data, { id: user.sub } as User)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(@Param(new ZodValidationPipe(DeleteCommunityParamsSchema)) params: { id: string }, 
   @Body(new ZodValidationPipe(UpdateCommunitySchema)) data: UpdateCommunityDTO, @CurrentUser() user: JwtPayloadUser) {
-    return await this.communitiesService.update(params.id, data, { id: user.sub } as unknown as any)
+    return await this.communitiesService.update(params.id, data, { id: user.sub } as User)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post(':id/join')
   join(@Param('id') id: string, @CurrentUser() user: JwtPayloadUser) {
-    return this.communitiesService.join(id, { id: user.sub } as unknown as any);
+    return this.communitiesService.join(id, { id: user.sub } as User);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id/leave')
   leave(@Param('id') id: string, @CurrentUser() user: JwtPayloadUser) {
-    return this.communitiesService.leave(id, { id: user.sub } as unknown as any);
+    return this.communitiesService.leave(id, { id: user.sub } as User);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':community/members/:user_id')
   updateMemberRole(
     @Param('community') communityId: string,
@@ -63,7 +64,7 @@ export class CommunitiesController {
     return this.communitiesService.updateMemberRole(communityId, userId, role, { id: user.sub } as unknown as any);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(':id/members')
   listMembers(
     @Param('id') id: string,
@@ -81,7 +82,7 @@ export class CommunitiesController {
     return this.communitiesService.listMembers(id, page, limit, data.role)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(':id/requests')
   listRequests(
     @Param('id') id: string,
@@ -96,7 +97,7 @@ export class CommunitiesController {
     return this.communitiesService.listJoinRequests(id, parsed.data.status, { id: user.sub } as unknown as any)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/requests/:request_id')
   actOnRequest(
     @Param('id') id: string,
@@ -112,7 +113,7 @@ export class CommunitiesController {
     return this.communitiesService.actOnJoinRequest(id, requestId, parsed.data.action, { id: user.sub } as unknown as any)
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/owner')
   transferOwner(
     @Param('id') id: string,

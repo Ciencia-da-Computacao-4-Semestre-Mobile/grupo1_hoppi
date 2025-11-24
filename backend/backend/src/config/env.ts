@@ -11,7 +11,7 @@ const envSchema = z.object({
     DB_PASSWORD: z.string(),
     JWT_SECRET: z.string(),
     JWT_EXPIRES_IN: z.string(),
-    SALT_ROUNDS: z.number(),
+    // SALT_ROUNDS: z.number(),
     EMAIL_HOST: z.string().default('smtp.gmail.com'),
     EMAIL_PORT: z.coerce.number().default(587),
     EMAIL_USER: z.string(),

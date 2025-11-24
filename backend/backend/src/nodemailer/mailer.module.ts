@@ -12,10 +12,15 @@ import { MailService } from "./mailer.service";
                 auth: {
                     user: process.env.EMAIL_USER || 'example@example.com',
                     pass: process.env.EMAIL_PASSWORD || 'password'
-                }
+                },
+
+                tls: {
+                    rejectUnauthorized: false
+                },
             },
+
             defaults: {
-                from: '"No Reply" <no-reply@example.com>'
+                from: 'No Reply <no-reply@example.com>',
             }
         })
     ],

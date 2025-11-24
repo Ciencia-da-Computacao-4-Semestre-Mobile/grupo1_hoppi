@@ -3,8 +3,6 @@ import { AuthService } from "./auth.service";
 import type { AuthRequest } from "./interfaces/auth-request.interface";
 import { ZodValidationPipe } from 'nestjs-zod';
 import { 
-  AuthLoginSchema, 
-  RegisterSchema, 
   ForgotPasswordSchema, 
   VerifyCodeSchema, 
   ResetPasswordSchema,
@@ -12,7 +10,9 @@ import {
   type RegisterDTO,
   type ForgotPasswordDTO,
   type VerifyCodeDTO,
-  type ResetPasswordDTO
+  type ResetPasswordDTO,
+  AuthLoginSchema,
+  RegisterSchema
 } from "./schemas/auth.schema";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 

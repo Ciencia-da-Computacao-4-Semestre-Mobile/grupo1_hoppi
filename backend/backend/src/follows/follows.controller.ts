@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common'
 import { FollowsService } from './follows.service'
-import { AuthGuard } from '@nestjs/passport'
 import { CreateFollowSchema, DeleteFollowSchema } from './schemas/follow.schema'
 import type { AuthRequest } from '../auth/interfaces/auth-request.interface'
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 
 @Controller()
 export class FollowController {
@@ -11,7 +11,7 @@ export class FollowController {
         private followService: FollowsService
     ){}
 
-    @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Post('follows')
     async follow(
         @Body() body: any,
@@ -39,7 +39,7 @@ export class FollowController {
         return this.followService.getFollowers(id)
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete('follows/:followee_id')
     async unfollow(
         @Param('followee_id') followee_id: string, 
