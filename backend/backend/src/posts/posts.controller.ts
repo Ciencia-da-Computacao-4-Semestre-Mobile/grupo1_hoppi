@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Query } from '@nestjs/common'
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Request, Query, BadRequestException } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { Post as PostEntity } from './posts.entity';
 import { type GetFeedQueryDTO, GetFeedQuerySchema, type CreatePostDTO } from './schemas/post.schema';
@@ -25,8 +25,12 @@ export class PostsController {
   @Post()
   create(
     @Body() data: CreatePostDTO,
-    @Request() req: any
+    @Request() req: AuthRequest
   ) {
+    if (!req.user || !req.user.sub) {
+        throw new BadRequestException('User not authenticated or ID missing.');
+    }
+
     return this.postsService.create(data, req.user);
   }
 

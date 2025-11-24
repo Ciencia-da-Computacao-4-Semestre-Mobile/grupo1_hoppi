@@ -4,13 +4,14 @@ import { User } from "src/users/users.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { RegisterDto } from "./dto/auth.register.dto";
 import { AuthLoginDto } from "./dto/auth.login.dto";
 // import { MailService } from "src/nodemailer/mailer.service";
 import { PasswordReset } from "./entities/password-reset.entity";
 import { EmailService } from "./email.service";
+import { JwtPayload } from "./interfaces/auth-request.interface";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
         @InjectRepository(User) private readonly userRepository: Repository<User>,
         @InjectRepository(PasswordReset) private readonly passwordResetRepository: Repository<PasswordReset>,
         private readonly jwtService: JwtService,
+
 
         private readonly emailService: EmailService
     ) {}
@@ -183,17 +185,17 @@ export class AuthService {
         return { message: 'Senha alterada com sucesso!' };
     }
 
-    private createToken(user: User) {
-        const payload = { 
+    private createToken(user: User): string {
+        const payload: JwtPayload = { 
             sub: user.id,
             email: user.email,
             username: user.username
         };
 
-        return this.jwtService.sign(payload);
+        return this.jwtService.sign(payload)
     }
 
-    private sanitizeUser(user: User) {
+    private sanitizeUser(user: User): Partial<User> {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password_hash, ...sanitizedUser } = user;
         return sanitizedUser;

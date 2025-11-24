@@ -6,6 +6,8 @@ import type { CreatePostDTO, GetFeedQueryDTO } from './schemas/post.schema';
 import { FollowsService } from 'src/follows/follows.service';
 import { FeedService } from './feed.service';
 import { SanitizedPost } from 'src/common/utils/post-sanitizer.util';
+import { User } from 'src/users/users.entity';
+import { JwtPayload } from 'src/auth/interfaces/auth-request.interface';
 
 @Injectable()
 export class PostsService {
@@ -16,14 +18,14 @@ export class PostsService {
     private postsRepository: Repository<Post>,
   ) { }
 
-  async create(data: CreatePostDTO, user: any) {
+  async create(data: CreatePostDTO, user: JwtPayload) {
     const post = this.postsRepository.create({
       content: data.content,
       metadata: data.metadata ?? null,
-      author: { id: user.sub } as any,
+      author: { id: user.sub } as User,
       is_reply_to: data.is_reply_to
-        ? ({ id: data.is_reply_to } as any)
-        : null,
+        ? ({ id: data.is_reply_to } as Post)
+        : undefined,
     });
 
     const savedPost = await this.postsRepository.save(post);
