@@ -10,7 +10,7 @@ export const CreatePostSchema = z.object({
     .min(1, "O conteúdo não pode estar vazio.")
     .max(300, "O conteúdo do post não deve exceder 300 caracteres."),
 
-    is_reply_to: z.uuid().optional().nullable(),
+    is_reply_to: z.uuid().optional(),
     metadata: MetadataSchema
 })
 

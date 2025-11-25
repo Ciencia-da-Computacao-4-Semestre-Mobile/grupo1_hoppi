@@ -19,12 +19,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt'){
     async validate(payload: JwtPayload): Promise<Partial<User>>{
 
         const user = await this.userService.getByID(payload.sub)
+
         if (!user) {
         throw new UnauthorizedException()
         }
 
         return {
-            id: payload.sub,
+            sub: payload.sub,
             email: payload.email,
             username: payload.username
         } as Partial<User>
