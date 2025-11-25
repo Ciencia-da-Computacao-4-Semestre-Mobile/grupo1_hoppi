@@ -61,7 +61,7 @@ export class CommunitiesController {
     @Body('role') role: 'member' | 'moderator' | 'owner',
     @CurrentUser() user: JwtPayloadUser
   ) {
-    return this.communitiesService.updateMemberRole(communityId, userId, role, { id: user.sub } as unknown as any);
+    return this.communitiesService.updateMemberRole(communityId, userId, role, user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -94,7 +94,7 @@ export class CommunitiesController {
       throw new BadRequestException(z.treeifyError(parsed.error))
     }
 
-    return this.communitiesService.listJoinRequests(id, parsed.data.status, { id: user.sub } as unknown as any)
+    return this.communitiesService.listJoinRequests(id, parsed.data.status, user.sub)
   }
 
   @UseGuards(JwtAuthGuard)
@@ -110,7 +110,7 @@ export class CommunitiesController {
       throw new BadRequestException(z.treeifyError(parsed.error))
     }
 
-    return this.communitiesService.actOnJoinRequest(id, requestId, parsed.data.action, { id: user.sub } as unknown as any)
+    return this.communitiesService.actOnJoinRequest(id, requestId, parsed.data.action, user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -125,6 +125,6 @@ export class CommunitiesController {
       throw new BadRequestException(z.treeifyError(parsed.error))
     }
 
-    return this.communitiesService.transferOwnership(id, parsed.data.new_owner_user_id, { id: user.sub } as unknown as any)
+    return this.communitiesService.transferOwnership(id, parsed.data.new_owner_user_id, user.sub);
   }
 }
