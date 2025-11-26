@@ -2,11 +2,12 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
 import { Community } from './communities.entity';
-import { CommunityMember } from 'src/community_members/community_members.entity';
+//import { CommunityMember } from 'src/community_members/community_members.entity';
 import { User } from 'src/users/users.entity';
 //import { CreateCommunityDto } from './dto/create-community.dto';
 import { CommunityJoinRequest } from './entities/community-join-request.entity';
 import { CreateCommunityDTO, ReturnCommunityDTO, UpdateCommunityDTO } from './schemas/community.schema'
+import { CommunityMember } from 'src/community_members/community_members.entity';
 
 @Injectable()
 export class CommunitiesService {
@@ -260,28 +261,52 @@ export class CommunitiesService {
   }
 
   async transferOwnership(communityId: string, newOwnerUserId: string, actor: string) {
-    const ownerMembership = await this.communityMembersRepository.findOne({ 
-      where: { 
-        community: { id: communityId }, 
-        user: { id: actor }, 
-        role: 'owner' 
-      } });
-    if (!ownerMembership) throw new UnauthorizedException('Only owner can transfer ownership');
+    const ownerMembership = await this.communityMembersRepository.findOne({
+      where: {
+        community: { id: communityId },
+        user: { id: actor },
+        role: 'owner',
+      },
+    })
 
-    const targetMembership = await this.communityMembersRepository.findOne({ 
-      where: { 
-        community: { id: communityId }, 
-        user: { id: newOwnerUserId } 
-      } });
-    if (!targetMembership) throw new NotFoundException('Target user is not a member');
+    if (!ownerMembership)
+      throw new UnauthorizedException('Only owner can transfer ownership')
 
-    if (targetMembership.user?.id === actor) throw new BadRequestException('You already are the owner');
+    const targetMembership = await this.communityMembersRepository.findOne({
+      where: { community: { id: communityId }, user: { id: newOwnerUserId } },
+    })
+
+    if (!targetMembership)
+      throw new NotFoundException('Target user is not a member')
+
+    if (targetMembership.user?.id === actor)
+      throw new BadRequestException('You already are the owner')
+
+
+    const ownersCount = await this.communityMembersRepository.count({
+      where: {
+        community: { id: communityId },
+        role: 'owner',
+      },
+    })
+
+    if (ownersCount === 1 && ownerMembership.user.id === actor) {
+      if (!targetMembership) {
+        throw new BadRequestException(
+          'Community must have at least one owner. Cannot remove the last owner.'
+        )
+      }
+    }
 
     return this.communitiesRepository.manager.transaction(async (trx) => {
-      // downgrade current owner to moderator by default (or member)
-      await trx.getRepository(CommunityMember).update(ownerMembership.id, { role: 'moderator' });
-      await trx.getRepository(CommunityMember).update(targetMembership.id, { role: 'owner' });
-      return { message: 'Ownership transferred' };
-    });
+      await trx.getRepository(CommunityMember).update(ownerMembership.id, {
+        role: 'moderator',
+      })
+
+      await trx.getRepository(CommunityMember).update(targetMembership.id, {
+        role: 'owner',
+      })
+      return { message: 'Ownership transferred' }
+    })
   }
 }
