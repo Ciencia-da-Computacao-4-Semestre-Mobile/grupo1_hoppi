@@ -76,8 +76,13 @@ export class FeedService {
         postsRepository: Repository<Post>,
         limit: number,
         excludedPostIds: string[],
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         cursor?: string
     ): Promise<Post[]> {
+
+        interface RawPostResult {
+            post_id: string;
+        }
         
         const sevenDaysAgo = new Date(); 
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
@@ -96,14 +101,14 @@ export class FeedService {
             queryBuilder.andWhere('post.id NOT IN (:...excludedPostIds)', { excludedPostIds });
         }
 
-        const rawResults: any[] = await queryBuilder.getRawMany(); 
+        const rawResults = await queryBuilder.getRawMany<RawPostResult>(); 
 
         const postIds = rawResults.map((r) => r.post_id); 
 
         if (postIds.length === 0) return [];
         
         return postsRepository.find({
-            where: { id: In(postIds) as any },
+            where: { id: In(postIds) },
             relations: ['author', 'likes', 'postCount'],
         });
     }

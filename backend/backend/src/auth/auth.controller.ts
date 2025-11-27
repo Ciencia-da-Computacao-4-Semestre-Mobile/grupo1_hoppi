@@ -1,11 +1,8 @@
 import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Req, BadRequestException } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "./guards/auth.guard";
 import type { AuthRequest } from "./interfaces/auth-request.interface";
 import { ZodValidationPipe } from 'nestjs-zod';
 import { 
-  AuthLoginSchema, 
-  RegisterSchema, 
   ForgotPasswordSchema, 
   VerifyCodeSchema, 
   ResetPasswordSchema,
@@ -13,8 +10,11 @@ import {
   type RegisterDTO,
   type ForgotPasswordDTO,
   type VerifyCodeDTO,
-  type ResetPasswordDTO
+  type ResetPasswordDTO,
+  AuthLoginSchema,
+  RegisterSchema
 } from "./schemas/auth.schema";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @Controller("auth")
 export class AuthController {
@@ -56,7 +56,7 @@ export class AuthController {
     }
 
     @Post("me")
-    @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     async getMe(@Req() req: AuthRequest) {
         if (!req.user) {
             throw new BadRequestException('User not authenticated');

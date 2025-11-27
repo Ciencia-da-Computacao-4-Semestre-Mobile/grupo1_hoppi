@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,22 +9,24 @@ import { MailModule } from 'src/nodemailer/mailer.module';
 import { PasswordReset } from './entities/password-reset.entity';
 import { EmailService } from './email.service';
 import { env } from 'src/config/env';
+import { JwtStrategy } from './jwt.strategy';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([User, PasswordReset]),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
-            global: true,
             secret: env.JWT_SECRET,
             signOptions: {
-                expiresIn: env.JWT_EXPIRES_IN,
+                expiresIn: '7d',
             }
         }),
-        MailModule
+        MailModule,
+        forwardRef(() => UsersModule)
     ],
     controllers: [AuthController],
-    providers: [AuthService, EmailService],
-    exports: [AuthService, PassportModule],
+    providers: [AuthService, JwtStrategy, EmailService],
+    exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

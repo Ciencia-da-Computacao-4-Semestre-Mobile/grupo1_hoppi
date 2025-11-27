@@ -4,7 +4,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm'
 import { IsNull, Repository } from 'typeorm'
 import { User } from './users.entity'
-import { CreateUserDTO, CreateUserSchema, mapToPublicUserDTO, UpdatePasswordDTO, UpdatePasswordSchema, UpdateUserDTO, UpdateUserSchema } from './schemas/user.schema'
+import { CreateUserDTO, CreateUserSchema, UpdatePasswordDTO, UpdatePasswordSchema, UpdateUserDTO, UpdateUserSchema } from './schemas/user.schema'
 import { Post } from '../posts/posts.entity'
 import { SanitizedPost, sanitizePostsArray } from 'src/common/utils/post-sanitizer.util'
 
