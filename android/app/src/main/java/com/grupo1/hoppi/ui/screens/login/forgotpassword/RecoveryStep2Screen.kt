@@ -39,11 +39,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
+import com.grupo1.hoppi.ui.screens.login.auth.ForgotPasswordViewModel
 
 @Composable
 fun RecoveryStep2Screen(
+    viewModel: ForgotPasswordViewModel = viewModel(),
     onVerificationSuccess: () -> Unit,
     onRetry: () -> Unit
 ) {
@@ -141,7 +144,9 @@ fun RecoveryStep2Screen(
 
             Button(
                 onClick = {
-                    if (code.all { it.isNotEmpty() }) {
+                    val typedCode = code.joinToString("")
+                    viewModel.setCode(typedCode)
+                    viewModel.verifyCode {
                         onVerificationSuccess()
                     }
                 },
@@ -155,15 +160,6 @@ fun RecoveryStep2Screen(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-
-            /* Text(
-                text = "Escolher outra validação",
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    textDecoration = TextDecoration.Underline
-                ),
-                modifier = Modifier.clickable { onRetry() }
-            ) */
         }
     }
 }

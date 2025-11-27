@@ -24,13 +24,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo1.hoppi.ui.components.login.LoginTextField
 import com.grupo1.hoppi.ui.components.login.PasswordTextField
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.login.auth.LoginUiState
+import com.grupo1.hoppi.ui.screens.login.auth.LoginViewModel
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
     onForgotPasswordClick: () -> Unit,
     onSignUpClick: () -> Unit,
     onLoginSuccess: () -> Unit
@@ -38,6 +42,21 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var visiblePassword by remember { mutableStateOf(false) }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is LoginUiState.Success -> {
+                onLoginSuccess()
+            }
+            is LoginUiState.Error -> {
+                println("Erro: ${(uiState as LoginUiState.Error).message}")
+            }
+            else -> {}
+        }
+    }
+
 
     val gradientColors = listOf(
         Color(0xFFEC8445),
@@ -146,7 +165,7 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    onLoginSuccess()
+                    viewModel.login(email, password)
                 },
                 Modifier.width(124.dp),
                 colors = ButtonDefaults.buttonColors(

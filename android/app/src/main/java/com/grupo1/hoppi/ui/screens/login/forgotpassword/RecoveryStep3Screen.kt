@@ -39,12 +39,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.components.login.LoginTextField
 import com.grupo1.hoppi.ui.components.login.PasswordTextField
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
+import com.grupo1.hoppi.ui.screens.login.auth.ForgotPasswordViewModel
 
 @Composable
 fun RecoveryStep3Screen(
+    viewModel: ForgotPasswordViewModel,
     onPasswordChangeSuccess: () -> Unit
 ) {
     var password by remember { mutableStateOf("") }
@@ -82,7 +83,10 @@ fun RecoveryStep3Screen(
 
                     Button(
                         onClick = {
-                            showSuccessDialog = false
+                            viewModel.setNewPassword(password)
+                            viewModel.resetPassword {
+                                showSuccessDialog = true
+                            }
                             onPasswordChangeSuccess()
                         },
                         colors = ButtonDefaults.buttonColors(
