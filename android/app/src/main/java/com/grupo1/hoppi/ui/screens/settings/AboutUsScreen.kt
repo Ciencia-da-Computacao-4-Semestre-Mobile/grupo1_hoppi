@@ -83,9 +83,9 @@ fun AboutUsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = paragrafo1,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 18.sp),
                     textAlign = TextAlign.Justify,
-                    color = Color.Black,
-                    fontSize = 14.sp,
+                    color = Color(0xFF000000),
                     lineHeight = 20.sp
                 )
             }
@@ -95,9 +95,9 @@ fun AboutUsScreen(
             item {
                 Text(
                     text = paragrafo2,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 18.sp),
                     textAlign = TextAlign.Justify,
-                    color = Color.Black,
-                    fontSize = 14.sp,
+                    color = Color(0xFF000000),
                     lineHeight = 20.sp
                 )
             }
@@ -107,9 +107,9 @@ fun AboutUsScreen(
             item {
                 Text(
                     text = paragrafo3,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 18.sp),
                     textAlign = TextAlign.Justify,
-                    color = Color.Black,
-                    fontSize = 14.sp,
+                    color = Color(0xFF000000),
                     lineHeight = 20.sp
                 )
             }
