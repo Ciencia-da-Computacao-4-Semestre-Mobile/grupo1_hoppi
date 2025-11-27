@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -27,12 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 import com.grupo1.hoppi.ui.components.login.RecoveryOptionCard
+import com.grupo1.hoppi.ui.screens.login.auth.ForgotPasswordViewModel
 
 @Composable
 fun RecoveryStep1Screen(
+    viewModel: ForgotPasswordViewModel = viewModel(),
     onCodeSent: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -121,13 +127,52 @@ fun RecoveryStep1Screen(
                             textAlign = TextAlign.Center,
                             fontSize = 18.sp
                         ),
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 20.dp)
                     )
-                    RecoveryOptionCard(
-                        value = "Ful*****@*****.com",
-                        backgroundColor = Color.White,
-                        onClick = onCodeSent
+
+                    val uiState = viewModel.state.collectAsState().value
+
+                    androidx.compose.material3.OutlinedTextField(
+                        value = uiState.email,
+                        placeholder = { Text("Digite seu e-mail") },
+                        onValueChange = { viewModel.setEmail(it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Digite seu e-mail") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(15.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            cursorColor = Color.DarkGray,
+                            focusedBorderColor = Color(0xFF000000),
+                            unfocusedBorderColor = Color(0xFF000000),
+                            focusedPlaceholderColor = Color(0xFF4C4B4B),
+                            unfocusedPlaceholderColor = Color(0xFF4C4B4B),
+                            focusedLabelColor = Color(0xFF4C4B4B),
+                            unfocusedLabelColor = Color(0xFF4C4B4B),
+                            focusedLeadingIconColor = Color(0xFF4C4B4B),
+                            unfocusedLeadingIconColor = Color(0xFF4C4B4B),
+                            focusedTextColor = Color(0xFF000000),
+                            unfocusedTextColor = Color(0xFF000000)
+                        )
                     )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            viewModel.sendRecoveryEmail {
+                                onCodeSent()
+                            }
+                        },
+                        enabled = !uiState.loading && uiState.email.isNotBlank(),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFEC8445)
+                        )
+                    ) {
+                        Text("Enviar código")
+                    }
                 }
             }
 

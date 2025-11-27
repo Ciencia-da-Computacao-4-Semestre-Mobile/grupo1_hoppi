@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.saveProfileAvatar
 
@@ -55,6 +56,7 @@ val profileAvatars = listOf(
 
 @Composable
 fun SignUpStep2Screen(
+    viewModel: SignUpViewModel = viewModel(),
     onFinish: () -> Unit
 ) {
     var selectedAvatarIndex by remember { mutableStateOf(1) }
@@ -181,8 +183,7 @@ fun SignUpStep2Screen(
 
             Button(
                 onClick = {
-                    saveProfileAvatar(context, selectedAvatarIndex)
-                    onFinish()
+                    viewModel.submitRegistration(onFinish)
                 },
                 modifier = Modifier
                     .width(124.dp)
