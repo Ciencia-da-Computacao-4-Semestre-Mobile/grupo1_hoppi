@@ -4,6 +4,6 @@
     "class-validator": "^0.14.2"
   },
   "scripts": {
-    "start:backend": "cd backend/backend && npm run start:dev"
+    "start:backend": "cd backend/backend && npm run start:prod"
   }
 }
