@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const envSchema = z.object({
+    DATABASE_URL: z.url(),
     DB_SERVICE_ROLE_KEY: z.jwt(),
     DB_HOST: z.string(),
     DB_PORT: z.coerce.number(),
