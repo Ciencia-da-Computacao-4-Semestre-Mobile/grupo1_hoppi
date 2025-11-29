@@ -33,7 +33,7 @@ import kotlinx.coroutines.delay
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 val Laranja = Color(0xFFEC8445)
 val Rosa = Color(0xFFA4485F)
@@ -56,7 +56,7 @@ data class TagItem(
 @Composable
 fun CreatePostScreen(
     navController: NavController,
-    userViewModel: UserViewModel,
+    userViewModel: UsersViewModel,
     postsViewModel: PostsViewModel
     ) {
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)

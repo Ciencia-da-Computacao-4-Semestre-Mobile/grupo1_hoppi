@@ -26,13 +26,13 @@ import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 @Composable
 fun FeedScreen(
     modifier: Modifier,
     postsViewModel: PostsViewModel,
-    userViewModel: UserViewModel,
+    userViewModel: UsersViewModel,
     onPostClick: (postId: Int) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: () -> Unit,

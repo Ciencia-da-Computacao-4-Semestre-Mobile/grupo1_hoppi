@@ -15,10 +15,12 @@ class LoginViewModel : ViewModel() {
 
     fun login(email: String, password: String) {
         _uiState.value = LoginUiState.Loading
+        println("DEBUG: Iniciando login com $email / $password")
 
         viewModelScope.launch {
             try {
                 val response = ApiClient.auth.login(LoginRequest(email, password))
+                println("DEBUG: Response recebida: $response")
 
                 if (response.access_token != null) {
                     _uiState.value = LoginUiState.Success(response.access_token)
@@ -31,6 +33,7 @@ class LoginViewModel : ViewModel() {
             }
         }
     }
+
 }
 
 sealed interface LoginUiState {

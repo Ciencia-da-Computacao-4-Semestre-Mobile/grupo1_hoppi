@@ -1,12 +1,11 @@
 package com.grupo1.hoppi.network
 
 import com.grupo1.hoppi.network.auth.AuthApiService
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.grupo1.hoppi.network.users.UsersApiService
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
@@ -36,4 +35,5 @@ object ApiClient {
         .build()
 
     val auth: AuthApiService = retrofit.create(AuthApiService::class.java)
+    val users: UsersApiService = retrofit.create(UsersApiService::class.java)
 }

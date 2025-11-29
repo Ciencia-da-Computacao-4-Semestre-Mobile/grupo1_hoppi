@@ -44,7 +44,7 @@ import com.grupo1.hoppi.R
 import androidx.navigation.NavController
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 data class DetailedPost(
     val id: Int,
@@ -103,7 +103,7 @@ object SelectedPostHolder {
 @Composable
 fun PostScreen(
     postId: Int?,
-    userViewModel: UserViewModel,
+    userViewModel: UsersViewModel,
     navController: NavController,
     postsViewModel: PostsViewModel
 ) {

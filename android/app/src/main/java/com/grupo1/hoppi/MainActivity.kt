@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -14,6 +16,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -33,9 +37,10 @@ import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import com.grupo1.hoppi.ui.screens.home.UserViewModelFactory
 import com.grupo1.hoppi.ui.screens.login.LoginScreen
+import com.grupo1.hoppi.ui.screens.login.auth.LoginViewModel
 import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import com.grupo1.hoppi.ui.screens.mainapp.*
@@ -56,6 +61,10 @@ fun HoppiApp() {
     SetStatusBarIcons()
     val rootNavController = rememberNavController()
     val bottomNavController = rememberNavController()
+    val context = LocalContext.current
+    val userViewModel: UsersViewModel = viewModel(
+        factory = UserViewModelFactory(context.dataStore)
+    )
 
     NavHost(
         navController = rootNavController,
@@ -63,6 +72,7 @@ fun HoppiApp() {
     ) {
         composable(Destinations.LOGIN_ROUTE) {
             LoginScreen(
+                userViewModel = userViewModel,
                 onSignUpClick = { rootNavController.navigate(Destinations.SIGNUP_ROUTE) },
                 onForgotPasswordClick = { rootNavController.navigate(Destinations.FORGOT_PASSWORD_ROUTE) },
                 onLoginSuccess = {
@@ -91,7 +101,8 @@ fun HoppiApp() {
         composable(Destinations.MAIN_APP) {
             MainApp(
                 rootNavController = rootNavController,
-                bottomNavController = bottomNavController
+                bottomNavController = bottomNavController,
+                userViewModel = userViewModel
             )
         }
 
@@ -113,14 +124,12 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "us
 @Composable
 fun MainApp(
     rootNavController: NavHostController,
-    bottomNavController: NavHostController
+    bottomNavController: NavHostController,
+    userViewModel: UsersViewModel
 ) {
     val postsViewModel: PostsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
     val context = LocalContext.current
-    val userViewModel: UserViewModel = viewModel(
-        factory = UserViewModelFactory(context.dataStore)
-    )
 
     val currentDestination = bottomNavController.currentBackStackEntryFlow.collectAsState(initial = null).value?.destination?.route
 
@@ -173,15 +182,30 @@ fun MainApp(
         ) {
 
             composable(MainAppDestinations.PROFILE_ROUTE) {
-                ProfileScreen(
-                    navController = bottomNavController,
-                    postsViewModel = postsViewModel,
-                    userViewModel = userViewModel,
-                    onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
-                    onSettingsClick = {
-                        rootNavController.navigate(Destinations.SETTINGS_FLOW)
+                val token = userViewModel.token.collectAsState(initial = "").value ?: ""
+
+                if (token.isNotEmpty()) {
+                    ProfileScreen(
+                        navController = bottomNavController,
+                        postsViewModel = postsViewModel,
+                        userViewModel = userViewModel,
+                        onPostClick = { postId ->
+                            bottomNavController.navigate("main/post_open/$postId")
+                        },
+                        onSettingsClick = {
+                            rootNavController.navigate(Destinations.SETTINGS_FLOW)
+                        },
+                        token = token
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = HoppiOrange)
                     }
-                )
+                }
+
             }
 
             composable(MainAppDestinations.CREATE_POST_ROUTE) {

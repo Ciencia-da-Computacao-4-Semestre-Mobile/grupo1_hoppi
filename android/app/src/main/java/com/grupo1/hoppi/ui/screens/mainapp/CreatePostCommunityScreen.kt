@@ -33,12 +33,12 @@ import kotlinx.coroutines.delay
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 @Composable
 fun CreatePostCommunityScreen(
     navController: NavController,
-    userViewModel: UserViewModel,
+    userViewModel: UsersViewModel,
     postsViewModel: PostsViewModel,
     communityId: Int
 ) {

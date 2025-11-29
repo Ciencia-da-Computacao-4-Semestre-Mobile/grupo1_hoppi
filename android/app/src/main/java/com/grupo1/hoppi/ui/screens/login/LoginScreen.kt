@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,12 +30,16 @@ import com.grupo1.hoppi.ui.components.login.LoginTextField
 import com.grupo1.hoppi.ui.components.login.PasswordTextField
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.dataStore
+import com.grupo1.hoppi.ui.screens.home.UserViewModelFactory
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import com.grupo1.hoppi.ui.screens.login.auth.LoginUiState
 import com.grupo1.hoppi.ui.screens.login.auth.LoginViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
+    userViewModel: UsersViewModel,
     onForgotPasswordClick: () -> Unit,
     onSignUpClick: () -> Unit,
     onLoginSuccess: () -> Unit
@@ -44,19 +49,22 @@ fun LoginScreen(
     var visiblePassword by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(uiState) {
         when (uiState) {
             is LoginUiState.Success -> {
+                val token = (uiState as LoginUiState.Success).token
+                userViewModel.setToken(token)
                 onLoginSuccess()
             }
             is LoginUiState.Error -> {
-                println("Erro: ${(uiState as LoginUiState.Error).message}")
+                val message = (uiState as LoginUiState.Error).message
+                println("Erro: $message")
             }
             else -> {}
         }
     }
-
 
     val gradientColors = listOf(
         Color(0xFFEC8445),

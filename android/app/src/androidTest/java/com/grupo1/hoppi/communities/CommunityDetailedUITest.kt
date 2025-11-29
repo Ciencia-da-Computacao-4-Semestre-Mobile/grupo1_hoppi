@@ -9,7 +9,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import com.grupo1.hoppi.ui.screens.mainapp.CommunityDetailScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -34,7 +34,7 @@ class CommunityDetailedUITest {
 
     @Test
     fun communityDetailScreen_showsCommunityName() {
-        val fakeUser = UserViewModel(FakeDataStore())
+        val fakeUser = UsersViewModel(FakeDataStore())
         val postsViewModel = PostsViewModel()
         val nav = fakeNavController()
 
@@ -53,7 +53,7 @@ class CommunityDetailedUITest {
 
     @Test
     fun communityDetailScreen_showsFollowButtonWhenNotMember() {
-        val fakeUser = UserViewModel(FakeDataStore())
+        val fakeUser = UsersViewModel(FakeDataStore())
         val postsViewModel = PostsViewModel()
         val nav = fakeNavController()
 
@@ -71,7 +71,7 @@ class CommunityDetailedUITest {
 
     @Test
     fun communityDetailScreen_showsPostsWhenHasAccess() {
-        val fakeUser = UserViewModel(FakeDataStore())
+        val fakeUser = UsersViewModel(FakeDataStore())
         val postsViewModel = PostsViewModel()
         postsViewModel.addCommunityPost(
             content = "Primeiro post!",
@@ -97,7 +97,7 @@ class CommunityDetailedUITest {
 
     @Test
     fun communityDetailScreen_privateCommunity_showsAccessDenied() {
-        val fakeUser = UserViewModel(FakeDataStore())
+        val fakeUser = UsersViewModel(FakeDataStore())
         val postsViewModel = PostsViewModel()
         val nav = fakeNavController()
 

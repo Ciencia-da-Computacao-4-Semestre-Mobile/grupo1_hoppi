@@ -30,7 +30,7 @@ fun HomeScreen(
     postsViewModel: PostsViewModel
 ) {
     val context = LocalContext.current
-    val userViewModel: UserViewModel = viewModel(
+    val userViewModel: UsersViewModel = viewModel(
         factory = UserViewModelFactory(context.dataStore)
     )
 

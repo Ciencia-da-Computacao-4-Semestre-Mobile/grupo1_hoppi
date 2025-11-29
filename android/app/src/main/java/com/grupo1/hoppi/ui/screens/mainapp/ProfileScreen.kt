@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +40,7 @@ import com.grupo1.hoppi.R
 import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 val ProfileGray = Color(0xFFDBD8D6)
 val Pink = Color(0xFFA4485F)
@@ -51,11 +52,34 @@ val LightGreyText = Color(0xFFA6A6A6)
 fun ProfileScreen(
     navController: NavController,
     postsViewModel: PostsViewModel,
-    userViewModel: UserViewModel,
+    userViewModel: UsersViewModel,
     onPostClick: (postId: Int) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    token: String
 ) {
-    val posts = postsViewModel.getUserPosts("Fulano de Tal")
+    LaunchedEffect(token) {
+        if (token.isNotEmpty()) {
+            userViewModel.loadProfile(token)
+        }
+    }
+
+    val profile by userViewModel.profile.collectAsState()
+
+    if (profile == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = HoppiOrange
+            )
+        }
+        return
+    }
+
+    val user = profile!!
+
+    val posts = postsViewModel.getUserPosts(user.username)
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
 
     LazyColumn(
@@ -65,7 +89,14 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         item {
-            ProfileHeaderContent(avatarIndex, navController, onSettingsClick)
+            ProfileHeaderContent(
+                avatarIndex = avatarIndex,
+                name = user.displayName,
+                username = "@${user.username}",
+                bio = user.institution ?: "",
+                navController = navController,
+                onSettingsClick = onSettingsClick
+            )
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
 
@@ -82,7 +113,14 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileHeaderContent(avatarIndex: Int, navController: NavController, onSettingsClick: () -> Unit) {
+fun ProfileHeaderContent(
+    avatarIndex: Int,
+    name: String,
+    username: String,
+    bio: String,
+    navController: NavController,
+    onSettingsClick: () -> Unit
+) {
     val headerHeight = 230.dp
     val profileSize = 140.dp
 
@@ -179,9 +217,9 @@ fun ProfileHeaderContent(avatarIndex: Int, navController: NavController, onSetti
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(top = profileSize / 2 - 10.dp)
     ) {
-        Text("@fulan.tal", color = LightGreyText, style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
+        Text(username, color = LightGreyText, style = MaterialTheme.typography.bodyMedium, fontSize = 14.sp)
         Spacer(Modifier.height(10.dp))
-        Text("Fulano de Tal", style = MaterialTheme.typography.headlineLarge, fontSize = 20.sp, color = Color(0xFF000000))
+        Text(name, style = MaterialTheme.typography.headlineLarge, fontSize = 20.sp, color = Color(0xFF000000))
         Spacer(Modifier.height(20.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(horizontal = 85.dp)) {
@@ -192,7 +230,7 @@ fun ProfileHeaderContent(avatarIndex: Int, navController: NavController, onSetti
 
         Spacer(Modifier.height(20.dp))
         Text(
-            "Lorem ipsum is simply dummy text of the printing and typesetting industry",
+            text = "Instituição: ${bio.ifBlank { "Sem bio definida." }}",
             style = MaterialTheme.typography.bodyMedium,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,

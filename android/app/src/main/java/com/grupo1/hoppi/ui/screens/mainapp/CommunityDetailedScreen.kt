@@ -34,7 +34,7 @@ import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
-import com.grupo1.hoppi.ui.screens.home.UserViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import kotlinx.coroutines.launch
 
 enum class CommunityAccessStatus {
@@ -48,7 +48,7 @@ enum class CommunityAccessStatus {
 fun CommunityDetailScreen(
     navController: NavController,
     communityId: Int,
-    userViewModel: UserViewModel,
+    userViewModel: UsersViewModel,
     postsViewModel: PostsViewModel
 ) {
     val community = findCommunityById(communityId)
