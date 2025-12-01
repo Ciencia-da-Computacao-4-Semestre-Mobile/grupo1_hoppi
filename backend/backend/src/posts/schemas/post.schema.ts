@@ -11,7 +11,8 @@ export const CreatePostSchema = z.object({
     .max(300, "O conteúdo do post não deve exceder 300 caracteres."),
 
     is_reply_to: z.uuid().optional(),
-    metadata: MetadataSchema
+    metadata: MetadataSchema,
+    tag: z.array(z.enum(["vendas", "estudos", "info"])).optional().default([])
 })
 
 export type CreatePostDTO = z.infer<typeof CreatePostSchema>
@@ -24,7 +25,7 @@ export const ReturnPostSchema = z.object({
     reply_count: z.number().int().default(0),
     is_deleted: z.boolean().default(false),
     metadata: MetadataSchema,
-
+    tag: z.array(z.string()),
     author: z.any() as z.ZodType<User>,
     is_reply_to: z.any() as z.ZodType<Post | null | undefined>,
     replies: z.array(z.any() as z.ZodType<Post>).optional(),

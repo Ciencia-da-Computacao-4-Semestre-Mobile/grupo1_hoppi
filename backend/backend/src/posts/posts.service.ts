@@ -22,6 +22,7 @@ export class PostsService {
     const post = this.postsRepository.create({
       content: data.content,
       metadata: data.metadata ?? null,
+      tag: data.tag,
       author: { id: user.sub } as User,
       is_reply_to: data.is_reply_to
         ? ({ id: data.is_reply_to } as Post)
