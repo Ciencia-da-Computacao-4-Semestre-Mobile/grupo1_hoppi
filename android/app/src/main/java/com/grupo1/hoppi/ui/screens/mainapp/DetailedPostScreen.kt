@@ -1,5 +1,7 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,14 +20,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -35,19 +38,28 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo1.hoppi.R
 import androidx.navigation.NavController
+import com.grupo1.hoppi.network.ApiClient
+import com.grupo1.hoppi.network.likes.LikeResponse
+import com.grupo1.hoppi.network.posts.PostResponse
+import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
+import com.grupo1.hoppi.ui.screens.home.formatDate
+import com.grupo1.hoppi.ui.screens.home.formatHour
+import kotlinx.coroutines.launch
 
 data class DetailedPost(
-    val id: Int,
+    val id: String,
     val username: String,
     val userHandle: String,
     val content: String,
@@ -62,7 +74,7 @@ data class DetailedPost(
 )
 
 data class Comment(
-    val id: Int,
+    val id: String,
     val username: String,
     val userHandle: String,
     val replyToHandle: String,
@@ -74,43 +86,54 @@ data class Comment(
     val avatarColor: Color = Color(0xFFA4485F)
 )
 
-val mockDetailedPost = DetailedPost(
-    id = 1,
-    username = "Fulano de Tal",
-    userHandle = "@fulan.tal",
-    content = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-    timestamp = "21:30",
-    date = "19 set 2025",
-    likes = "10 K",
-    commentsCount = "1,5 K",
-    shares = "2 K"
-)
-
-val mockComments = listOf(
-    Comment(1, "Pessoa 2", "@pessoa_2", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "15", "1", "0"),
-    Comment(2, "Pessoa 3", "@pessoa_3", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "20", "2", "1"),
-    Comment(3, "Pessoa 4", "@pessoa_4", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "20", "2", "1"),
-    Comment(4, "Pessoa 5", "@pessoa_5", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "25", "5", "2"),
-    Comment(5, "Pessoa 6", "@pessoa_6", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "25", "0", "2"),
-    Comment(6, "Pessoa 7", "@pessoa_7", "@fulan.tal", "Lorem Ipsum is simply dummy text of the printing and typesetting industry.", "25", "1", "1"),
-)
-
 object SelectedPostHolder {
     var selectedPost: DetailedPost? = null
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostScreen(
-    postId: Int?,
+    postId: String?,
     userViewModel: UsersViewModel,
     navController: NavController,
-    postsViewModel: PostsViewModel
+    postsViewModel: PostsViewModel,
+    likesViewModel: LikesViewModel = viewModel()
 ) {
+    val postState = remember { mutableStateOf<PostResponse?>(null) }
+    val commentsState = remember { mutableStateListOf<PostResponse>() }
+    var isLoading by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
-    val commentList = remember { mutableStateListOf<Comment>().apply { addAll(mockComments) } }
     var showCommentBox by remember { mutableStateOf(false) }
     var newCommentText by remember { mutableStateOf("") }
+
+    val token = userViewModel.token.collectAsState().value
+    val currentUser = userViewModel.currentUser.collectAsState().value
+    val currentUserId by userViewModel.currentUserId.collectAsState(initial = "")
+    val likesMap by likesViewModel.likes.collectAsState()
+
+    LaunchedEffect(postId) {
+        if (postId != null) {
+            isLoading = true
+            try {
+                val post = ApiClient.posts.getPost(postId)
+                postState.value = post
+
+                val replies = ApiClient.posts.getReplies(postId)
+                commentsState.clear()
+                commentsState.addAll(replies)
+
+                likesViewModel.loadLikes(postId)
+                replies.forEach { likesViewModel.loadLikes(it.id) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoading = false
+            }
+        }
+    }
 
     Scaffold(
         topBar = { PostTopBar(navController) },
@@ -128,46 +151,97 @@ fun PostScreen(
                     .padding(bottom = if (showCommentBox) 80.dp else 0.dp)
             ) {
                 item {
-                    val post = postsViewModel.posts.firstOrNull { it.id == postId }
+                    val post = postState.value
 
                     if (post != null) {
                         PostHeader(
                             avatarIndex,
                             post = DetailedPost(
                                 id = post.id,
-                                username = post.username,
-                                userHandle = "@${post.username.lowercase()}",
+                                username = post.author?.display_name ?: "Anônimo",
+                                userHandle = "@${post.author?.username?.lowercase() ?: "anon"}",
                                 content = post.content,
-                                timestamp = "agora",
-                                date = "hoje",
-                                likes = post.likes.toString(),
-                                commentsCount = post.comments.toString(),
-                                shares = post.shares.toString(),
-                                tag = post.tag,
-                                isLiked = post.isLiked
+                                timestamp = formatHour(post.created_at),
+                                date = formatDate(post.created_at),
+                                likes = (likesMap[post.id]?.size ?: 0).toString(),
+                                commentsCount = post.reply_count.toString(),
+                                shares = post.metadata?.get("shares")?.toString() ?: "0",
+                                // tag = post.tag,
+                                isLiked = post.metadata?.get("is_liked") as? Boolean ?: false
                             ),
-                            postsViewModel = postsViewModel,
-                            onLikeClick = { postsViewModel.toggleLike(post.id) },
+                            currentUser = currentUser,
+                            likesMap = likesMap,
+                            userViewModel = userViewModel,
+                            onLikeClick = {
+                                if (token != null) {
+                                    coroutineScope.launch {
+                                        val isLiked = likesMap[post.id]?.any { it.user_id == currentUserId } ?: false
+                                        if (isLiked) {
+                                            likesViewModel.unlikePost(post.id, token)
+                                        } else {
+                                            likesViewModel.likePost(post.id, token)
+                                        }
+                                        likesViewModel.loadLikes(post.id)
+                                    }
+                                }
+                            },
                             onDeletePost = {
-                                postsViewModel.deletePost(post.id)
-                                navController.popBackStack()
+                                postsViewModel.deletePost(post.id, token ?: "") {
+                                    navController.popBackStack()
+                                }
                             },
                             onCommentClick = { showCommentBox = true }
                         )
                     } else {
-                        Text("Post não encontrado", modifier = Modifier.padding(20.dp))
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.padding(20.dp))
+                        } else {
+                            Text("Post não encontrado", modifier = Modifier.padding(20.dp))
+                        }
                     }
 
                     Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
                 }
 
-                items(commentList) { comment ->
+                items(commentsState) { comment ->
                     CommentItem(
                         avatarIndex,
-                        comment = comment,
-                        onLikeClick = { /* atualizar likes */ },
+                        comment = Comment(
+                            id = comment.id,
+                            username = comment.author?.display_name ?: "Anônimo",
+                            userHandle = "@${comment.author?.username?.lowercase() ?: "anon"}",
+                            replyToHandle = "",
+                            content = comment.content,
+                            likes = (likesMap[comment.id]?.size ?: 0).toString(),
+                            commentsCount = comment.reply_count.toString(),
+                            shares = comment.metadata?.get("shares")?.toString() ?: "0",
+                            isLiked = comment.metadata?.get("is_liked") as? Boolean ?: false
+                        ),
+                        currentUserHandle = "@${currentUser?.lowercase() ?: ""}",
+                        likesMap = likesMap,
+                        userViewModel = userViewModel,
+                        onLikeClick = {
+                            if (token != null) {
+                                coroutineScope.launch {
+                                    val isLiked = likesMap[comment.id]?.any { it.user_id == currentUserId } ?: false
+                                    if (isLiked) {
+                                        likesViewModel.unlikePost(comment.id, token)
+                                    } else {
+                                        likesViewModel.likePost(comment.id, token)
+                                    }
+                                    likesViewModel.loadLikes(comment.id)
+                                }
+                            }
+                        },
                         onDeleteComment = {
-                            commentList.remove(comment)
+                            commentsState.remove(comment)
+                            coroutineScope.launch {
+                                try {
+                                    ApiClient.posts.deletePost(token ?: "", comment.id)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
                         }
                     )
                 }
@@ -196,12 +270,14 @@ fun PostScreen(
                         placeholder = { Text("Escreva um comentário...") },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFEDC8B1),
-                            unfocusedContainerColor = Color(0xFFEDC8B1),
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
                             cursorColor = Color.Black,
-                            focusedIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Black,
                             unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
+                            disabledIndicatorColor = Color.Transparent,
+                            focusedTextColor = Color(0xFF000000),
+                            unfocusedTextColor = Color(0xFF000000)
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
@@ -211,25 +287,25 @@ fun PostScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            if (newCommentText.isNotBlank()) {
-                                commentList.add(
-                                    0,
-                                    Comment(
-                                        id = (commentList.maxOfOrNull { it.id } ?: 0) + 1,
-                                        username = "Você",
-                                        userHandle = "@voce",
-                                        replyToHandle = "",
-                                        content = newCommentText,
-                                        likes = "0",
-                                        commentsCount = "0",
-                                        shares = "0"
-                                    )
-                                )
+                            if (newCommentText.isNotBlank() && token != null && postId != null) {
+                                coroutineScope.launch {
+                                    try {
+                                        postsViewModel.createComment(
+                                            postId = postId,
+                                            content = newCommentText.trim(),
+                                            token = token
+                                        )
+                                        newCommentText = ""
+                                        showCommentBox = false
 
-                                postsViewModel.addComment(postId!!)
+                                        val replies = ApiClient.posts.getReplies(postId)
+                                        commentsState.clear()
+                                        commentsState.addAll(replies)
 
-                                newCommentText = ""
-                                showCommentBox = false
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
                             }
                         },
                         modifier = Modifier.testTag("SendCommentButton"),
@@ -273,7 +349,9 @@ fun PostTopBar(navController: NavController) {
 fun PostHeader(
     avatarIndex: Int,
     post: DetailedPost,
-    postsViewModel: PostsViewModel,
+    currentUser: String?,
+    likesMap: Map<String, List<LikeResponse>>,
+    userViewModel: UsersViewModel,
     onLikeClick: () -> Unit,
     onDeletePost: () -> Unit,
     onCommentClick: () -> Unit
@@ -281,6 +359,14 @@ fun PostHeader(
     var menuExpanded by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val current = currentUser?.removePrefix("@")?.trim()?.lowercase()
+    val author = post.userHandle.removePrefix("@").trim().lowercase()
+    val currentUserId by userViewModel.currentUserId.collectAsState()
+    val isLiked by remember(likesMap, currentUserId) {
+        derivedStateOf {
+            likesMap[post.id]?.any { it.user_id == currentUserId } == true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -290,7 +376,7 @@ fun PostHeader(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box (
+                Box(
                     modifier = Modifier.border(1.dp, Black, CircleShape)
                 ) {
                     ProfileImage(
@@ -339,7 +425,7 @@ fun PostHeader(
                             }
                         )
 
-                        if (post.username == postsViewModel.currentUser) {
+                        if (author == current) {
                             DropdownMenuItem(
                                 text = { Text("Excluir Post", color = Color.Red) },
                                 onClick = {
@@ -411,25 +497,21 @@ fun PostHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             InteractionIcon(
-                iconResId = if (post.isLiked) R.drawable.liked else R.drawable.like_detailed,
+                iconResId = if (isLiked) R.drawable.liked else R.drawable.like_detailed,
                 count = post.likes,
                 iconSize = 25.dp,
                 textSize = 14.sp,
-                onClick = onLikeClick,
+                onClick = {
+                    onLikeClick()
+                },
             )
             InteractionIcon(
                 R.drawable.comments_detailed,
                 post.commentsCount,
-                25.dp,
+                20.dp,
                 12.sp,
                 onClick = onCommentClick
             )
-            InteractionIcon(
-                R.drawable.share_detailed,
-                post.shares,
-                25.dp,
-                14.sp,
-                onClick = { /* */ })
         }
 
         Divider(color = Color.Black.copy(alpha = 0.5f), thickness = 1.dp)
@@ -456,15 +538,25 @@ fun PostHeader(
     }
 }
 
+
 @Composable
 fun CommentItem(
     avatarIndex: Int,
     comment: Comment,
+    currentUserHandle: String,
+    likesMap: Map<String, List<LikeResponse>>,
+    userViewModel: UsersViewModel,
     onLikeClick: () -> Unit,
     onDeleteComment: () -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
+    val currentUserId by userViewModel.currentUserId.collectAsState()
+    val isLiked by remember(likesMap, currentUserId) {
+        derivedStateOf {
+            likesMap[comment.id]?.any { it.user_id == currentUserId } == true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -495,6 +587,8 @@ fun CommentItem(
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = comment.userHandle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         color = Color(0xFFA6A6A6),
                         fontSize = 12.sp,
                         style = MaterialTheme.typography.bodyMedium
@@ -513,7 +607,7 @@ fun CommentItem(
                     modifier = Modifier.padding(top = 1.dp)
                 )
             }
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp))
             Box {
                 Icon(
                     Icons.Default.MoreVert,
@@ -529,7 +623,10 @@ fun CommentItem(
                     onDismissRequest = { menuExpanded = false }
                 ) {
 
-                    if (comment.userHandle == "@voce") {
+                    if (
+                        comment.userHandle.removePrefix("@").trim().lowercase() ==
+                        currentUserHandle.removePrefix("@").trim().lowercase()
+                    ) {
                         DropdownMenuItem(
                             text = { Text("Excluir Comentário", color = Color.Red) },
                             onClick = {
@@ -574,14 +671,12 @@ fun CommentItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             InteractionIcon(
-                iconResId = if (comment.isLiked) R.drawable.liked else R.drawable.like_detailed,
+                iconResId = if (isLiked) R.drawable.liked else R.drawable.like_detailed,
                 count = comment.likes,
-                iconSize = 25.dp,
+                iconSize = 20.dp,
                 textSize = 14.sp,
-                onClick = onLikeClick
+                onClick = onLikeClick,
             )
-            InteractionIcon(R.drawable.comments_detailed, comment.commentsCount, 15.dp, 10.sp, onClick = { /* */ })
-            InteractionIcon(R.drawable.share_detailed, comment.shares, 15.dp, 10.sp, onClick = { /* */ })
         }
     }
 }

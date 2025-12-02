@@ -22,16 +22,22 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.grupo1.hoppi.network.users.UpdateUserRequest
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 const val MOCK_CODE = "1234"
 
 @Composable
-fun EditEmailScreen(navController: NavController) {
+fun EditEmailScreen(
+    navController: NavController,
+    usersViewModel: UsersViewModel
+    ) {
     Scaffold(
         topBar = { EditEmailTopBar(navController = navController) },
         content = { paddingValues ->
             EditEmailContent(
+                usersViewModel = usersViewModel,
                 modifier = Modifier.padding(paddingValues),
                 onSave = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() }
@@ -70,19 +76,40 @@ fun EditEmailTopBar(navController: NavController) {
 
 @Composable
 fun EditEmailContent(
+    usersViewModel: UsersViewModel,
     modifier: Modifier = Modifier,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current // Objeto para controlar o teclado
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     var newEmail by remember { mutableStateOf(TextFieldValue("")) }
-    var currentEmailState by remember { mutableStateOf("fulanodetal@gmail.com") }
+    val profile by usersViewModel.profile.collectAsState()
+    val currentEmail = profile?.email ?: ""
     var showVerificationCode by remember { mutableStateOf(false) }
     var verificationCode by remember { mutableStateOf("") }
     var showSuccessDialog by remember { mutableStateOf(false) }
 
-    val currentEmail = currentEmailState
+    usersViewModel.token.value?.let { token ->
+        usersViewModel.updateProfile(
+            token = token,
+            body = UpdateUserRequest(
+                username = null,
+                displayName = null,
+                avatarKey = null,
+                institution = null
+            ).copy(
+                // ADICIONE APENAS O EMAIL
+                // mas seu backend NÃO tem update de e-mail
+                // então precisamos ver a rota real
+
+                // Se houver um updateEmailRequest, usamos ela.
+            ),
+            onSuccess = {
+                showSuccessDialog = true
+            }
+        )
+    }
 
     val onSendEmailAttempt: () -> Unit = {
         if (newEmail.text.isNotEmpty() && newEmail.text != currentEmail) {
@@ -97,7 +124,7 @@ fun EditEmailContent(
     val onCodeValidation: () -> Unit = {
         if (verificationCode == MOCK_CODE) {
             keyboardController?.hide()
-            currentEmailState = newEmail.text
+            // currentEmailState = newEmail.text
             newEmail = TextFieldValue("")
             verificationCode = ""
             showVerificationCode = false

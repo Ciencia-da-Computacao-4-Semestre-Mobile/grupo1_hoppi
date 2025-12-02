@@ -30,8 +30,6 @@ import com.grupo1.hoppi.ui.components.login.LoginTextField
 import com.grupo1.hoppi.ui.components.login.PasswordTextField
 import com.grupo1.hoppi.ui.components.login.PawPrintsDecorationLocal
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.dataStore
-import com.grupo1.hoppi.ui.screens.home.UserViewModelFactory
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import com.grupo1.hoppi.ui.screens.login.auth.LoginUiState
 import com.grupo1.hoppi.ui.screens.login.auth.LoginViewModel
@@ -54,10 +52,14 @@ fun LoginScreen(
     LaunchedEffect(uiState) {
         when (uiState) {
             is LoginUiState.Success -> {
-                val token = (uiState as LoginUiState.Success).token
-                userViewModel.setToken(token)
+                val success = uiState as LoginUiState.Success
+                userViewModel.setToken(success.token)
+                userViewModel.setCurrentUser(success.username)
+                userViewModel.setCurrentUserId(success.id)
+
                 onLoginSuccess()
             }
+
             is LoginUiState.Error -> {
                 val message = (uiState as LoginUiState.Error).message
                 println("Erro: $message")

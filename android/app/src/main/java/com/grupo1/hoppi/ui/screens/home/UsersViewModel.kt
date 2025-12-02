@@ -19,6 +19,11 @@ class UsersViewModel(
     private val _token = MutableStateFlow<String?>(null)
     val token: StateFlow<String?> = _token
 
+    private val _currentUser = MutableStateFlow<String?>(null)
+    val currentUser: StateFlow<String?> = _currentUser
+    private val _currentUserId = MutableStateFlow<String?>(null)
+    val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
+
     fun setToken(newToken: String) {
         _token.value = newToken
     }
@@ -70,5 +75,14 @@ class UsersViewModel(
                 e.printStackTrace()
             }
         }
+    }
+
+    fun setCurrentUser(username: String) {
+        _currentUser.value = username
+    }
+
+
+    fun setCurrentUserId(id: String) {
+        _currentUserId.value = id
     }
 }

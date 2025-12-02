@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.network.posts.PostResponse
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
-import com.grupo1.hoppi.ui.screens.home.Post
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
@@ -65,16 +65,22 @@ fun CommunityDetailScreen(
         isPrivate = false
     )
 
-    val isPrivate = currentCommunity.isPrivate
+    LaunchedEffect(currentCommunity.id) {
+        postsViewModel.loadCommunityPosts(currentCommunity.id)
+    }
 
-    val posts by remember(currentCommunity.id) {
+    val isPrivate = currentCommunity.isPrivate
+    val posts by postsViewModel.communityPosts.collectAsState()
+
+    /* val posts by remember(currentCommunity.id) {
         derivedStateOf {
             postsViewModel.getCommunityPosts(currentCommunity.id)
         }
-    }
+    } */
 
     val realCreator = currentCommunity.creatorUsername
-    val isCreator = realCreator == postsViewModel.currentUser
+    val currentUser by userViewModel.currentUser.collectAsState()
+    val isCreator = realCreator == currentUser
     val creatorInfo = "Criado por $realCreator"
 
     val followedSnapshot = AppCommunityManager.followedCommunities.toList()
@@ -129,7 +135,7 @@ fun CommunityDetailScreen(
             CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
                 AppCommunityManager.sendFollowRequest(currentCommunity.name)
                 accessStatus = CommunityAccessStatus.REQUEST_PENDING
-                notifications.add("${postsViewModel.currentUser} pediu para seguir ${currentCommunity.name}")
+                notifications.add("${userViewModel.currentUser} pediu para seguir ${currentCommunity.name}")
                 scope.launch { snackbarHostState.showSnackbar("Pedido de seguir enviado ao criador") }
             }
             CommunityAccessStatus.REQUEST_PENDING -> {
@@ -284,7 +290,7 @@ fun CommunityDetailScreen(
 
 fun LazyListScope.CommunityDetailBodyItems(
     accessStatus: CommunityAccessStatus,
-    posts: List<Post>,
+    posts: List<PostResponse>,
     navController: NavController,
     postsViewModel: PostsViewModel,
     avatarIndex: Int,
@@ -293,7 +299,7 @@ fun LazyListScope.CommunityDetailBodyItems(
             accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
 
     if (hasAccess) {
-        items(posts) { post ->
+        items(items = posts) { post ->
 
             PostCardDetail(
                 avatarIndex,
@@ -301,9 +307,7 @@ fun LazyListScope.CommunityDetailBodyItems(
                 onPostClick = { postId ->
                     navController.navigate("main/post_open/$postId")
                 },
-                onLikeClick = {
-                    postsViewModel.toggleLike(post.id)
-                }
+                onLikeClick = { /* */ }
             )
 
             Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 1.dp)
@@ -626,8 +630,8 @@ fun CommunityStat(count: String, label: String) {
 @Composable
 fun PostCardDetail(
     avatarIndex: Int,
-    post: Post,
-    onPostClick: (Int) -> Unit,
+    post: PostResponse,
+    onPostClick: (String) -> Unit,
     onLikeClick: () -> Unit
 ) {
     Row(
@@ -658,7 +662,7 @@ fun PostCardDetail(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = post.username,
+                    text = post.author?.display_name ?: "Usuário",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 14.sp,
@@ -668,7 +672,7 @@ fun PostCardDetail(
                 Spacer(Modifier.width(5.dp))
 
                 Text(
-                    text = "@${post.username.replace(" ", "").lowercase()}",
+                    text = "@${post.author?.username ?: "usuario"}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 14.sp,
                     color = Color.Gray
@@ -686,14 +690,14 @@ fun PostCardDetail(
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = if (post.isLiked) R.drawable.liked else R.drawable.like_detailed),
+                    painter = painterResource(id = R.drawable.like_detailed),
                     contentDescription = null,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(post.likes.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text("0", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 
@@ -703,11 +707,11 @@ fun PostCardDetail(
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(post.comments.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(post.reply_count.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.weight(1f))
 
-                post.tag?.let { tagName ->
+                /* post.tag?.let { tagName ->
                     val (bgColor, textColor, iconRes) = when (tagName) {
                         "Estudo" -> Triple(VerdeEstudo, TextColorEstudo, R.drawable.estudo_icon)
                         "Venda" -> Triple(AzulVenda, TextColorVenda, R.drawable.venda_icon)
@@ -733,7 +737,7 @@ fun PostCardDetail(
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier.height(20.dp)
                     )
-                }
+                } */
             }
         }
     }

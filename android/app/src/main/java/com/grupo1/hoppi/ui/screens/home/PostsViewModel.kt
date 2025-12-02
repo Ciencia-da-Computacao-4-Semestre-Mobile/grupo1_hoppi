@@ -1,125 +1,143 @@
 package com.grupo1.hoppi.ui.screens.home
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-
-data class Post(
-    val id: Int,
-    val username: String,
-    val handle: String,
-    val content: String,
-    val isSale: Boolean = false,
-    val tag: String? = null,
-    val communityId: Int? = null,
-
-    val likes: Int = 0,
-    val isLiked: Boolean = false,
-    val comments: Int = 0,
-    val shares: Int = 0
-)
+import androidx.lifecycle.viewModelScope
+import com.grupo1.hoppi.network.ApiClient
+import com.grupo1.hoppi.network.posts.CreatePostRequest
+import com.grupo1.hoppi.network.posts.PostResponse
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class PostsViewModel : ViewModel() {
 
-    var currentUser: String = "Fulano de Tal"
-        private set
+    private val _posts = MutableStateFlow<List<PostResponse>>(emptyList())
+    val posts: StateFlow<List<PostResponse>> = _posts
+    private val _userPosts = MutableStateFlow<List<PostResponse>>(emptyList())
+    val userPosts: StateFlow<List<PostResponse>> = _userPosts
+    private val _communityPosts = MutableStateFlow<List<PostResponse>>(emptyList())
+    val communityPosts: StateFlow<List<PostResponse>> = _communityPosts
+    private val _comments = MutableStateFlow<List<PostResponse>>(emptyList())
+    val comments = _comments.asStateFlow()
 
-    fun setCurrentUser(username: String) {
-        currentUser = username
-    }
+    private var cursor: String? = null
 
-    private val _posts = mutableStateListOf<Post>().apply {
-        addAll(
-            List(10) { i ->
-                Post(
-                    id = i,
-                    username = "Fulano de Tal",
-                    handle = "@fulan.tal",
-                    content = "Lorem Ipsum is simply dummy text of the printing industry.",
-                    isSale = i % 3 == 0,
-                    likes = (5..40).random(),
-                    isLiked = false,
-                    communityId = if (i % 4 == 0) 1 else null,
-                    tag = null
+    fun loadFeed() {
+        viewModelScope.launch {
+            try {
+                val result = ApiClient.posts.getFeed(
+                    token = "",
+                    limit = 20,
+                    cursor = cursor,
+                    strategy = "main"
                 )
+
+                if (result.isNotEmpty()) {
+                    cursor = result.last().id
+                }
+
+                _posts.value = result
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        )
+        }
     }
 
-    val posts: List<Post> get() = _posts
+    fun loadUserPosts(userId: String, token: String) {
+        viewModelScope.launch {
+            try {
+                val result = ApiClient.posts.getPostsByUser(userId, "Bearer $token")
 
-    private fun addNewPost(
+                result.forEach { post ->
+                    println("POST ${post.id} -> metadata = ${post.metadata}")
+                }
+
+                _userPosts.value = result
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadComments(postId: String) {
+        viewModelScope.launch {
+            try {
+                val post = ApiClient.posts.getPost(postId)
+                _comments.value = post.replies
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun createPost(content: String, token: String, tag: String? = null) {
+        viewModelScope.launch {
+            try {
+                ApiClient.posts.createPost(
+                    token = "Bearer $token",
+                    body = CreatePostRequest(
+                        content = content,
+                        metadata = if (tag != null) {
+                            mapOf("tags" to listOf(tag))
+                        } else {
+                            null
+                        }
+                    )
+
+                )
+
+                loadFeed()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun createComment(
+        postId: String,
         content: String,
-        username: String,
-        isSale: Boolean,
-        tag: String?,
-        communityId: Int?
+        token: String,
+        onSuccess: (() -> Unit)? = null
     ) {
-        val newPost = Post(
-            id = _posts.size + 1,
-            username = username,
-            handle = "@fulan.tal",
-            content = content,
-            isSale = isSale,
-            tag = tag,
-            communityId = communityId,
-            likes = 0,
-            isLiked = false
-        )
-        _posts.add(0, newPost)
-    }
+        viewModelScope.launch {
+            try {
+                val newComment = ApiClient.posts.createPost(
+                    token = "Bearer $token",
+                    body = CreatePostRequest(
+                        content = content,
+                        is_reply_to = postId
+                    )
+                )
 
-    fun addPost(content: String, username: String, isSale: Boolean, tag: String?) {
-        addNewPost(content, username, isSale, tag, communityId = null)
-    }
+                val updated = _comments.value.toMutableList()
+                updated.add(0, newComment)
+                _comments.value = updated
 
-    fun addCommunityPost(content: String, username: String, isSale: Boolean, tag: String?, communityId: Int) {
-        addNewPost(content, username, isSale, tag, communityId)
-    }
+                onSuccess?.invoke()
 
-    private fun ensureMockCommunityPosts(communityId: Int) {
-        val existing = posts.filter { it.communityId == communityId }
-        if (existing.isNotEmpty()) return
-
-        repeat(5) { i ->
-            addNewPost(
-                content = "Conteúdo de exemplo #$i da comunidade $communityId",
-                username = "Usuário $i",
-                isSale = false,
-                tag = null,
-                communityId = communityId
-            )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    fun getCommunityPosts(communityId: Int): List<Post> {
-        ensureMockCommunityPosts(communityId)
-        return posts.filter { it.communityId == communityId }
+    fun loadCommunityPosts(communityId: Int) {
+        _communityPosts.value = emptyList()
     }
 
-    fun toggleLike(postId: Int) {
-        val index = _posts.indexOfFirst { it.id == postId }
-        if (index != -1) {
-            val post = _posts[index]
-            _posts[index] = post.copy(
-                isLiked = !post.isLiked,
-                likes = if (post.isLiked) post.likes - 1 else post.likes + 1
-            )
+    fun deletePost(postId: String, token: String, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                ApiClient.posts.deletePost(
+                    token = "Bearer $token",
+                    id = postId
+                )
+                onComplete()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-    }
-
-    fun addComment(postId: Int) {
-        val index = _posts.indexOfFirst { it.id == postId }
-        if (index != -1) {
-            val post = _posts[index]
-            _posts[index] = post.copy(comments = post.comments + 1)
-        }
-    }
-
-    fun deletePost(id: Int) {
-        _posts.removeAll { it.id == id }
-    }
-
-    fun getUserPosts(username: String): List<Post> {
-        return posts.filter { it.username == username }
     }
 }

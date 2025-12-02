@@ -20,6 +20,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.grupo1.hoppi.network.users.UpdateUserRequest
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 val HoppiOrange = Color(0xFFEC8445)
@@ -27,11 +29,15 @@ val GrayTextField = Color(0xFFE0E0E0)
 val DarkText = Color(0xFF000000)
 
 @Composable
-fun EditInformationScreen(navController: NavController) {
+fun EditInformationScreen(
+    navController: NavController,
+    usersViewModel: UsersViewModel
+) {
     Scaffold(
         topBar = { EditInformationTopBar(navController = navController) },
         content = { paddingValues ->
             EditInformationContent(
+                userViewModel = usersViewModel,
                 modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
                 onSave = {
                     println("Dados salvos. Voltando...")
@@ -79,19 +85,28 @@ fun EditInformationTopBar(navController: NavController) {
 
 @Composable
 fun EditInformationContent(
+    userViewModel: UsersViewModel,
     modifier: Modifier = Modifier,
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val profile by userViewModel.profile.collectAsState()
+
     var newName by remember { mutableStateOf(TextFieldValue("")) }
     var newUsername by remember { mutableStateOf(TextFieldValue("")) }
     var newBirthdate by remember { mutableStateOf(TextFieldValue("")) }
     var newInstitution by remember { mutableStateOf(TextFieldValue("")) }
 
-    val currentName = "Fulano de Tal"
-    val currentUsername = "@fulan.tal"
-    val currentBirthdate = "01/01/2000"
-    val currentInstitution = "Universidade xxxxx"
+    val token by userViewModel.token.collectAsState()
+
+    LaunchedEffect(profile) {
+        profile?.let {
+            if (newName.text.isEmpty()) newName = TextFieldValue(it.displayName)
+            if (newUsername.text.isEmpty()) newUsername = TextFieldValue(it.username)
+            if (newBirthdate.text.isEmpty()) newBirthdate = TextFieldValue(it.birthDate)
+            if (newInstitution.text.isEmpty()) newInstitution = TextFieldValue(it.institution ?: "")
+        }
+    }
 
     Column(
         modifier = modifier
@@ -112,7 +127,7 @@ fun EditInformationContent(
 
         EditFieldGroup(
             label = "Nome *",
-            currentValue = currentName,
+            currentValue = profile?.displayName ?: "",
             textFieldValue = newName,
             onValueChange = { newName = it },
             placeholder = "Nome Completo"
@@ -122,7 +137,7 @@ fun EditInformationContent(
 
         EditFieldGroup(
             label = "Nome de usuário *",
-            currentValue = currentUsername,
+            currentValue = profile?.username ?: "",
             textFieldValue = newUsername,
             onValueChange = { newUsername = it },
             placeholder = "@novo_nome_de_usuario"
@@ -132,7 +147,7 @@ fun EditInformationContent(
 
         EditFieldGroup(
             label = "Data de nascimento *",
-            currentValue = currentBirthdate,
+            currentValue = profile?.birthDate ?: "",
             textFieldValue = newBirthdate,
             onValueChange = { newBirthdate = it },
             placeholder = "dd/mm/aaaa"
@@ -142,7 +157,7 @@ fun EditInformationContent(
 
         EditFieldGroup(
             label = "Instituição de ensino *",
-            currentValue = currentInstitution,
+            currentValue = profile?.institution ?: "",
             textFieldValue = newInstitution,
             onValueChange = { newInstitution = it },
             placeholder = "Mudar instituição"
@@ -151,7 +166,20 @@ fun EditInformationContent(
         Spacer(modifier = Modifier.height(30.dp))
 
         Button(
-            onClick = onSave,
+            onClick = {
+                token?.let { tkn ->
+                    userViewModel.updateProfile(
+                        token = tkn,
+                        body = UpdateUserRequest(
+                            displayName = newName.text,
+                            username = newUsername.text,
+                            institution = newInstitution.text
+                        )
+                    ) {
+                        onSave()
+                    }
+                }
+            },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .size(210.dp, 42.dp),

@@ -27,9 +27,13 @@ import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 @Composable
-fun CreateCommunityScreen(navController: NavController) {
+fun CreateCommunityScreen(
+    navController: NavController,
+    usersViewModel: UsersViewModel
+) {
     var communityName by remember { mutableStateOf("") }
     var communityDescription by remember { mutableStateOf("") }
     var isPrivacyExpanded by remember { mutableStateOf(false) }
@@ -38,6 +42,8 @@ fun CreateCommunityScreen(navController: NavController) {
     val useDarkIcons = false
     val isCreateEnabled = communityName.isNotBlank() && communityDescription.isNotBlank() && selectedPrivacyOption.isNotBlank()
     val postsViewModel: PostsViewModel = viewModel()
+    val profile by usersViewModel.profile.collectAsState()
+    val creatorUsername = profile?.username ?: "Desconhecido"
 
     DisposableEffect(systemUiController) {
         systemUiController.setStatusBarColor(
@@ -248,7 +254,7 @@ fun CreateCommunityScreen(navController: NavController) {
                         name = communityName,
                         description = communityDescription,
                         privacy = selectedPrivacyOption,
-                        creatorUsername = postsViewModel.currentUser
+                        creatorUsername = profile?.username ?: "Desconhecido"
                     )
                     navController.popBackStack()
                 },

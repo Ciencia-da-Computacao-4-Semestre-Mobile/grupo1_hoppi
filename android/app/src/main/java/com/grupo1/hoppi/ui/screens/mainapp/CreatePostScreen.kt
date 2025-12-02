@@ -65,6 +65,8 @@ fun CreatePostScreen(
     var showMenuTags by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
+    val token = userViewModel.token.collectAsState().value
+
     val availableTags = listOf(
         TagItem("Estudo", VerdeEstudo, R.drawable.estudo_icon),
         TagItem("Venda", AzulVenda, R.drawable.venda_icon),
@@ -83,13 +85,8 @@ fun CreatePostScreen(
                 selectedTag = selectedTag,
                 onCloseClick = { navController.popBackStack() },
                 onPublish = {
-                    if (postText.isNotBlank()) {
-                        postsViewModel.addPost(
-                            content = postText.trim(),
-                            username = "Fulano de Tal",
-                            isSale = selectedTag?.name == "Venda",
-                            tag = selectedTag?.name
-                        )
+                    if (postText.isNotBlank() && token != null) {
+                        postsViewModel.createPost(postText.trim(), token)
                         navController.popBackStack()
                     }
                 }

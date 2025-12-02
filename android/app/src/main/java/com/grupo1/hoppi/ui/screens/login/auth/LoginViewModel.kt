@@ -22,10 +22,14 @@ class LoginViewModel : ViewModel() {
                 val response = ApiClient.auth.login(LoginRequest(email, password))
                 println("DEBUG: Response recebida: $response")
 
-                if (response.access_token != null) {
-                    _uiState.value = LoginUiState.Success(response.access_token)
+                if (response.access_token != null && response.user != null) {
+                    _uiState.value = LoginUiState.Success(
+                        token = response.access_token,
+                        username = response.user.username,
+                        id = response.user.id
+                    )
                 } else {
-                    _uiState.value = LoginUiState.Error("Token não recebido")
+                    _uiState.value = LoginUiState.Error("Token ou usuário não recebido")
                 }
 
             } catch (e: Exception) {
@@ -39,6 +43,10 @@ class LoginViewModel : ViewModel() {
 sealed interface LoginUiState {
     object Idle : LoginUiState
     object Loading : LoginUiState
-    data class Success(val token: String) : LoginUiState
+    data class Success(
+        val token: String,
+        val username: String,
+        val id: String
+    ) : LoginUiState
     data class Error(val message: String) : LoginUiState
 }

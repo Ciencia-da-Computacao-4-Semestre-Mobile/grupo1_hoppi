@@ -113,7 +113,8 @@ fun HoppiApp() {
                     rootNavController.navigate(Destinations.LOGIN_ROUTE) {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
+                usersViewModel = userViewModel
             )
         }
     }
@@ -228,7 +229,10 @@ fun MainApp(
             }
 
             composable(MainAppDestinations.CREATE_COMMUNITY_ROUTE) {
-                CreateCommunityScreen(navController = bottomNavController)
+                CreateCommunityScreen(
+                    navController = bottomNavController,
+                    usersViewModel = userViewModel
+                    )
             }
 
             composable(MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
@@ -273,12 +277,12 @@ fun MainApp(
             }
 
             composable(MainAppDestinations.POST_OPEN_ROUTE) { backStackEntry ->
-                val postId = backStackEntry.arguments?.getString("postId")?.toIntOrNull()
+                val postId = backStackEntry.arguments?.getString("postId")
                 PostScreen(
                     postId = postId,
                     navController = bottomNavController,
                     userViewModel = userViewModel,
-                    postsViewModel = postsViewModel
+                    postsViewModel = postsViewModel,
                 )
             }
 

@@ -46,5 +46,5 @@ data class AuthResponse(
 data class UserDTO(
     @SerializedName("id") val id: String,
     @SerializedName("email") val email: String,
-    @SerializedName("name") val name: String
+    @SerializedName("username") val username: String
 )

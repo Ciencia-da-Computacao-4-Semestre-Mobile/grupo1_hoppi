@@ -8,8 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,12 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
-import com.grupo1.hoppi.ui.screens.home.Post
+import com.grupo1.hoppi.network.posts.PostResponse
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
-val ProfileGray = Color(0xFFDBD8D6)
 val Pink = Color(0xFFA4485F)
 val LightBlueDivider = Color(0xFF9CBDC6)
 val LightGreyText = Color(0xFFA6A6A6)
@@ -53,7 +52,7 @@ fun ProfileScreen(
     navController: NavController,
     postsViewModel: PostsViewModel,
     userViewModel: UsersViewModel,
-    onPostClick: (postId: Int) -> Unit,
+    onPostClick: (postId: String) -> Unit,
     onSettingsClick: () -> Unit,
     token: String
 ) {
@@ -79,7 +78,13 @@ fun ProfileScreen(
 
     val user = profile!!
 
-    val posts = postsViewModel.getUserPosts(user.username)
+    LaunchedEffect(user.id, token) {
+        if (token.isNotEmpty()) {
+            postsViewModel.loadUserPosts(user.id, token)
+        }
+    }
+
+    val posts by postsViewModel.userPosts.collectAsState()
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
 
     LazyColumn(
@@ -102,10 +107,10 @@ fun ProfileScreen(
 
         items(posts) { post ->
             ProfilePostCard(
-                avatarIndex,
+                avatarIndex = avatarIndex,
                 post = post,
                 onPostClick = onPostClick,
-                onLikeClick = { postsViewModel.toggleLike(post.id) }
+                onLikeClick = { /* Placeholder, like ainda não implementado */ }
             )
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
@@ -263,8 +268,8 @@ fun ProfileStat(count: String, label: String) {
 @Composable
 fun ProfilePostCard(
     avatarIndex: Int,
-    post: Post,
-    onPostClick: (postId: Int) -> Unit,
+    post: PostResponse,
+    onPostClick: (postId: String) -> Unit,
     onLikeClick: () -> Unit
 ) {
 
@@ -296,7 +301,7 @@ fun ProfilePostCard(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            post.username,
+                            text = post.author?.display_name ?: "Usuário",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 14.sp,
@@ -304,7 +309,7 @@ fun ProfilePostCard(
                         )
                         Spacer(Modifier.width(5.dp))
                         Text(
-                            post.handle,
+                            text = "@${post.author?.username ?: "usuario"}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = LightGreyText,
                             fontSize = 14.sp
@@ -321,17 +326,27 @@ fun ProfilePostCard(
                 color = Color(0xFF000000),
             )
 
+            val tags = post.metadata
+                ?.get("tags")
+                ?.let { raw ->
+                    when (raw) {
+                        is List<*> -> raw.filterIsInstance<String>()
+                        is String -> listOf(raw)
+                        else -> emptyList()
+                    }
+                } ?: emptyList()
+
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = if (post.isLiked) R.drawable.liked else R.drawable.like_detailed),
+                    painter = painterResource(id = R.drawable.like_detailed),
                     contentDescription = null,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(post.likes.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text("0", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 
@@ -341,11 +356,11 @@ fun ProfilePostCard(
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(post.comments.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(post.reply_count.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.weight(1f))
 
-                post.tag?.let { tagName ->
+                tags.forEach { tagName ->
                     val (bgColor, textColor, iconRes) = when (tagName) {
                         "Estudo" -> Triple(VerdeEstudo, TextColorEstudo, R.drawable.estudo_icon)
                         "Venda" -> Triple(AzulVenda, TextColorVenda, R.drawable.venda_icon)
