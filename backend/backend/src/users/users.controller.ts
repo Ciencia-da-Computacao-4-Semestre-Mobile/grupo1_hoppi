@@ -77,4 +77,23 @@ export class UsersController {
     return this.usersService.getUserLikes(id)
   }
   
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  getAllUsers() {
+    return this.usersService.getAllUsers();
+  }
+
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    const user = await this.usersService.getByID(id);
+
+    return {
+        id: user.id,
+        username: user.username,
+        displayName: user.display_name,
+        avatarKey: user.avatar_key,
+        institution: user.institution,
+        isSuspended: user.is_suspended
+    };
+  }
 }

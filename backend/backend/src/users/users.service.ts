@@ -148,4 +148,10 @@ export class UsersService {
       order: { created_at: 'DESC' }
     })
   }
+
+  async getAllUsers() {
+    return this.usersRepository.find({
+      select: ['id', 'username', 'display_name']
+    });
+  }
 }
