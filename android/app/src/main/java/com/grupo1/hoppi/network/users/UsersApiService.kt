@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.network.users
 
+import com.grupo1.hoppi.network.posts.PostResponse
 import retrofit2.http.*
 
 interface UsersApiService {
@@ -30,10 +31,21 @@ interface UsersApiService {
     @GET("users/{id}/posts")
     suspend fun getUserPosts(
         @Path("id") id: String
-    ): List<Any>
+    ): List<PostResponse>
 
     @GET("users/{id}/likes")
     suspend fun getUserLikes(
         @Path("id") id: String
     ): List<Any>
+
+    @GET("users")
+    suspend fun getAllUsers(
+        @Header("Authorization") token: String
+    ): List<PublicUserDTO>
+
+    @GET("users/{id}")
+    suspend fun getUserById(
+        @Path("id") id: String
+    ): PublicUserDTO
+
 }

@@ -3,6 +3,8 @@ package com.grupo1.hoppi.ui.screens.home
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,12 +29,18 @@ object MainAppDestinations {
 @Composable
 fun HomeScreen(
     bottomNavController: NavHostController,
-    postsViewModel: PostsViewModel
+    postsViewModel: PostsViewModel,
+    userViewModel: UsersViewModel
 ) {
     val context = LocalContext.current
-    val userViewModel: UsersViewModel = viewModel(
-        factory = UserViewModelFactory(context.dataStore)
-    )
+    val tokenState = userViewModel.token.collectAsState(initial = null)
+    val token = tokenState.value
+
+    LaunchedEffect(token) {
+        if (!token.isNullOrEmpty()) {
+            postsViewModel.loadFeed(token)
+        }
+    }
 
     Scaffold() { paddingValues ->
         FeedScreen(
@@ -41,7 +49,10 @@ fun HomeScreen(
             userViewModel = userViewModel,
             onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
             onNotificationsClick = { bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE) },
-            onProfileClick = { bottomNavController.navigate(MainAppDestinations.PROFILE_ROUTE) }
+            onProfileClick = { userId ->
+                bottomNavController.navigate("main/profile/$userId")
+            },
+            token = token ?: ""
         )
     }
 }

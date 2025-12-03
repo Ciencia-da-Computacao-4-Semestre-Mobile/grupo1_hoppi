@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo1.hoppi.network.ApiClient
@@ -17,11 +18,13 @@ class LikesViewModel : ViewModel() {
     fun loadLikes(postId: String) {
         viewModelScope.launch {
             try {
+                Log.d("LikesViewModel", "Calling loadLikes for $postId")
                 val response = ApiClient.likes.getLikes(postId)
                 val updated = _likes.value.toMutableMap()
                 updated[postId] = response
                 _likes.value = updated
             } catch (e: Exception) {
+                Log.e("LikesViewModel", "Error load", e)
                 e.printStackTrace()
             }
         }
@@ -30,10 +33,12 @@ class LikesViewModel : ViewModel() {
     fun likePost(postId: String, token: String, onComplete: (() -> Unit)? = null) {
         viewModelScope.launch {
             try {
+                Log.d("LikesViewModel", "Calling likePost for $postId (tokenPresent=${token.isNotBlank()})")
                 ApiClient.likes.likePost(postId, "Bearer $token")
                 loadLikes(postId)
                 onComplete?.invoke()
             } catch (e: Exception) {
+                Log.e("LikesViewModel", "Error likePost", e)
                 e.printStackTrace()
             }
         }
@@ -42,10 +47,12 @@ class LikesViewModel : ViewModel() {
     fun unlikePost(postId: String, token: String, onComplete: (() -> Unit)? = null) {
         viewModelScope.launch {
             try {
+                Log.d("LikesViewModel", "Calling unlikePost for $postId (tokenPresent=${token.isNotBlank()})")
                 ApiClient.likes.unlikePost(postId, "Bearer $token")
                 loadLikes(postId)
                 onComplete?.invoke()
             } catch (e: Exception) {
+                Log.e("LikesViewModel", "Error unlikePost", e)
                 e.printStackTrace()
             }
         }

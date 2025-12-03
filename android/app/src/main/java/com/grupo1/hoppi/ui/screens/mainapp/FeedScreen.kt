@@ -36,15 +36,23 @@ fun FeedScreen(
     userViewModel: UsersViewModel,
     onPostClick: (postId: String) -> Unit,
     onNotificationsClick: () -> Unit,
-    onProfileClick: () -> Unit,
+    onProfileClick: (String) -> Unit,
+    token: String
 ) {
     val posts by postsViewModel.posts.collectAsState()
 
-    LaunchedEffect(Unit) {
+    /* LaunchedEffect(Unit) {
         postsViewModel.loadFeed()
+    } */
+
+    LaunchedEffect(token) {
+        if (token.isNotEmpty()) {
+            userViewModel.loadProfile(token)
+        }
     }
 
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
+    val currentUserId by userViewModel.currentUserId.collectAsState()
 
     Column(
         modifier = Modifier
@@ -53,7 +61,10 @@ fun FeedScreen(
     ) {
         FeedTopBarContent(
             onNotificationsClick = onNotificationsClick,
-            onProfileClick = onProfileClick
+            onProfileClick = {
+                val idToUse = currentUserId ?: return@FeedTopBarContent
+                onProfileClick(idToUse)
+            }
         )
         Divider(color = Color(0xFF9CBDC6), thickness = 1.dp)
 

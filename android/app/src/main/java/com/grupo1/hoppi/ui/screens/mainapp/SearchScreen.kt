@@ -1,6 +1,8 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import android.R.attr.onClick
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,16 +28,25 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.testTag
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
-val mockSearchItems = listOf("Item 1", "Item 2", "Item 3", "Item 4", "Item 5")
 
 @Composable
 fun SearchScreen(
-    navController: NavController
+    navController: NavController,
+    usersViewModel: UsersViewModel
 ) {
     var searchText by remember { mutableStateOf("") }
-    var searchHistory by remember { mutableStateOf(mockSearchItems.toMutableList()) }
+    val searchResults by usersViewModel.searchResults.collectAsState()
+    val token by usersViewModel.token.collectAsState()
     val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(token) {
+        if (!token.isNullOrEmpty()) {
+            usersViewModel.loadAllUsers()
+            focusRequester.requestFocus()
+        }
+    }
 
     Scaffold(
         topBar = { SearchTopBar(navController) },
@@ -51,7 +62,10 @@ fun SearchScreen(
         ) {
             OutlinedTextField(
                 value = searchText,
-                onValueChange = { searchText = it },
+                onValueChange = { text ->
+                    searchText = text
+                    usersViewModel.searchUsers(text)
+                                },
                 placeholder = { Text("O que você está buscando?") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Busca", tint = Color(0xFFA5A5A5)) },
                 modifier = Modifier
@@ -78,21 +92,19 @@ fun SearchScreen(
                 )
             )
 
-            LaunchedEffect(Unit) {
-                focusRequester.requestFocus()
-            }
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                items(searchHistory) { item ->
+                items(searchResults) { user ->
                     SearchItemRow(
-                        item = item,
-                        onRemoveItem = { removed ->
-                            searchHistory = searchHistory.filterNot { it == removed }.toMutableList()
+                        userId = user.id,
+                        username = user.username,
+                        displayName = user.displayName,
+                        onClick = { selectedUserId ->
+                            navController.navigate("profile/$selectedUserId")
                         }
                     )
                 }
@@ -124,10 +136,16 @@ fun SearchTopBar(navController: NavController) {
 
 @Composable
 fun SearchItemRow(
-    item: String,
-    onRemoveItem: (String) -> Unit
+    userId: String,
+    username: String,
+    displayName: String,
+    onClick: (String) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(userId) }
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -135,14 +153,11 @@ fun SearchItemRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(item, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF000000))
-
-            IconButton(
-                onClick = { onRemoveItem(item) },
-                modifier = Modifier.testTag("RemoveButton_$item")
-            ) {
-                Icon(Icons.Filled.Close, contentDescription = "Remover item", tint = Color(0xFF000000))
-            }
+            Text(
+                "$displayName (@$username)",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF000000)
+            )
         }
         Divider(
             modifier = Modifier

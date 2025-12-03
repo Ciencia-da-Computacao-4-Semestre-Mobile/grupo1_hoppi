@@ -1,6 +1,7 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -101,7 +102,7 @@ fun PostScreen(
     likesViewModel: LikesViewModel = viewModel()
 ) {
     val postState = remember { mutableStateOf<PostResponse?>(null) }
-    val commentsState = remember { mutableStateListOf<PostResponse>() }
+    val commentsState by postsViewModel.comments.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -121,12 +122,9 @@ fun PostScreen(
                 val post = ApiClient.posts.getPost(postId)
                 postState.value = post
 
-                val replies = ApiClient.posts.getReplies(postId)
-                commentsState.clear()
-                commentsState.addAll(replies)
+                postsViewModel.loadComments(postId)
 
                 likesViewModel.loadLikes(postId)
-                replies.forEach { likesViewModel.loadLikes(it.id) }
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -217,7 +215,7 @@ fun PostScreen(
                             shares = comment.metadata?.get("shares")?.toString() ?: "0",
                             isLiked = comment.metadata?.get("is_liked") as? Boolean ?: false
                         ),
-                        currentUserHandle = "@${currentUser?.lowercase() ?: ""}",
+                        currentUser = currentUser,
                         likesMap = likesMap,
                         userViewModel = userViewModel,
                         onLikeClick = {
@@ -234,15 +232,18 @@ fun PostScreen(
                             }
                         },
                         onDeleteComment = {
-                            commentsState.remove(comment)
                             coroutineScope.launch {
                                 try {
-                                    ApiClient.posts.deletePost(token ?: "", comment.id)
+                                    ApiClient.posts.deletePost(token = "Bearer $token", id = comment.id)
+
+                                    if (postId == null) return@launch
+                                    postsViewModel.loadComments(postId)
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
                             }
                         }
+
                     )
                 }
             }
@@ -298,9 +299,7 @@ fun PostScreen(
                                         newCommentText = ""
                                         showCommentBox = false
 
-                                        val replies = ApiClient.posts.getReplies(postId)
-                                        commentsState.clear()
-                                        commentsState.addAll(replies)
+                                        postsViewModel.loadComments(postId)
 
                                     } catch (e: Exception) {
                                         e.printStackTrace()
@@ -498,10 +497,11 @@ fun PostHeader(
         ) {
             InteractionIcon(
                 iconResId = if (isLiked) R.drawable.liked else R.drawable.like_detailed,
-                count = post.likes,
+                count = (likesMap[post.id]?.size ?: 0).toString(),
                 iconSize = 25.dp,
                 textSize = 14.sp,
                 onClick = {
+                    Log.d("PostHeader", "Like clicked for post=${post.id}, currentUserId=$currentUserId, isLiked=$isLiked")
                     onLikeClick()
                 },
             )
@@ -543,7 +543,7 @@ fun PostHeader(
 fun CommentItem(
     avatarIndex: Int,
     comment: Comment,
-    currentUserHandle: String,
+    currentUser: String?,
     likesMap: Map<String, List<LikeResponse>>,
     userViewModel: UsersViewModel,
     onLikeClick: () -> Unit,
@@ -551,6 +551,8 @@ fun CommentItem(
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
+    val current = currentUser?.removePrefix("@")?.trim()?.lowercase()
+    val author = comment.userHandle.removePrefix("@").trim().lowercase()
     val currentUserId by userViewModel.currentUserId.collectAsState()
     val isLiked by remember(likesMap, currentUserId) {
         derivedStateOf {
@@ -623,10 +625,7 @@ fun CommentItem(
                     onDismissRequest = { menuExpanded = false }
                 ) {
 
-                    if (
-                        comment.userHandle.removePrefix("@").trim().lowercase() ==
-                        currentUserHandle.removePrefix("@").trim().lowercase()
-                    ) {
+                    if (author == current) {
                         DropdownMenuItem(
                             text = { Text("Excluir Comentário", color = Color.Red) },
                             onClick = {
@@ -672,14 +671,18 @@ fun CommentItem(
         ) {
             InteractionIcon(
                 iconResId = if (isLiked) R.drawable.liked else R.drawable.like_detailed,
-                count = comment.likes,
+                count = (likesMap[comment.id]?.size ?: 0).toString(),
                 iconSize = 20.dp,
                 textSize = 14.sp,
-                onClick = onLikeClick,
-            )
+                onClick = {
+                    Log.d("CommentItem", "Like clicked for comment=${comment.id}, currentUserId=$currentUserId, isLiked=$isLiked")
+                    onLikeClick()
+                          },
+                )
+                }
         }
     }
-}
+
 
 @Composable
 fun InteractionIcon(

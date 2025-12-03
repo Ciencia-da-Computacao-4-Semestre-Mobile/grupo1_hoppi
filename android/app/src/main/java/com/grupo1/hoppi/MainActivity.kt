@@ -1,6 +1,7 @@
 package com.grupo1.hoppi
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.grupo1.hoppi.ui.components.mainapp.BottomNavBar
 import com.grupo1.hoppi.ui.screens.home.HomeScreen
+import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
@@ -129,6 +132,7 @@ fun MainApp(
     userViewModel: UsersViewModel
 ) {
     val postsViewModel: PostsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val likesViewModel: LikesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
     val context = LocalContext.current
 
@@ -182,7 +186,11 @@ fun MainApp(
             modifier = Modifier.padding(padding)
         ) {
 
-            composable(MainAppDestinations.PROFILE_ROUTE) {
+            composable(
+                route = "${MainAppDestinations.PROFILE_ROUTE}/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: ""
                 val token = userViewModel.token.collectAsState(initial = "").value ?: ""
 
                 if (token.isNotEmpty()) {
@@ -190,6 +198,8 @@ fun MainApp(
                         navController = bottomNavController,
                         postsViewModel = postsViewModel,
                         userViewModel = userViewModel,
+                        userId = userId,
+                        likesViewModel = likesViewModel,
                         onPostClick = { postId ->
                             bottomNavController.navigate("main/post_open/$postId")
                         },
@@ -206,7 +216,6 @@ fun MainApp(
                         CircularProgressIndicator(color = HoppiOrange)
                     }
                 }
-
             }
 
             composable(MainAppDestinations.CREATE_POST_ROUTE) {
@@ -220,7 +229,8 @@ fun MainApp(
             composable(MainAppDestinations.FEED_ROUTE) {
                 HomeScreen(
                     bottomNavController = bottomNavController,
-                    postsViewModel = postsViewModel
+                    postsViewModel = postsViewModel,
+                    userViewModel = userViewModel
                 )
             }
 
@@ -273,17 +283,26 @@ fun MainApp(
             }
 
             composable(MainAppDestinations.SEARCH_ROUTE) {
-                SearchScreen(navController = bottomNavController)
+                SearchScreen(
+                    navController = bottomNavController,
+                    usersViewModel = userViewModel
+                )
             }
 
             composable(MainAppDestinations.POST_OPEN_ROUTE) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
-                PostScreen(
-                    postId = postId,
-                    navController = bottomNavController,
-                    userViewModel = userViewModel,
-                    postsViewModel = postsViewModel,
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    PostScreen(
+                        postId = postId,
+                        navController = bottomNavController,
+                        userViewModel = userViewModel,
+                        postsViewModel = postsViewModel,
+                    )
+                } else {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Requisição de visualização completa de Post requer Android 8+. Mostrando versão reduzida.")
+                    }
+                }
             }
 
             composable(MainAppDestinations.NOTIFICATIONS_ROUTE) {

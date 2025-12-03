@@ -6,9 +6,11 @@ import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo1.hoppi.network.ApiClient
+import com.grupo1.hoppi.network.users.PublicUserDTO
 import com.grupo1.hoppi.network.users.UpdatePasswordRequest
 import com.grupo1.hoppi.network.users.UpdateUserRequest
 import com.grupo1.hoppi.network.users.UserResponse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -23,6 +25,11 @@ class UsersViewModel(
     val currentUser: StateFlow<String?> = _currentUser
     private val _currentUserId = MutableStateFlow<String?>(null)
     val currentUserId: StateFlow<String?> = _currentUserId.asStateFlow()
+    private val _searchResults = MutableStateFlow<List<PublicUserDTO>>(emptyList())
+    val searchResults: StateFlow<List<PublicUserDTO>> = _searchResults.asStateFlow()
+    private val _allUsers = MutableStateFlow<List<PublicUserDTO>>(emptyList())
+    private val _publicProfile = MutableStateFlow<PublicUserDTO?>(null)
+    val publicProfile: StateFlow<PublicUserDTO?> = _publicProfile.asStateFlow()
 
     fun setToken(newToken: String) {
         _token.value = newToken
@@ -48,6 +55,15 @@ class UsersViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    suspend fun getUserById(id: String): PublicUserDTO? {
+        return try {
+            ApiClient.users.getUserById(id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -84,5 +100,26 @@ class UsersViewModel(
 
     fun setCurrentUserId(id: String) {
         _currentUserId.value = id
+    }
+
+    fun searchUsers(query: String) {
+        val filtered = _allUsers.value.filter { user ->
+            user.username.contains(query, ignoreCase = true) ||
+                    user.displayName.contains(query, ignoreCase = true)
+        }
+        _searchResults.value = filtered
+    }
+
+    fun loadAllUsers() {
+        val tokenValue = _token.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val users = ApiClient.users.getAllUsers("Bearer $tokenValue")
+                _allUsers.value = users
+                _searchResults.value = users
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

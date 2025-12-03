@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo1.hoppi.network.ApiClient
@@ -23,26 +24,27 @@ class PostsViewModel : ViewModel() {
 
     private var cursor: String? = null
 
-    fun loadFeed() {
+    fun loadFeed(token: String) {
         viewModelScope.launch {
             try {
                 val result = ApiClient.posts.getFeed(
-                    token = "",
+                    token = "Bearer $token",
                     limit = 20,
                     cursor = cursor,
                     strategy = "main"
                 )
 
-                if (result.isNotEmpty()) {
-                    cursor = result.last().id
-                }
-
+                if (result.isNotEmpty()) cursor = result.last().id
                 _posts.value = result
+                Log.d("PostsViewModel", "TOKEN: $token")
+                Log.d("PostsViewModel", "RESULT: $result")
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
 
     fun loadUserPosts(userId: String, token: String) {
         viewModelScope.launch {
@@ -88,7 +90,7 @@ class PostsViewModel : ViewModel() {
 
                 )
 
-                loadFeed()
+                loadFeed(token)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

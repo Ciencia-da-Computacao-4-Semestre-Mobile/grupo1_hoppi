@@ -1,6 +1,7 @@
 package com.grupo1.hoppi.network
 
 import com.grupo1.hoppi.network.auth.AuthApiService
+import com.grupo1.hoppi.network.follows.FollowsApiService
 import com.grupo1.hoppi.network.likes.LikesApiService
 import com.grupo1.hoppi.network.posts.PostsApiService
 import com.grupo1.hoppi.network.users.UsersApiService
@@ -40,4 +41,5 @@ object ApiClient {
     val users: UsersApiService = retrofit.create(UsersApiService::class.java)
     val posts: PostsApiService = retrofit.create(PostsApiService::class.java)
     val likes: LikesApiService = retrofit.create(LikesApiService::class.java)
+    val follows: FollowsApiService = retrofit.create(FollowsApiService::class.java)
 }

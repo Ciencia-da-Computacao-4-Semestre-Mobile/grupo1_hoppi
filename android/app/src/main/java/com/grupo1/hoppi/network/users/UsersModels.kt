@@ -29,5 +29,6 @@ data class UpdatePasswordRequest(
 data class PublicUserDTO(
     @SerializedName("id") val id: String,
     @SerializedName("username") val username: String,
-    @SerializedName("display_name") val displayName: String
+    @SerializedName("display_name") val displayName: String,
+    // @SerializedName("institution") val institution: String? = null
 )

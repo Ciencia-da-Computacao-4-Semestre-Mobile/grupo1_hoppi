@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,7 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.network.ApiClient
 import com.grupo1.hoppi.network.posts.PostResponse
+import com.grupo1.hoppi.network.users.UserResponse
+import com.grupo1.hoppi.ui.screens.home.FollowsViewModel
+import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
@@ -52,6 +57,8 @@ fun ProfileScreen(
     navController: NavController,
     postsViewModel: PostsViewModel,
     userViewModel: UsersViewModel,
+    userId: String,
+    likesViewModel: LikesViewModel,
     onPostClick: (postId: String) -> Unit,
     onSettingsClick: () -> Unit,
     token: String
@@ -64,14 +71,14 @@ fun ProfileScreen(
 
     val profile by userViewModel.profile.collectAsState()
 
-    if (profile == null) {
+    val currentUserId by userViewModel.currentUserId.collectAsState()
+
+    if (profile == null || currentUserId == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(
-                color = HoppiOrange
-            )
+            CircularProgressIndicator(color = HoppiOrange)
         }
         return
     }
@@ -85,6 +92,20 @@ fun ProfileScreen(
     }
 
     val posts by postsViewModel.userPosts.collectAsState()
+
+    LaunchedEffect(posts) {
+        posts.forEach { post ->
+            likesViewModel.loadLikes(post.id)
+        }
+    }
+
+    val followsViewModel = remember { FollowsViewModel(ApiClient.follows) }
+
+    LaunchedEffect(user.id) {
+        followsViewModel.loadFollowers(user.id)
+        followsViewModel.loadFollowing(user.id)
+    }
+
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
 
     LazyColumn(
@@ -100,18 +121,37 @@ fun ProfileScreen(
                 username = "@${user.username}",
                 bio = user.institution ?: "",
                 navController = navController,
-                onSettingsClick = onSettingsClick
+                onSettingsClick = onSettingsClick,
+                followsViewModel = followsViewModel,
+                currentUserId = currentUserId!!,
+                profileUserId = user.id,
+                token = token
             )
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
 
         items(posts) { post ->
+            val likesMap by likesViewModel.likes.collectAsState()
+            val likesForPost = likesMap[post.id] ?: emptyList()
+
+            val isLiked = likesForPost.any { it.user_id == user.id }
+            val likeCount = likesForPost.size
+
             ProfilePostCard(
                 avatarIndex = avatarIndex,
                 post = post,
+                isLiked = isLiked,
+                likeCount = likeCount,
                 onPostClick = onPostClick,
-                onLikeClick = { /* Placeholder, like ainda não implementado */ }
+                onLikeClick = {
+                    if (isLiked) {
+                        likesViewModel.unlikePost(post.id, token)
+                    } else {
+                        likesViewModel.likePost(post.id, token)
+                    }
+                }
             )
+
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
         }
     }
@@ -124,12 +164,23 @@ fun ProfileHeaderContent(
     username: String,
     bio: String,
     navController: NavController,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    followsViewModel: FollowsViewModel,
+    currentUserId: String,
+    profileUserId: String,
+    token: String
 ) {
     val headerHeight = 230.dp
     val profileSize = 140.dp
+    val followers by followsViewModel.followers.collectAsState()
+    val following by followsViewModel.following.collectAsState()
 
     var expanded by remember { mutableStateOf(false) }
+    var isFollowing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(followers) {
+        isFollowing = followers.any { it.follower_id == currentUserId }
+    }
 
     Box(
         modifier = Modifier
@@ -228,9 +279,8 @@ fun ProfileHeaderContent(
         Spacer(Modifier.height(20.dp))
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(horizontal = 85.dp)) {
-            ProfileStat("150", "Seguidores")
-            ProfileStat("435", "Seguindo")
-            ProfileStat("20", "Posts")
+            ProfileStat(followers.size.toString(), "Seguidores")
+            ProfileStat(following.size.toString(), "Seguindo")
         }
 
         Spacer(Modifier.height(20.dp))
@@ -242,6 +292,35 @@ fun ProfileHeaderContent(
             modifier = Modifier.padding(horizontal = 40.dp),
             color = Color(0xFF000000)
         )
+
+        Spacer(Modifier.height(20.dp))
+
+        if (currentUserId != profileUserId) {
+            Button(
+                onClick = {
+                    if (isFollowing) {
+                        followsViewModel.unfollowUser(username.removePrefix("@"), token) {
+                            isFollowing = false
+                            followsViewModel.loadFollowers(username.removePrefix("@"))
+                        }
+                    } else {
+                        followsViewModel.followUser(username.removePrefix("@"), token) {
+                            isFollowing = true
+                            followsViewModel.loadFollowers(username.removePrefix("@"))
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = HoppiOrange,
+                    contentColor = Color.White
+                ),
+                shape = CircleShape,
+                modifier = Modifier.height(36.dp)
+            ) {
+                Text(if (isFollowing) "Seguindo" else "Seguir")
+            }
+        }
+
         Spacer(Modifier.height(20.dp))
     }
 }
@@ -269,6 +348,8 @@ fun ProfileStat(count: String, label: String) {
 fun ProfilePostCard(
     avatarIndex: Int,
     post: PostResponse,
+    isLiked: Boolean,
+    likeCount: Int,
     onPostClick: (postId: String) -> Unit,
     onLikeClick: () -> Unit
 ) {
@@ -339,14 +420,20 @@ fun ProfilePostCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like_detailed),
-                    contentDescription = null,
+                    painter = painterResource(
+                        id = if (isLiked) R.drawable.liked else R.drawable.like_detailed
+                    ),
+                    contentDescription = "Like",
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onLikeClick() }
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("0", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(
+                    likeCount.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF000000)
+                )
 
                 Spacer(Modifier.width(16.dp))
 
