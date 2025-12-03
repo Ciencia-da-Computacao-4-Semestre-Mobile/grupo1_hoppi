@@ -18,29 +18,19 @@ Para clonar e executar o projeto localmente, siga os passos abaixo:
 
 ```bash
 
-git clone <https://github.com/aninhaa08/library-microservice.git>
-cd <library-microservice>
+git clone <https://github.com/Ciencia-da-Computacao-4-Semestre-Mobile/grupo1_hoppi.git>
 
 ```
++ Não se esqueça de criar e configurar o arquivo ".env". Como modelo para definição dessas variáveis de ambiente, utilize o arquivo ".env.example".
 
-## Criação de branches
+## Padrão de desenvolvimento
 
-Esse projeto será dividido em branches de funcionalidades. Ao começar uma nova atividade, crie uma nova branch e nomeie-a como descrito na seção abaixo (Regras de nomenclatura de branches).
-Para criar uma nova branch:
+Esse projeto será dividido em branches de desenvolvimento separadas por camadas (backend e frontend) e uma geral. Ao começar uma nova atividade, acesse a branch relacionada a camada que desenvolverá e, ao finalizar sua contribuição, crie um commit detalhado, que descreva o código desenvolvido.
 
-```bash
+## Regras de nomenclatura de commits
 
-git checkout dev
-git pull
-git checkout -b nome-da-nova-branch
-git push origin nome-da-nova-branch
-
-```
-
-## Regras de nomenclatura de branches
-
-Nomeie sua nova branch seguindo os padrões abaixo.
-Sua branch deve conter 2 partes:
+Nomeie seu novo commit seguindo os padrões abaixo.
+Seu commit deve conter 2 partes:
 
 1. Tipo de mudança/funcionalidade:
    - **build**: mudanças na estrutura/arquitetura do projeto (criação e exclusão de pastas e/ou exclusão de arquivos);
@@ -52,10 +42,10 @@ Sua branch deve conter 2 partes:
    - **refactor**: mudança de código que não adiciona uma funcionalidade e também não corrige um bug;
    - **style**: mudanças no código que não afetam seu significado (espaço em branco, formatação, ponto e vírgula, etc).
 
-3. O que a branch faz:
-   - Descreva de forma resumida e com palavras-chaves a funcionalidade da sua branch.
+3. O que o código faz:
+   - Descreva de forma resumida e com palavras-chaves a funcionalidade do seu código.
 
-**Exemplo de nome de branch:**
-feat: cadastro-livros
+**Exemplo de commit:**
+feat: user registration functionality
 
 ---

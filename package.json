@@ -4,6 +4,8 @@
     "class-validator": "^0.14.2"
   },
   "scripts": {
-    "start:backend": "cd backend/backend && npm run start:dev"
+    "dev": "npm-run-all --parallel start:frontend start:backend",
+    "start:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend/backend && npm run start:prod"
   }
 }

@@ -13,12 +13,10 @@ import { env } from 'src/config/env'
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  username: env.DB_USERNAME,
-  password: env.DB_PASSWORD,
-  database: 'postgres',
+  url: env.DATABASE_URL,
   entities: [User, Post, Follow, Like, PostCount, Community, CommunityMember, CommunityJoinRequest, PasswordReset],
   synchronize: true, // true só em dev! nunca em produção
-  ssl: false, 
+  ssl: {
+    rejectUnauthorized: false,
+  } 
 });

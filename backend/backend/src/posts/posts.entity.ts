@@ -39,6 +39,9 @@ export class Post {
     @Column({ type: 'jsonb', nullable: true })
     metadata: Record<string, any> | null
 
+    @Column("text", { array: true, default: [] })
+    tag: string[]
+
     @OneToMany(() => Like, (like) => like.post)
     likes: Like[]
 
