@@ -50,7 +50,7 @@ export class LikesService {
   }
 
   async getLikes(postID: string){
-    return this.likesRepository.count({
+    return this.likesRepository.find({
       where: { post_id: postID }
     })
   }
