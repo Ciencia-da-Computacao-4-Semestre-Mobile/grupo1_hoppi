@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.platform.testTag
+import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 
@@ -104,7 +105,7 @@ fun SearchScreen(
                         username = user.username,
                         displayName = user.displayName,
                         onClick = { selectedUserId ->
-                            navController.navigate("profile/$selectedUserId")
+                            navController.navigate("${MainAppDestinations.PROFILE_ROUTE}/$selectedUserId")
                         }
                     )
                 }

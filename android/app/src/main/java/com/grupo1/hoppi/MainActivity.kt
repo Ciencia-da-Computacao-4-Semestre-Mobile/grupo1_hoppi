@@ -236,7 +236,10 @@ fun MainApp(
             }
 
             composable(MainAppDestinations.COMMUNITY_ROUTE) {
-                CommunitiesScreen(navController = bottomNavController)
+                CommunitiesScreen(
+                    navController = bottomNavController,
+                    userViewModel = userViewModel
+                )
             }
 
             composable(MainAppDestinations.CREATE_COMMUNITY_ROUTE) {

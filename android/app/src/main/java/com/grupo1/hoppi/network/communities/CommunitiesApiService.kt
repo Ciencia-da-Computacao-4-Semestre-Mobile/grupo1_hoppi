@@ -61,4 +61,16 @@ interface CommunitiesApiService {
         @Body body: TransferOwnerRequest,
         @Header("Authorization") token: String
     ): Response<Unit>
+
+    @POST("communities/{id}/join")
+    suspend fun followCommunity(
+        @Path("id") id: String,
+        @Header("Authorization") token: String
+    ): Response<Unit>
+
+    @DELETE("communities/{id}/leave")
+    suspend fun unfollowCommunity(
+        @Path("id") id: String,
+        @Header("Authorization") token: String
+    ): Response<Unit>
 }

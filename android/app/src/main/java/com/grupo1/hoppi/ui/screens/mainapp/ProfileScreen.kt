@@ -40,6 +40,8 @@ import androidx.navigation.NavController
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.network.ApiClient
 import com.grupo1.hoppi.network.posts.PostResponse
+import com.grupo1.hoppi.network.users.PublicUserDTO
+import com.grupo1.hoppi.network.users.UserResponse
 import com.grupo1.hoppi.ui.screens.home.FollowsViewModel
 import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
@@ -63,15 +65,56 @@ fun ProfileScreen(
     onSettingsClick: () -> Unit,
     token: String
 ) {
-    LaunchedEffect(token) {
-        if (token.isNotEmpty()) {
-            userViewModel.loadProfile(token)
+    val currentUserId by userViewModel.currentUserId.collectAsState()
+
+    val publicProfile by userViewModel.publicProfile.collectAsState()
+
+    LaunchedEffect(userId, token) {
+        if (token.isNotEmpty() && currentUserId != null) {
+            if (userId == currentUserId) {
+                userViewModel.loadProfile(token)
+            } else {
+                val otherUser = userViewModel.getUserById(userId)
+                otherUser?.let { userViewModel.setPublicProfile(it) }
+            }
         }
     }
 
-    val profile by userViewModel.profile.collectAsState()
+    val profileToShow = if (userId == currentUserId) {
+        userViewModel.profile.collectAsState().value
+    } else {
+        publicProfile
+    }
 
-    val currentUserId by userViewModel.currentUserId.collectAsState()
+    if (profileToShow == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = HoppiOrange)
+        }
+        return
+    }
+
+    val displayName = when (profileToShow) {
+        is UserResponse -> profileToShow.displayName ?: "Usuário"
+        is PublicUserDTO -> profileToShow.displayName ?: "Usuário"
+        else -> "Usuário"
+    }
+
+    val usernameStr = when (profileToShow) {
+        is UserResponse -> profileToShow.username
+        is PublicUserDTO -> profileToShow.username
+        else -> ""
+    }
+
+    val profileUserId = when (profileToShow) {
+        is UserResponse -> profileToShow.id
+        is PublicUserDTO -> profileToShow.id
+        else -> ""
+    }
+
+    val profile by userViewModel.profile.collectAsState()
 
     if (profile == null || currentUserId == null) {
         Box(
@@ -83,11 +126,10 @@ fun ProfileScreen(
         return
     }
 
-    val user = profile!!
 
-    LaunchedEffect(user.id, token) {
+    LaunchedEffect(profileUserId, token) {
         if (token.isNotEmpty()) {
-            postsViewModel.loadUserPosts(user.id, token)
+            postsViewModel.loadUserPosts(profileUserId, token)
         }
     }
 
@@ -101,9 +143,9 @@ fun ProfileScreen(
 
     val followsViewModel = remember { FollowsViewModel(ApiClient.follows) }
 
-    LaunchedEffect(user.id) {
-        followsViewModel.loadFollowers(user.id)
-        followsViewModel.loadFollowing(user.id)
+    LaunchedEffect(profileUserId) {
+        followsViewModel.loadFollowers(profileUserId)
+        followsViewModel.loadFollowing(profileUserId)
     }
 
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
@@ -117,14 +159,14 @@ fun ProfileScreen(
         item {
             ProfileHeaderContent(
                 avatarIndex = avatarIndex,
-                name = user.displayName,
-                username = "@${user.username}",
-                bio = user.institution ?: "",
+                name = displayName,
+                username = "@$usernameStr",
+                // bio = user.institution ?: "",
                 navController = navController,
                 onSettingsClick = onSettingsClick,
                 followsViewModel = followsViewModel,
                 currentUserId = currentUserId!!,
-                profileUserId = user.id,
+                profileUserId = profileUserId,
                 token = token
             )
             Divider(color = LightBlueDivider.copy(alpha = 0.5f), thickness = 1.dp)
@@ -134,7 +176,7 @@ fun ProfileScreen(
             val likesMap by likesViewModel.likes.collectAsState()
             val likesForPost = likesMap[post.id] ?: emptyList()
 
-            val isLiked = likesForPost.any { it.user_id == user.id }
+            val isLiked = likesForPost.any { it.user_id == profileUserId }
             val likeCount = likesForPost.size
 
             ProfilePostCard(
@@ -162,7 +204,7 @@ fun ProfileHeaderContent(
     avatarIndex: Int,
     name: String,
     username: String,
-    bio: String,
+    //bio: String,
     navController: NavController,
     onSettingsClick: () -> Unit,
     followsViewModel: FollowsViewModel,
@@ -283,7 +325,7 @@ fun ProfileHeaderContent(
             ProfileStat(following.size.toString(), "Seguindo")
         }
 
-        Spacer(Modifier.height(20.dp))
+        /*Spacer(Modifier.height(20.dp))
         Text(
             text = "Instituição: ${bio.ifBlank { "Sem bio definida." }}",
             style = MaterialTheme.typography.bodyMedium,
@@ -319,7 +361,7 @@ fun ProfileHeaderContent(
             ) {
                 Text(if (isFollowing) "Seguindo" else "Seguir")
             }
-        }
+        } */
 
         Spacer(Modifier.height(20.dp))
     }

@@ -83,14 +83,12 @@ fun CommunityDetailScreen(
 
     val communityMembers by communitiesViewModel.members.collectAsState()
     val isMember = communityMembers[currentCommunity.id]?.any { it.user_id == currentUser } == true
-    val accessStatus = remember(currentCommunity.id, isMember) {
-        mutableStateOf(
-            when {
-                isMember -> CommunityAccessStatus.MEMBER
-                currentCommunity.isPrivate -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
-                else -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
-            }
-        )
+    val followedCommunities by communitiesViewModel.followedCommunities.collectAsState()
+
+    val accessStatus = when {
+        followedCommunities.contains(currentCommunity.id) -> CommunityAccessStatus.MEMBER
+        currentCommunity.isPrivate -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
+        else -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
     }
 
     val posts by postsViewModel.posts.collectAsState()
@@ -124,66 +122,30 @@ fun CommunityDetailScreen(
     fun handleCommunityAction() {
         if (token.isNullOrEmpty()) return
 
-        when (accessStatus.value) {
+        when (accessStatus) {
             CommunityAccessStatus.MEMBER -> {
                 communitiesViewModel.leaveCommunity(currentCommunity.id, token!!)
-                communitiesViewModel.markCommunityAsFollowed(currentCommunity.name)
-
-                accessStatus.value =
-                    if (currentCommunity.isPrivate) CommunityAccessStatus.NOT_MEMBER_PRIVATE
-                    else CommunityAccessStatus.NOT_MEMBER_PUBLIC
+                communitiesViewModel.unfollowCommunity(currentCommunity.id, token!!)
             }
             CommunityAccessStatus.NOT_MEMBER_PUBLIC -> {
                 communitiesViewModel.joinCommunity(currentCommunity.id, token!!)
-                communitiesViewModel.markCommunityAsFollowed(currentCommunity.name)
-
-                accessStatus.value = CommunityAccessStatus.MEMBER
+                communitiesViewModel.followCommunity(currentCommunity.id, token!!)
             }
             CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
                 communitiesViewModel.joinCommunity(currentCommunity.id, token!!)
-                communitiesViewModel.markCommunityAsFollowed(currentCommunity.name)
-
-                accessStatus.value = CommunityAccessStatus.REQUEST_PENDING
+                communitiesViewModel.followCommunity(currentCommunity.id, token!!)
                 scope.launch { snackbarHostState.showSnackbar("Pedido de seguir enviado") }
             }
             CommunityAccessStatus.REQUEST_PENDING -> {
-                accessStatus.value = CommunityAccessStatus.NOT_MEMBER_PRIVATE
+                // cancelar solicitação
             }
         }
     }
-
-
-    /* LaunchedEffect(currentCommunity.id) {
-        postsViewModel.loadCommunityPosts(currentCommunity.id)
-    }
-
-    val isPrivate = currentCommunity.isPrivate
-
-    val realCreator = currentCommunity.creatorUsername
-    val isCreator = realCreator == currentUser
-    val creatorInfo = "Criado por $realCreator"
-
-    val followedSnapshot = CommunitiesViewModel.followedCommunities.toList()
-
-    LaunchedEffect(followedSnapshot, currentCommunity.id) {
-        accessStatus = when {
-            CommunitiesViewModel.isFollowing(currentCommunity.name) -> CommunityAccessStatus.MEMBER
-            CommunitiesViewModel.isRequestPending(currentCommunity.name) -> CommunityAccessStatus.REQUEST_PENDING
-            isPrivate -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
-            else -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
-        }
-    }
-
-    val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
-            accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
-     */
 
     var showReportDialog by remember { mutableStateOf(false) }
     var reportReason by remember { mutableStateOf("") }
 
     val notifications = remember { mutableStateListOf<String>() }
-
-
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -197,8 +159,8 @@ fun CommunityDetailScreen(
                 },
                 isOfficial = false,
                 isCreator = currentCommunity.createdBy?.id == currentUser,
-                isMember = accessStatus.value == CommunityAccessStatus.MEMBER,
-                accessStatus = accessStatus.value,
+                isMember = accessStatus == CommunityAccessStatus.MEMBER,
+                accessStatus = accessStatus,
                 onReportClick = { /* TODO */ },
                 onFollowClick = { handleCommunityAction() },
                 onUnfollowClick = { handleCommunityAction() },
@@ -209,7 +171,7 @@ fun CommunityDetailScreen(
         },
         contentWindowInsets = WindowInsets(0,0,0,0),
         floatingActionButton = {
-            if (accessStatus.value == CommunityAccessStatus.MEMBER || accessStatus.value == CommunityAccessStatus.NOT_MEMBER_PUBLIC) {
+            if (accessStatus == CommunityAccessStatus.MEMBER || accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC) {
                 FloatingActionButton(
                     onClick = {
                         navController.navigate("${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/${currentCommunity.id}")
@@ -237,7 +199,7 @@ fun CommunityDetailScreen(
                     isPrivate = currentCommunity.isPrivate,
                     membersCount = (communityMembers[currentCommunity.id]?.size ?: 0).toString(),
                     postsCount = posts.size.toString(),
-                    accessStatus = accessStatus.value,
+                    accessStatus = accessStatus,
                     onActionButtonClick = { handleCommunityAction() },
                     isCreator = currentCommunity.createdBy?.id == currentUser
                 )

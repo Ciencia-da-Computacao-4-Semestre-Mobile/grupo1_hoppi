@@ -8,6 +8,7 @@ import com.grupo1.hoppi.network.communities.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CommunitiesViewModel(
@@ -19,8 +20,8 @@ class CommunitiesViewModel(
 
     private val _members = MutableStateFlow<Map<String, List<CommunityMember>>>(emptyMap())
     val members: StateFlow<Map<String, List<CommunityMember>>> = _members
-    private val _followedCommunities = MutableStateFlow<Set<String>>(emptySet())
-    val followedCommunities = _followedCommunities.asStateFlow()
+    private val _followedCommunities = MutableStateFlow<List<String>>(emptyList())
+    val followedCommunities: StateFlow<List<String>> = _followedCommunities
 
     fun loadCommunities() {
         viewModelScope.launch {
@@ -85,11 +86,17 @@ class CommunitiesViewModel(
         }
     }
 
-    fun markCommunityAsFollowed(name: String) {
-        _followedCommunities.value = _followedCommunities.value + name
+    fun followCommunity(communityId: String, token: String) {
+        viewModelScope.launch {
+            api.followCommunity(communityId, token)
+            _followedCommunities.update { it + communityId }
+        }
     }
 
-    fun markCommunityAsUnfollowed(name: String) {
-        _followedCommunities.value = _followedCommunities.value - name
+    fun unfollowCommunity(communityId: String, token: String) {
+        viewModelScope.launch {
+            api.unfollowCommunity(communityId, token)
+            _followedCommunities.update { it - communityId }
+        }
     }
 }

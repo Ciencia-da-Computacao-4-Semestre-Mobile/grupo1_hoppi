@@ -125,11 +125,11 @@ fun SettingsContent(
             title = "Editar informações",
             onClick = onEditInformationClick
         )
-        SettingItem(
+        /* SettingItem(
             icon = Icons.Default.Email,
             title = "E-mail",
             onClick = onEditEmailClick
-        )
+        ) */
 
         SettingItem(
             icon = Icons.Default.Lock,

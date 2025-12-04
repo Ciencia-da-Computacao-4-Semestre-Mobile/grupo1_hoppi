@@ -31,6 +31,10 @@ class UsersViewModel(
     private val _publicProfile = MutableStateFlow<PublicUserDTO?>(null)
     val publicProfile: StateFlow<PublicUserDTO?> = _publicProfile.asStateFlow()
 
+    fun setPublicProfile(profile: PublicUserDTO?) {
+        _publicProfile.value = profile
+    }
+
     fun setToken(newToken: String) {
         _token.value = newToken
     }

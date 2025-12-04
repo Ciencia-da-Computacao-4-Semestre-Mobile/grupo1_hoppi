@@ -32,10 +32,12 @@ import com.grupo1.hoppi.network.communities.Community
 import com.grupo1.hoppi.ui.screens.home.CommunitiesViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
 
 @Composable
 fun CommunitiesScreen(
     navController: NavController,
+    userViewModel: UsersViewModel,
     communitiesViewModel: CommunitiesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val tabs = listOf("Home", "Explorar")
@@ -50,8 +52,8 @@ fun CommunitiesScreen(
 
     val followedCommunities by communitiesViewModel.followedCommunities.collectAsState()
 
-    val homeCommunities = communities.filter { followedCommunities.contains(it.name) }
-    val exploreCommunities = communities.filter { !followedCommunities.contains(it.name) }
+    val homeCommunities = communities.filter { followedCommunities.contains(it.id) }
+    val exploreCommunities = communities.filter { !followedCommunities.contains(it.id) }
     val currentList = if (selectedTabIndex == 0) homeCommunities else exploreCommunities
 
     val filteredCommunities = if (!isSearchActive || searchText.isBlank()) {
@@ -63,6 +65,8 @@ fun CommunitiesScreen(
                     community.description.lowercase().contains(q)
         }
     }
+
+    val token by userViewModel.token.collectAsState(initial = "")
 
     LaunchedEffect(Unit) {
         communitiesViewModel.loadCommunities()
@@ -148,11 +152,11 @@ fun CommunitiesScreen(
                 onCommunityClick = { communityId ->
                     navController.navigate("main/community_detail/$communityId")
                 },
-                onFollowToggle = { communityName ->
-                    if (followedCommunities.contains(communityName)) {
-                        communitiesViewModel.markCommunityAsUnfollowed(communityName)
+                onFollowToggle = { communityId ->
+                    if (followedCommunities.contains(communityId)) {
+                        communitiesViewModel.unfollowCommunity(communityId, token!!)
                     } else {
-                        communitiesViewModel.markCommunityAsFollowed(communityName)
+                        communitiesViewModel.followCommunity(communityId, token!!)
                     }
                 }
             )
@@ -251,7 +255,7 @@ fun CommunityTabContent(
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(communities) { community ->
-            val isFollowing = followedCommunities.contains(community.name)
+            val isFollowing = followedCommunities.contains(community.id)
             CommunityItem(
                 community = community,
                 isFollowing = isFollowing,
@@ -339,7 +343,7 @@ fun CommunityItem(
             Spacer(modifier = Modifier.width(16.dp))
 
             IconButton(onClick = {
-                onFollowToggle(community.name)
+                onFollowToggle(community.id)
             },
                 modifier = Modifier.testTag("follow_${community.name}")
             ) {
