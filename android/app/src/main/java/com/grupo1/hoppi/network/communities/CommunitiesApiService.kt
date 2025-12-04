@@ -34,10 +34,10 @@ interface CommunitiesApiService {
     @GET("communities/{id}/members")
     suspend fun listMembers(
         @Path("id") id: String,
+        @Header("Authorization") token: String,
         @Query("page") page: Int? = null,
         @Query("limit") limit: Int? = null,
         @Query("role") role: String? = null,
-        @Header("Authorization") token: String
     ): List<CommunityMember>
 
     @GET("communities/{id}/requests")

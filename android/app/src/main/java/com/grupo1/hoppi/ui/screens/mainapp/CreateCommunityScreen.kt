@@ -48,7 +48,7 @@ fun CreateCommunityScreen(
     val postsViewModel: PostsViewModel = viewModel()
     val profile by usersViewModel.profile.collectAsState()
     val creatorUsername = profile?.username ?: "Desconhecido"
-    val communitiesViewModel: CommunitiesViewModel = viewModel()
+    // val communitiesViewModel: CommunitiesViewModel = viewModel()
     val token by usersViewModel.token.collectAsState()
 
     DisposableEffect(systemUiController) {
@@ -236,7 +236,7 @@ fun CreateCommunityScreen(
                             isPrivacyExpanded = false
                         }
                     )
-                    DropdownMenuItem(
+                    /*DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Lock, contentDescription = "Private Icon", tint = Color(0xFF000000))
@@ -248,7 +248,7 @@ fun CreateCommunityScreen(
                             selectedPrivacyOption = "Privado"
                             isPrivacyExpanded = false
                         }
-                    )
+                    ) */
                 }
             }
 
@@ -262,7 +262,7 @@ fun CreateCommunityScreen(
                             description = communityDescription,
                             is_private = selectedPrivacyOption == "Privado"
                         ),
-                        token = "Bearer $token"
+                        token = token!!
                     )
                     navController.popBackStack()
                 },

@@ -40,7 +40,7 @@ fun CreatePostCommunityScreen(
     navController: NavController,
     userViewModel: UsersViewModel,
     postsViewModel: PostsViewModel,
-    communityId: Int
+    communityId: String
 ) {
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
     var postText by remember { mutableStateOf("") }

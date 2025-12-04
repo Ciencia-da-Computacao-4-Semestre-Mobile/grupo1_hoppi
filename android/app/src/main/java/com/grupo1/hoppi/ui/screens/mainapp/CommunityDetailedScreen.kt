@@ -33,6 +33,7 @@ import com.grupo1.hoppi.R
 import com.grupo1.hoppi.network.communities.Community
 import com.grupo1.hoppi.network.posts.PostResponse
 import com.grupo1.hoppi.ui.screens.home.CommunitiesViewModel
+import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
@@ -53,7 +54,8 @@ fun CommunityDetailScreen(
     communityId: String,
     userViewModel: UsersViewModel,
     postsViewModel: PostsViewModel,
-    communitiesViewModel: CommunitiesViewModel
+    communitiesViewModel: CommunitiesViewModel,
+    likesViewModel: LikesViewModel
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -91,15 +93,33 @@ fun CommunityDetailScreen(
         )
     }
 
-    LaunchedEffect(currentCommunity.id, token) {
-        postsViewModel.loadCommunityPosts(currentCommunity.id.toString())
-        if (!token.isNullOrEmpty()) {
-            communitiesViewModel.loadCommunityMembers(currentCommunity.id, token = token!!)
+    val posts by postsViewModel.posts.collectAsState()
+    val mainPosts by remember(posts) {
+        derivedStateOf {
+            posts.distinctBy { it.id }
+                .filter {
+                    it.is_reply_to == null ||
+                            it.is_reply_to == "" ||
+                            it.is_reply_to.lowercase() == "null"
+                }
         }
-
     }
 
-    val posts by postsViewModel.communityPosts.collectAsState()
+    val likesMap by likesViewModel.likes.collectAsState()
+    val currentUserId by userViewModel.currentUserId.collectAsState()
+
+    LaunchedEffect(token) {
+        if (!token.isNullOrEmpty()) {
+            userViewModel.loadProfile(token!!)
+            postsViewModel.loadFeed(token!!)
+        }
+    }
+
+    LaunchedEffect(posts) {
+        posts.forEach { post ->
+            likesViewModel.loadLikes(post.id)
+        }
+    }
 
     fun handleCommunityAction() {
         if (token.isNullOrEmpty()) return
@@ -107,16 +127,22 @@ fun CommunityDetailScreen(
         when (accessStatus.value) {
             CommunityAccessStatus.MEMBER -> {
                 communitiesViewModel.leaveCommunity(currentCommunity.id, token!!)
+                communitiesViewModel.markCommunityAsFollowed(currentCommunity.name)
+
                 accessStatus.value =
                     if (currentCommunity.isPrivate) CommunityAccessStatus.NOT_MEMBER_PRIVATE
                     else CommunityAccessStatus.NOT_MEMBER_PUBLIC
             }
             CommunityAccessStatus.NOT_MEMBER_PUBLIC -> {
                 communitiesViewModel.joinCommunity(currentCommunity.id, token!!)
+                communitiesViewModel.markCommunityAsFollowed(currentCommunity.name)
+
                 accessStatus.value = CommunityAccessStatus.MEMBER
             }
             CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
                 communitiesViewModel.joinCommunity(currentCommunity.id, token!!)
+                communitiesViewModel.markCommunityAsFollowed(currentCommunity.name)
+
                 accessStatus.value = CommunityAccessStatus.REQUEST_PENDING
                 scope.launch { snackbarHostState.showSnackbar("Pedido de seguir enviado") }
             }
@@ -217,13 +243,39 @@ fun CommunityDetailScreen(
                 )
             }
 
-            CommunityDetailBodyItems(
+            items(mainPosts) { post ->
+                val likesForPost = likesMap[post.id] ?: emptyList()
+                val isLiked = likesForPost.any { it.user_id == currentUserId }
+                val likeCount = likesForPost.size
+
+                PostCard(
+                    avatarIndex = avatarIndex,
+                    post = post,
+                    isLiked = isLiked,
+                    likeCount = likeCount,
+                    onPostClick = { navController.navigate("main/post_open/${post.id}") },
+                    onLikeClick = {
+                        if (isLiked) {
+                            likesViewModel.unlikePost(post.id, token!!)
+                        } else {
+                            likesViewModel.likePost(post.id, token!!)
+                        }
+                    }
+                )
+
+                Divider(
+                    color = Color(0xFF9CBDC6).copy(alpha = 0.5f),
+                    thickness = 1.dp
+                )
+            }
+
+            /* CommunityDetailBodyItems(
                 accessStatus = accessStatus.value,
                 posts = posts,
                 navController = navController,
                 postsViewModel = postsViewModel,
                 avatarIndex = avatarIndex
-            )
+            ) */
         }
 
         if (showReportDialog) {

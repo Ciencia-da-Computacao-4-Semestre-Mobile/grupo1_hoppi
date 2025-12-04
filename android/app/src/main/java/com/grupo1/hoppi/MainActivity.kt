@@ -255,15 +255,16 @@ fun MainApp(
                     communityId = communityId,
                     userViewModel = userViewModel,
                     postsViewModel = postsViewModel,
-                    communitiesViewModel = viewModel()
+                    communitiesViewModel = viewModel(),
+                    likesViewModel = likesViewModel
                 )
             }
 
             composable(
                 "${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/{communityId}",
-                arguments = listOf(navArgument("communityId") { type = NavType.IntType })
+                arguments = listOf(navArgument("communityId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val communityId = backStackEntry.arguments?.getInt("communityId") ?: -1
+                val communityId = backStackEntry.arguments?.getString("communityId") ?: ""
 
                 CreatePostCommunityScreen(
                     navController = bottomNavController,

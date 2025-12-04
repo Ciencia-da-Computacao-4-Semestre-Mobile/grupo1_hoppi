@@ -48,7 +48,7 @@ fun CommunitiesScreen(
 
     val communities by communitiesViewModel.communities.collectAsState()
 
-    val followedCommunities = remember { mutableStateListOf<String>() }
+    val followedCommunities by communitiesViewModel.followedCommunities.collectAsState()
 
     val homeCommunities = communities.filter { followedCommunities.contains(it.name) }
     val exploreCommunities = communities.filter { !followedCommunities.contains(it.name) }
@@ -144,17 +144,15 @@ fun CommunitiesScreen(
             CommunityTabContent(
                 communities = filteredCommunities,
                 isExploreTab = selectedTabIndex == 1,
-                followedCommunities = followedCommunities,
+                followedCommunities = followedCommunities.toList(),
                 onCommunityClick = { communityId ->
                     navController.navigate("main/community_detail/$communityId")
                 },
                 onFollowToggle = { communityName ->
                     if (followedCommunities.contains(communityName)) {
-                        followedCommunities.remove(communityName)
-                        scope.launch { snackbarHostState.showSnackbar("Você deixou a comunidade") }
+                        communitiesViewModel.markCommunityAsUnfollowed(communityName)
                     } else {
-                        followedCommunities.add(communityName)
-                        scope.launch { snackbarHostState.showSnackbar("Você seguiu a comunidade") }
+                        communitiesViewModel.markCommunityAsFollowed(communityName)
                     }
                 }
             )
