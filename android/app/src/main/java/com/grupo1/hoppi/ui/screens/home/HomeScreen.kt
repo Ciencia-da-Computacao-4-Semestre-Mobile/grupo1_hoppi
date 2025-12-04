@@ -35,6 +35,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val tokenState = userViewModel.token.collectAsState(initial = null)
     val token = tokenState.value
+    val likesViewModel: LikesViewModel = viewModel()
 
     LaunchedEffect(token) {
         if (!token.isNullOrEmpty()) {
@@ -47,6 +48,7 @@ fun HomeScreen(
             postsViewModel = postsViewModel,
             modifier = Modifier.padding(paddingValues),
             userViewModel = userViewModel,
+            likesViewModel = likesViewModel,
             onPostClick = { postId -> bottomNavController.navigate("main/post_open/$postId") },
             onNotificationsClick = { bottomNavController.navigate(MainAppDestinations.NOTIFICATIONS_ROUTE) },
             onProfileClick = { userId ->

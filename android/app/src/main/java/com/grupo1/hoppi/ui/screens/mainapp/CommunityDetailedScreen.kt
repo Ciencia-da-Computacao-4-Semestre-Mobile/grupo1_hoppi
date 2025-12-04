@@ -30,11 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.network.communities.Community
 import com.grupo1.hoppi.network.posts.PostResponse
+import com.grupo1.hoppi.ui.screens.home.CommunitiesViewModel
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 import kotlinx.coroutines.launch
 
 enum class CommunityAccessStatus {
@@ -47,59 +50,99 @@ enum class CommunityAccessStatus {
 @Composable
 fun CommunityDetailScreen(
     navController: NavController,
-    communityId: Int,
+    communityId: String,
     userViewModel: UsersViewModel,
-    postsViewModel: PostsViewModel
+    postsViewModel: PostsViewModel,
+    communitiesViewModel: CommunitiesViewModel
 ) {
-    val community = findCommunityById(communityId)
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val currentUser by userViewModel.currentUser.collectAsState()
     val avatarIndex by userViewModel.avatarIndexFlow.collectAsState(initial = 5)
+    val token by userViewModel.token.collectAsState(initial = null)
 
-    val currentCommunity = community?.copy(
-        isPrivate = if (communityId == 10) true else community.isPrivate
-    ) ?: Community(
-        id = 0,
+    LaunchedEffect(Unit) {
+        communitiesViewModel.loadCommunities()
+    }
+
+    val communities by communitiesViewModel.communities.collectAsState()
+
+    val currentCommunity = communities.find { it.id == communityId } ?: Community(
+        id = communityId,
         name = "Comunidade Não Encontrada",
         description = "Esta comunidade não existe ou não foi encontrada.",
-        creatorUsername = "Sistema",
-        isOfficial = false,
-        isPrivate = false
+        avatar = "avatar_1",
+        isPrivate = false,
+        requiresApproval = false,
+        createdAt = java.util.Date(),
+        createdBy = null,
+        members = emptyList()
     )
 
-    LaunchedEffect(currentCommunity.id) {
+    val communityMembers by communitiesViewModel.members.collectAsState()
+    val isMember = communityMembers[currentCommunity.id]?.any { it.user_id == currentUser } == true
+    val accessStatus = remember(currentCommunity.id, isMember) {
+        mutableStateOf(
+            when {
+                isMember -> CommunityAccessStatus.MEMBER
+                currentCommunity.isPrivate -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
+                else -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
+            }
+        )
+    }
+
+    LaunchedEffect(currentCommunity.id, token) {
+        postsViewModel.loadCommunityPosts(currentCommunity.id.toString())
+        if (!token.isNullOrEmpty()) {
+            communitiesViewModel.loadCommunityMembers(currentCommunity.id, token = token!!)
+        }
+
+    }
+
+    val posts by postsViewModel.communityPosts.collectAsState()
+
+    fun handleCommunityAction() {
+        if (token.isNullOrEmpty()) return
+
+        when (accessStatus.value) {
+            CommunityAccessStatus.MEMBER -> {
+                communitiesViewModel.leaveCommunity(currentCommunity.id, token!!)
+                accessStatus.value =
+                    if (currentCommunity.isPrivate) CommunityAccessStatus.NOT_MEMBER_PRIVATE
+                    else CommunityAccessStatus.NOT_MEMBER_PUBLIC
+            }
+            CommunityAccessStatus.NOT_MEMBER_PUBLIC -> {
+                communitiesViewModel.joinCommunity(currentCommunity.id, token!!)
+                accessStatus.value = CommunityAccessStatus.MEMBER
+            }
+            CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
+                communitiesViewModel.joinCommunity(currentCommunity.id, token!!)
+                accessStatus.value = CommunityAccessStatus.REQUEST_PENDING
+                scope.launch { snackbarHostState.showSnackbar("Pedido de seguir enviado") }
+            }
+            CommunityAccessStatus.REQUEST_PENDING -> {
+                accessStatus.value = CommunityAccessStatus.NOT_MEMBER_PRIVATE
+            }
+        }
+    }
+
+
+    /* LaunchedEffect(currentCommunity.id) {
         postsViewModel.loadCommunityPosts(currentCommunity.id)
     }
 
     val isPrivate = currentCommunity.isPrivate
-    val posts by postsViewModel.communityPosts.collectAsState()
-
-    /* val posts by remember(currentCommunity.id) {
-        derivedStateOf {
-            postsViewModel.getCommunityPosts(currentCommunity.id)
-        }
-    } */
 
     val realCreator = currentCommunity.creatorUsername
-    val currentUser by userViewModel.currentUser.collectAsState()
     val isCreator = realCreator == currentUser
     val creatorInfo = "Criado por $realCreator"
 
-    val followedSnapshot = AppCommunityManager.followedCommunities.toList()
-
-    var accessStatus by remember(currentCommunity.id, followedSnapshot) {
-        mutableStateOf(
-            if (AppCommunityManager.isFollowing(currentCommunity.name))
-                CommunityAccessStatus.MEMBER
-            else if (isPrivate)
-                CommunityAccessStatus.NOT_MEMBER_PRIVATE
-            else
-                CommunityAccessStatus.NOT_MEMBER_PUBLIC
-        )
-    }
+    val followedSnapshot = CommunitiesViewModel.followedCommunities.toList()
 
     LaunchedEffect(followedSnapshot, currentCommunity.id) {
         accessStatus = when {
-            AppCommunityManager.isFollowing(currentCommunity.name) -> CommunityAccessStatus.MEMBER
-            AppCommunityManager.isRequestPending(currentCommunity.name) -> CommunityAccessStatus.REQUEST_PENDING
+            CommunitiesViewModel.isFollowing(currentCommunity.name) -> CommunityAccessStatus.MEMBER
+            CommunitiesViewModel.isRequestPending(currentCommunity.name) -> CommunityAccessStatus.REQUEST_PENDING
             isPrivate -> CommunityAccessStatus.NOT_MEMBER_PRIVATE
             else -> CommunityAccessStatus.NOT_MEMBER_PUBLIC
         }
@@ -107,43 +150,14 @@ fun CommunityDetailScreen(
 
     val hasAccess = accessStatus == CommunityAccessStatus.MEMBER ||
             accessStatus == CommunityAccessStatus.NOT_MEMBER_PUBLIC
+     */
 
     var showReportDialog by remember { mutableStateOf(false) }
     var reportReason by remember { mutableStateOf("") }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    fun onDeleteCommunityClick() {
-        AppCommunityManager.deleteCommunity(currentCommunity.name)
-        navController.popBackStack()
-    }
 
     val notifications = remember { mutableStateListOf<String>() }
 
-    fun handleCommunityFollow(currentStatus: CommunityAccessStatus, isPrivate: Boolean) {
-        when (currentStatus) {
-            CommunityAccessStatus.MEMBER -> {
-                AppCommunityManager.unfollowCommunity(currentCommunity.name)
-                accessStatus = if (isPrivate) CommunityAccessStatus.NOT_MEMBER_PRIVATE else CommunityAccessStatus.NOT_MEMBER_PUBLIC
-            }
-            CommunityAccessStatus.NOT_MEMBER_PUBLIC -> {
-                AppCommunityManager.followCommunity(currentCommunity.name)
-                accessStatus = CommunityAccessStatus.MEMBER
-            }
-            CommunityAccessStatus.NOT_MEMBER_PRIVATE -> {
-                AppCommunityManager.sendFollowRequest(currentCommunity.name)
-                accessStatus = CommunityAccessStatus.REQUEST_PENDING
-                notifications.add("${userViewModel.currentUser} pediu para seguir ${currentCommunity.name}")
-                scope.launch { snackbarHostState.showSnackbar("Pedido de seguir enviado ao criador") }
-            }
-            CommunityAccessStatus.REQUEST_PENDING -> {
-                AppCommunityManager.cancelFollowRequest(currentCommunity.name)
-                accessStatus = CommunityAccessStatus.NOT_MEMBER_PRIVATE
-            }
-        }
-    }
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -155,22 +169,13 @@ fun CommunityDetailScreen(
                 onSettingsClick = {
                     navController.navigate("main/community_settings/${currentCommunity.id}")
                 },
-                isOfficial = currentCommunity.isOfficial,
-                isCreator = isCreator,
-                isMember = accessStatus == CommunityAccessStatus.MEMBER,
-                accessStatus = accessStatus,
-                onReportClick = { showReportDialog = true },
-                onFollowClick = {
-                    AppCommunityManager.followCommunity(currentCommunity.name)
-                    accessStatus = CommunityAccessStatus.MEMBER
-                    scope.launch { snackbarHostState.showSnackbar("Você seguiu a comunidade") }
-                },
-                onUnfollowClick = {
-                    AppCommunityManager.unfollowCommunity(currentCommunity.name)
-                    accessStatus = if (isPrivate) CommunityAccessStatus.NOT_MEMBER_PRIVATE else CommunityAccessStatus.NOT_MEMBER_PUBLIC
-                    scope.launch { snackbarHostState.showSnackbar("Você deixou a comunidade") }
-                },
-                onDeleteCommunityClick = { showDeleteDialog = true },
+                isOfficial = false,
+                isCreator = currentCommunity.createdBy?.id == currentUser,
+                isMember = accessStatus.value == CommunityAccessStatus.MEMBER,
+                accessStatus = accessStatus.value,
+                onReportClick = { /* TODO */ },
+                onFollowClick = { handleCommunityAction() },
+                onUnfollowClick = { handleCommunityAction() },
                 onEditCommunityClick = {
                     navController.navigate("${MainAppDestinations.EDIT_COMMUNITY_ROUTE}/${currentCommunity.id}")
                 }
@@ -178,7 +183,7 @@ fun CommunityDetailScreen(
         },
         contentWindowInsets = WindowInsets(0,0,0,0),
         floatingActionButton = {
-            if (hasAccess) {
+            if (accessStatus.value == CommunityAccessStatus.MEMBER || accessStatus.value == CommunityAccessStatus.NOT_MEMBER_PUBLIC) {
                 FloatingActionButton(
                     onClick = {
                         navController.navigate("${MainAppDestinations.CREATE_POST_COMMUNITY_ROUTE}/${currentCommunity.id}")
@@ -186,12 +191,7 @@ fun CommunityDetailScreen(
                     shape = CircleShape,
                     containerColor = HoppiOrange
                 ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Criar Post",
-                        tint = Color.White,
-                        modifier = Modifier.size(30.dp)
-                    )
+                    Icon(Icons.Filled.Add, contentDescription = "Criar Post", tint = Color.White, modifier = Modifier.size(30.dp))
                 }
             }
         },
@@ -205,26 +205,24 @@ fun CommunityDetailScreen(
             item {
                 CommunityDetailHeader(
                     communityName = currentCommunity.name,
-                    creatorInfo = creatorInfo,
-                    isOfficial = currentCommunity.isOfficial,
+                    creatorInfo = "Criado por ${currentCommunity.createdBy?.display_name ?: "Sistema"}",
+                    isOfficial = false,
                     communityDescription = currentCommunity.description,
-                    isPrivate = isPrivate,
-                    membersCount = "1.870",
+                    isPrivate = currentCommunity.isPrivate,
+                    membersCount = (communityMembers[currentCommunity.id]?.size ?: 0).toString(),
                     postsCount = posts.size.toString(),
-                    accessStatus = accessStatus,
-                    onActionButtonClick = {
-                        handleCommunityFollow(accessStatus, isPrivate)
-                    },
-                    isCreator = isCreator
+                    accessStatus = accessStatus.value,
+                    onActionButtonClick = { handleCommunityAction() },
+                    isCreator = currentCommunity.createdBy?.id == currentUser
                 )
             }
 
             CommunityDetailBodyItems(
-                accessStatus = accessStatus,
+                accessStatus = accessStatus.value,
                 posts = posts,
                 navController = navController,
                 postsViewModel = postsViewModel,
-                avatarIndex
+                avatarIndex = avatarIndex
             )
         }
 
@@ -261,30 +259,6 @@ fun CommunityDetailScreen(
             )
         }
 
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Excluir Comunidade") },
-                text = {
-                    Text("Tem certeza de que deseja excluir esta comunidade?")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            onDeleteCommunityClick()
-                        }
-                    ) {
-                        Text("Excluir", color = Color.Red)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Cancelar")
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -310,7 +284,7 @@ fun LazyListScope.CommunityDetailBodyItems(
                 onLikeClick = { /* */ }
             )
 
-            Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 1.dp)
+            Divider(color = LightBlueDivider.copy(alpha = 0.2f), thickness = 1.dp)
         }
 
         item { Spacer(modifier = Modifier.height(56.dp)) }
@@ -335,7 +309,6 @@ fun CommunityDetailTopBar(
     onReportClick: () -> Unit,
     onFollowClick: () -> Unit,
     onUnfollowClick: () -> Unit,
-    onDeleteCommunityClick: () -> Unit,
     onEditCommunityClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -346,7 +319,6 @@ fun CommunityDetailTopBar(
     }
     var menuExpanded by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     TopAppBar(
         modifier = Modifier.testTag("community_topbar"),
@@ -402,13 +374,6 @@ fun CommunityDetailTopBar(
                             onClick = {
                                 showMenu = false
                                 onEditCommunityClick()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Excluir Comunidade", color = Color.Red) },
-                            onClick = {
-                                showMenu = false
-                                onDeleteCommunityClick()
                             }
                         )
                     }
@@ -471,7 +436,7 @@ fun CommunityDetailHeader(
     val (buttonText, buttonColors, isBordered) = when (accessStatus) {
         CommunityAccessStatus.MEMBER -> Triple(
             "Membro",
-            ButtonDefaults.buttonColors(containerColor = LightBlue),
+            ButtonDefaults.buttonColors(containerColor = LightBlueDivider),
             false
         )
         CommunityAccessStatus.NOT_MEMBER_PUBLIC -> Triple(
@@ -605,7 +570,7 @@ fun CommunityDetailHeader(
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
-    Divider(color = LightBlue.copy(alpha = 0.2f), thickness = 2.dp)
+    Divider(color = LightBlueDivider.copy(alpha = 0.2f), thickness = 2.dp)
 }
 
 fun handleCommunityAction(currentStatus: CommunityAccessStatus, isPrivate: Boolean): CommunityAccessStatus {

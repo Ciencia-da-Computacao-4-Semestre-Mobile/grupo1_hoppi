@@ -1,5 +1,6 @@
 package com.grupo1.hoppi.ui.screens.mainapp
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,7 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.network.posts.PostResponse
+import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
@@ -34,20 +38,32 @@ fun FeedScreen(
     modifier: Modifier,
     postsViewModel: PostsViewModel,
     userViewModel: UsersViewModel,
+    likesViewModel: LikesViewModel,
     onPostClick: (postId: String) -> Unit,
     onNotificationsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     token: String
 ) {
     val posts by postsViewModel.posts.collectAsState()
+    val mainPosts by remember(posts) {
+        derivedStateOf {
+            posts.distinctBy { it.id }
+                .filter { it.is_reply_to == null || it.is_reply_to == "" || it.is_reply_to.lowercase() == "null" }
+        }
+    }
 
-    /* LaunchedEffect(Unit) {
-        postsViewModel.loadFeed()
-    } */
+    val likesMap by likesViewModel.likes.collectAsState()
 
     LaunchedEffect(token) {
         if (token.isNotEmpty()) {
             userViewModel.loadProfile(token)
+            postsViewModel.loadFeed(token)
+        }
+    }
+
+    LaunchedEffect(posts) {
+        posts.forEach { post ->
+            likesViewModel.loadLikes(post.id)
         }
     }
 
@@ -72,12 +88,25 @@ fun FeedScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-            items(posts) { post ->
+            items(mainPosts) { post ->
+                val likesForPost = likesMap[post.id] ?: emptyList()
+                val currentUserId by userViewModel.currentUserId.collectAsState()
+                val isLiked = likesForPost.any { it.user_id == currentUserId }
+                val likeCount = likesForPost.size
+
                 PostCard(
                     avatarIndex,
                     post = post,
+                    isLiked = isLiked,
+                    likeCount = likeCount,
                     onPostClick = { onPostClick(post.id) },
-                    onLikeClick = { /* */ }
+                    onLikeClick = {
+                        if (isLiked) {
+                            likesViewModel.unlikePost(post.id, token)
+                        } else {
+                            likesViewModel.likePost(post.id, token)
+                        }
+                    }
                 )
                 Divider(color = Color(0xFF9CBDC6).copy(alpha = 0.5f), thickness = 1.dp)
             }
@@ -129,6 +158,8 @@ fun FeedTopBarContent(
 fun PostCard(
     avatarIndex: Int,
     post: PostResponse,
+    isLiked: Boolean,
+    likeCount: Int,
     onPostClick: (postId: String) -> Unit,
     onLikeClick: () -> Unit
 ) {
@@ -188,15 +219,15 @@ fun PostCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.like_detailed),
-                    contentDescription = null,
+                    painter = painterResource(id = if (isLiked) R.drawable.liked else R.drawable.like_detailed),
+                    contentDescription = "Like",
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onLikeClick() }
                         .testTag("like_icon")
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("0", style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
+                Text(likeCount.toString(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF000000))
 
                 Spacer(Modifier.width(16.dp))
 

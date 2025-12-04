@@ -35,7 +35,9 @@ class PostsViewModel : ViewModel() {
                 )
 
                 if (result.isNotEmpty()) cursor = result.last().id
-                _posts.value = result
+
+                _posts.value = result.filter { it.is_reply_to == null }
+
                 Log.d("PostsViewModel", "TOKEN: $token")
                 Log.d("PostsViewModel", "RESULT: $result")
 
@@ -44,6 +46,7 @@ class PostsViewModel : ViewModel() {
             }
         }
     }
+
 
 
     fun loadUserPosts(userId: String, token: String) {
@@ -125,7 +128,7 @@ class PostsViewModel : ViewModel() {
         }
     }
 
-    fun loadCommunityPosts(communityId: Int) {
+    fun loadCommunityPosts(communityId: String) {
         _communityPosts.value = emptyList()
     }
 

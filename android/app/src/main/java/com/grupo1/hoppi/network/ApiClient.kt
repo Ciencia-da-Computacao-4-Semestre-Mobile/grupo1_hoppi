@@ -1,6 +1,7 @@
 package com.grupo1.hoppi.network
 
 import com.grupo1.hoppi.network.auth.AuthApiService
+import com.grupo1.hoppi.network.communities.CommunitiesApiService
 import com.grupo1.hoppi.network.follows.FollowsApiService
 import com.grupo1.hoppi.network.likes.LikesApiService
 import com.grupo1.hoppi.network.posts.PostsApiService
@@ -12,8 +13,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:3000/"
-    //private const val BASE_URL = "https://hoppi.onrender.com/"
+    //private const val BASE_URL = "http://10.0.2.2:3000/"
+    private const val BASE_URL = "https://hoppi.onrender.com/"
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -42,4 +43,5 @@ object ApiClient {
     val posts: PostsApiService = retrofit.create(PostsApiService::class.java)
     val likes: LikesApiService = retrofit.create(LikesApiService::class.java)
     val follows: FollowsApiService = retrofit.create(FollowsApiService::class.java)
+    val communities: CommunitiesApiService = retrofit.create(CommunitiesApiService::class.java)
 }

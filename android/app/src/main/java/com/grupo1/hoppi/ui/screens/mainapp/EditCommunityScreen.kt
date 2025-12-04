@@ -22,23 +22,33 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.grupo1.hoppi.network.communities.UpdateCommunityRequest
+import com.grupo1.hoppi.ui.screens.home.CommunitiesViewModel
+import com.grupo1.hoppi.ui.screens.home.UsersViewModel
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 @Composable
 fun EditCommunityScreen(
     navController: NavController,
-    communityId: Int
+    communityId: String,
+    usersViewModel: UsersViewModel,
+    communitiesViewModel: CommunitiesViewModel = viewModel()
 ) {
-    val community = remember { mutableStateOf(findCommunityById(communityId)) }
-    if (community.value == null) {
+    val token by usersViewModel.token.collectAsState()
+    val communities by communitiesViewModel.communities.collectAsState()
+
+    val community = communities.find { it.id == communityId }
+    if (community == null) {
         navController.popBackStack()
         return
     }
 
-    var newName by remember { mutableStateOf(community.value!!.name) }
-    var newDescription by remember { mutableStateOf(community.value!!.description) }
+    var newName by remember { mutableStateOf(community.name) }
+    var newDescription by remember { mutableStateOf(community.description) }
     var isPrivacyExpanded by remember { mutableStateOf(false) }
-    var selectedPrivacyOption by remember { mutableStateOf(if (community.value!!.isPrivate) "Privado" else "Público") }
+    var selectedPrivacyOption by remember { mutableStateOf(if (community.isPrivate) "Privado" else "Público") }
 
     Scaffold(
         topBar = {
@@ -65,7 +75,7 @@ fun EditCommunityScreen(
             OutlinedTextField(
                 value = newName,
                 onValueChange = { newName = it },
-                label = { Text("Nome da Comunidade", color = GrayColor) },
+                label = { Text("Nome da Comunidade", color = Color(0xFF4C4B4B)) },
                 singleLine = true,
                 shape = RoundedCornerShape(30.dp),
                 modifier = Modifier.fillMaxWidth(),
@@ -93,7 +103,7 @@ fun EditCommunityScreen(
             OutlinedTextField(
                 value = newDescription,
                 onValueChange = { newDescription = it },
-                label = { Text("Descrição", color = GrayColor) },
+                label = { Text("Descrição", color = Color(0xFF4C4B4B)) },
                 minLines = 3,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
@@ -222,19 +232,23 @@ fun EditCommunityScreen(
 
             Button(
                 onClick = {
-                    val updatedCommunity = community.value!!.copy(
-                        name = newName,
-                        description = newDescription,
-                        isPrivate = selectedPrivacyOption == "Privado"
-                    )
-                    AppCommunityManager.allCommunities.removeAll { it.id == community.value!!.id }
-                    AppCommunityManager.allCommunities.add(updatedCommunity)
-                    AppCommunityManager.userCreatedCommunities.removeAll { it.id == community.value!!.id }
-                    AppCommunityManager.userCreatedCommunities.add(updatedCommunity)
+                    if (!token.isNullOrEmpty()) {
+                        val request = UpdateCommunityRequest(
+                            name = newName,
+                            description = newDescription,
+                            is_private = selectedPrivacyOption == "Privado"
+                        )
 
-                    navController.popBackStack()
+                        communitiesViewModel.updateCommunity(
+                            communityId = community.id,
+                            request = request,
+                            token = "Bearer $token"
+                        )
+
+                        navController.popBackStack()
+                    }
                 },
-                enabled = newName.isNotBlank(),
+                enabled = newName.isNotBlank() && !token.isNullOrEmpty(),
                 modifier = Modifier
                     .width(140.dp)
                     .padding(bottom = 20.dp),
@@ -243,6 +257,7 @@ fun EditCommunityScreen(
             ) {
                 Text("Salvar", color = Color.White, fontSize = 18.sp, textAlign = TextAlign.Center)
             }
+
         }
     }
 }

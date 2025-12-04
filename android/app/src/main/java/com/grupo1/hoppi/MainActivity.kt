@@ -48,6 +48,7 @@ import com.grupo1.hoppi.ui.screens.signup.SignUpFlow
 import com.grupo1.hoppi.ui.screens.login.forgotpassword.ForgotPasswordFlow
 import com.grupo1.hoppi.ui.screens.mainapp.*
 import com.grupo1.hoppi.ui.screens.mainapp.settings.SettingsNavGraph
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 import com.grupo1.hoppi.ui.theme.HoppiTheme
 import com.grupo1.hoppi.ui.util.SetStatusBarIcons
 
@@ -246,14 +247,15 @@ fun MainApp(
             }
 
             composable(MainAppDestinations.COMMUNITY_DETAIL_ROUTE,
-                arguments = listOf(navArgument("communityId") { type = NavType.IntType })
+                arguments = listOf(navArgument("communityId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val communityId = backStackEntry.arguments?.getInt("communityId") ?: -1
+                val communityId = backStackEntry.arguments?.getString("communityId") ?: ""
                 CommunityDetailScreen(
                     navController = bottomNavController,
                     communityId = communityId,
                     userViewModel = userViewModel,
-                    postsViewModel = postsViewModel
+                    postsViewModel = postsViewModel,
+                    communitiesViewModel = viewModel()
                 )
             }
 
@@ -273,12 +275,14 @@ fun MainApp(
 
             composable(
                 "${MainAppDestinations.EDIT_COMMUNITY_ROUTE}/{communityId}",
-                arguments = listOf(navArgument("communityId") { type = NavType.IntType })
+                arguments = listOf(navArgument("communityId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val communityId = backStackEntry.arguments?.getInt("communityId") ?: 0
+                val communityId = backStackEntry.arguments?.getString("communityId") ?: ""
                 EditCommunityScreen(
                     navController = bottomNavController,
-                    communityId = communityId
+                    communityId = communityId,
+                    usersViewModel = userViewModel,
+                    communitiesViewModel = viewModel()
                 )
             }
 

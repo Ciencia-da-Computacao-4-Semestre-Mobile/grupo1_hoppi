@@ -40,12 +40,12 @@ import androidx.navigation.NavController
 import com.grupo1.hoppi.R
 import com.grupo1.hoppi.network.ApiClient
 import com.grupo1.hoppi.network.posts.PostResponse
-import com.grupo1.hoppi.network.users.UserResponse
 import com.grupo1.hoppi.ui.screens.home.FollowsViewModel
 import com.grupo1.hoppi.ui.screens.home.LikesViewModel
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.ui.screens.home.ProfileImage
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 val Pink = Color(0xFFA4485F)
 val LightBlueDivider = Color(0xFF9CBDC6)

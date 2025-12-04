@@ -27,12 +27,16 @@ import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.grupo1.hoppi.ui.screens.home.PostsViewModel
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.network.communities.CreateCommunityRequest
+import com.grupo1.hoppi.ui.screens.home.CommunitiesViewModel
 import com.grupo1.hoppi.ui.screens.home.UsersViewModel
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 
 @Composable
 fun CreateCommunityScreen(
     navController: NavController,
-    usersViewModel: UsersViewModel
+    usersViewModel: UsersViewModel,
+    communitiesViewModel: CommunitiesViewModel = viewModel()
 ) {
     var communityName by remember { mutableStateOf("") }
     var communityDescription by remember { mutableStateOf("") }
@@ -44,6 +48,8 @@ fun CreateCommunityScreen(
     val postsViewModel: PostsViewModel = viewModel()
     val profile by usersViewModel.profile.collectAsState()
     val creatorUsername = profile?.username ?: "Desconhecido"
+    val communitiesViewModel: CommunitiesViewModel = viewModel()
+    val token by usersViewModel.token.collectAsState()
 
     DisposableEffect(systemUiController) {
         systemUiController.setStatusBarColor(
@@ -250,11 +256,13 @@ fun CreateCommunityScreen(
 
             Button(
                 onClick = {
-                    AppCommunityManager.createCommunity(
-                        name = communityName,
-                        description = communityDescription,
-                        privacy = selectedPrivacyOption,
-                        creatorUsername = profile?.username ?: "Desconhecido"
+                    communitiesViewModel.createCommunity(
+                        CreateCommunityRequest(
+                            name = communityName,
+                            description = communityDescription,
+                            is_private = selectedPrivacyOption == "Privado"
+                        ),
+                        token = "Bearer $token"
                     )
                     navController.popBackStack()
                 },

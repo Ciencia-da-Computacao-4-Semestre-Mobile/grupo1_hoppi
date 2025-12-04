@@ -15,7 +15,8 @@ data class PostResponse(
     val is_deleted: Boolean = false,
     val metadata: Map<String, Any>? = null,
     val author: AuthorDTO?,
-    val replies: List<PostResponse> = emptyList()
+    val replies: List<PostResponse> = emptyList(),
+    val is_reply_to: String? = null
 )
 
 data class CreatePostRequest(

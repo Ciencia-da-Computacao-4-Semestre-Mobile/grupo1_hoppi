@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import com.grupo1.hoppi.ui.screens.settings.HoppiOrange
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,10 +28,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo1.hoppi.ui.screens.home.MainAppDestinations
 import com.grupo1.hoppi.R
+import com.grupo1.hoppi.network.communities.Community
+import com.grupo1.hoppi.ui.screens.home.CommunitiesViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.items
 
 @Composable
-fun CommunitiesScreen(navController: NavController) {
+fun CommunitiesScreen(
+    navController: NavController,
+    communitiesViewModel: CommunitiesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val tabs = listOf("Home", "Explorar")
     var selectedTabIndex by remember { mutableStateOf(0) }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -40,8 +46,12 @@ fun CommunitiesScreen(navController: NavController) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val homeCommunities = AppCommunityManager.allCommunities.filter { AppCommunityManager.isFollowing(it.name) }
-    val exploreCommunities = AppCommunityManager.allCommunities.filter { !AppCommunityManager.isFollowing(it.name) }
+    val communities by communitiesViewModel.communities.collectAsState()
+
+    val followedCommunities = remember { mutableStateListOf<String>() }
+
+    val homeCommunities = communities.filter { followedCommunities.contains(it.name) }
+    val exploreCommunities = communities.filter { !followedCommunities.contains(it.name) }
     val currentList = if (selectedTabIndex == 0) homeCommunities else exploreCommunities
 
     val filteredCommunities = if (!isSearchActive || searchText.isBlank()) {
@@ -52,6 +62,10 @@ fun CommunitiesScreen(navController: NavController) {
             community.name.lowercase().contains(q) ||
                     community.description.lowercase().contains(q)
         }
+    }
+
+    LaunchedEffect(Unit) {
+        communitiesViewModel.loadCommunities()
     }
 
     Scaffold(
@@ -130,15 +144,16 @@ fun CommunitiesScreen(navController: NavController) {
             CommunityTabContent(
                 communities = filteredCommunities,
                 isExploreTab = selectedTabIndex == 1,
+                followedCommunities = followedCommunities,
                 onCommunityClick = { communityId ->
                     navController.navigate("main/community_detail/$communityId")
                 },
                 onFollowToggle = { communityName ->
-                    if (AppCommunityManager.isFollowing(communityName)) {
-                        AppCommunityManager.unfollowCommunity(communityName)
+                    if (followedCommunities.contains(communityName)) {
+                        followedCommunities.remove(communityName)
                         scope.launch { snackbarHostState.showSnackbar("Você deixou a comunidade") }
                     } else {
-                        AppCommunityManager.followCommunity(communityName)
+                        followedCommunities.add(communityName)
                         scope.launch { snackbarHostState.showSnackbar("Você seguiu a comunidade") }
                     }
                 }
@@ -226,7 +241,8 @@ fun CommunitiesTopBar(
 fun CommunityTabContent(
     communities: List<Community>,
     isExploreTab: Boolean,
-    onCommunityClick: (Int) -> Unit,
+    followedCommunities: List<String>,
+    onCommunityClick: (String) -> Unit,
     onFollowToggle: (String) -> Unit
 ) {
     Spacer(modifier = Modifier.width(20.dp))
@@ -237,8 +253,10 @@ fun CommunityTabContent(
         verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(communities) { community ->
+            val isFollowing = followedCommunities.contains(community.name)
             CommunityItem(
                 community = community,
+                isFollowing = isFollowing,
                 onCommunityClick = { onCommunityClick(community.id) },
                 isExploreTab = isExploreTab,
                 onFollowToggle = onFollowToggle
@@ -250,6 +268,7 @@ fun CommunityTabContent(
 @Composable
 fun CommunityItem(
     community: Community,
+    isFollowing: Boolean,
     onCommunityClick: () -> Unit,
     isExploreTab: Boolean,
     onFollowToggle: (String) -> Unit
@@ -261,7 +280,7 @@ fun CommunityItem(
             .clickable(onClick = onCommunityClick)
             .testTag("community_${community.name}"),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = ItemCardBackground),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEBEBEB)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -293,12 +312,12 @@ fun CommunityItem(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = community.creatorUsername,
+                        text = community.createdBy?.username ?: "Desconhecido",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    if (community.isOfficial) {
+                    if (community.isPrivate.not()) {
                         Image(
                             painter = painterResource(id = R.drawable.oficial),
                             contentDescription = "Comunidade Oficial",
@@ -321,7 +340,6 @@ fun CommunityItem(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            val isFollowing = AppCommunityManager.isFollowing(community.name)
             IconButton(onClick = {
                 onFollowToggle(community.name)
             },
