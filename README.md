@@ -11,6 +11,10 @@ Este projeto é uma rede social voltada para estudantes, com o objetivo de promo
     - Node.js
     - Nest.js
     - Supabase/Postgres
+   
+
+### Documentação
+https://www.notion.so/Documenta-o-2b82405855c880be84e3cd849c9ee592
 
 ## 🚀 Como rodar o projeto localmente
 
